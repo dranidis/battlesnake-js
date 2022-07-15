@@ -158,7 +158,7 @@ function applyMove(gameState, newHead) {
   return newGameState;
 }
 
-function getPossibleMovesDepth(gameState, depth) {
+function getPossibleMovesDepth(gameState, depth, visited) {
   let possibleMoves = getPossibleMoves(gameState);
   if (depth == 0) {
     return possibleMoves;
@@ -168,14 +168,21 @@ function getPossibleMovesDepth(gameState, depth) {
   );
 
   for (let index = 0; index < safeMoves.length; index++) {
-    let newHead = newSquare(gameState.you.head, safeMoves[index])
-    let newGameState = applyMove(gameState, newHead);
-    let newPossibleMoves = getPossibleMovesDepth(newGameState, depth - 1);
-    let newSafeMoves = Object.keys(newPossibleMoves).filter(
-      (key) => newPossibleMoves[key]
-    );
-    if (newSafeMoves.length == 0) {
-      possibleMoves[safeMoves[index]] = false;
+    let newHead = newSquare(gameState.you.head, safeMoves[index]);
+    if (visited.filter(h => h.x == newHead.x && h.y == newHead.y).length == 0) {
+      visited.push(newHead);
+      let newGameState = applyMove(gameState, newHead);
+      let newPossibleMoves = getPossibleMovesDepth(
+        newGameState,
+        depth - 1,
+        visited
+      );
+      let newSafeMoves = Object.keys(newPossibleMoves).filter(
+        (key) => newPossibleMoves[key]
+      );
+      if (newSafeMoves.length == 0) {
+        possibleMoves[safeMoves[index]] = false;
+      }
     }
   }
   return possibleMoves;
@@ -188,13 +195,17 @@ function pickMove(safeMoves) {
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
 
-  let possibleMoves = getPossibleMovesDepth(gameState, 7);
+  let possibleMoves = getPossibleMovesDepth(gameState, 50, []);
 
   const myHead = gameState.you.head;
   const snakes = gameState.board.snakes;
 
   // TODO: Step 4 - Find food.
   // Use information in gameState to seek out and find food.
+
+  // TODO:
+  //  Find food that is closer to you than to any other snake.
+
   let minDistanceFoodIndex = undefined;
   const boardfood = gameState.board.food;
   const distances = boardfood.map((f) => distance(myHead, f));
