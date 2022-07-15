@@ -125,11 +125,9 @@ function getPossibleMoves(gameState) {
   return possibleMoves;
 }
 
-function applyMove(gameState, aMove) {
-  let newGameState = JSON.parse(JSON.stringify(gameState));
-
-  let x = gameState.you.head.x;
-  let y = gameState.you.head.y;
+function newSquare(sq, aMove) {
+  let x = sq.x;
+  let y = sq.y;
 
   switch (aMove) {
     case "up":
@@ -147,10 +145,17 @@ function applyMove(gameState, aMove) {
     default:
     // code block
   }
-  newGameState.you.body.unshift({ x: x, y: y });
+  return { x: x, y: y };
+}
+
+function applyMove(gameState, aMove) {
+  let newGameState = JSON.parse(JSON.stringify(gameState));
+
+  const newHead = newSquare(gameState.you.head, aMove);
+
+  newGameState.you.body.unshift(newHead);
   newGameState.you.body.pop();
-  newGameState.you.head.x = x;
-  newGameState.you.head.y = y;
+  newGameState.you.head = newHead;
 
   return newGameState;
 }
