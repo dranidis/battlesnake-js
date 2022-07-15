@@ -240,7 +240,7 @@ function move(gameState) {
     safeMoves = Object.keys(possibleMoves).filter((key) => possibleMoves[key]);
   }
 
-  let isAttacking = snakes.length > 1 && gameState.you.length > longest + 1;
+  let isAttacking = snakes.length > 1 && gameState.you.length > longest;
 
   let target = undefined;
   let safeTargetMoves = undefined;
