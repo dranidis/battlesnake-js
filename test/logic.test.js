@@ -1,6 +1,6 @@
 const { info, move } = require("../src/logic");
 
-function createGameState(myBattlesnake) {
+function createGameState(myBattlesnake, allSnakes) {
   return {
     game: {
       id: "",
@@ -9,10 +9,10 @@ function createGameState(myBattlesnake) {
     },
     turn: 0,
     board: {
-      height: 0,
-      width: 0,
+      height: 5,
+      width: 5,
       food: [],
-      snakes: [myBattlesnake],
+      snakes: allSnakes,
       hazards: [],
     },
     you: myBattlesnake,
@@ -33,6 +33,10 @@ function createBattlesnake(id, bodyCoords) {
   };
 }
 
+function addFood(gameState, coord) {
+  gameState.board.food.push(coord);
+}
+
 describe("Battlesnake API Version", () => {
   test("should be api version 1", () => {
     const result = info();
@@ -48,14 +52,76 @@ describe("Battlesnake Moves", () => {
       { x: 1, y: 0 },
       { x: 0, y: 0 },
     ]);
-    const gameState = createGameState(me);
+    const gameState = createGameState(me, [me]);
 
-    // Act 1,000x (this isn't a great way to test, but it's okay for starting out)
-    for (let i = 0; i < 1000; i++) {
-      const moveResponse = move(gameState);
-      // In this state, we should NEVER move left.
-      const allowedMoves = ["up", "down", "right"];
-      expect(allowedMoves).toContain(moveResponse.move);
-    }
+    const moveResponse = move(gameState);
+    // In this state, we should NEVER move left.
+    const allowedMoves = ["up", "down", "right"];
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
+  test("should never get trapped inside its own body", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: 2, y: 0 },
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+      { x: 0, y: 3 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    const moveResponse = move(gameState);
+    // In this state, we should NEVER move left.
+    const allowedMoves = ["right"];
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
+  test("can escape due to its length", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: 2, y: 0 },
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    const moveResponse = move(gameState);
+    // In this state, we should NEVER move left.
+    const allowedMoves = ["right", "left"];
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
+  test("goes towards closest food", () => {
+    // Arrange
+    console.log("goes towards closest food");
+    const me = createBattlesnake("me", [{ x: 1, y: 1 }]);
+    const gameState = createGameState(me, [me]);
+    addFood(gameState, { x: 3, y: 1 });
+    addFood(gameState, { x: 1, y: 4 });
+
+    const moveResponse = move(gameState);
+    const allowedMoves = ["right"];
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
+  test("goes towards closest food unless there is another snake closer to the food", () => {
+    // Arrange
+    console.log(
+      "goes towards closest food unless there is another snake closer to the food"
+    );
+
+    const me = createBattlesnake("me", [{ x: 1, y: 1 }]);
+    const other = createBattlesnake("other", [{ x: 4, y: 1 }]);
+    const gameState = createGameState(me, [me, other]);
+    addFood(gameState, { x: 3, y: 1 });
+    addFood(gameState, { x: 1, y: 4 });
+
+    const moveResponse = move(gameState);
+    const allowedMoves = ["up"];
+    expect(allowedMoves).toContain(moveResponse.move);
   });
 });

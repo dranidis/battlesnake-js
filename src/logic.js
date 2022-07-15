@@ -158,6 +158,14 @@ function applyMove(gameState, newHead) {
   return newGameState;
 }
 
+function deepCopy(arrayCoord) {
+  let copy = [];
+  for (let i = 0; i < arrayCoord.length; i++) {
+    copy.push(arrayCoord[i]);
+  }
+  return copy;
+}
+
 function getPossibleMovesDepth(gameState, depth, visited) {
   let possibleMoves = getPossibleMoves(gameState);
   if (depth == 0) {
@@ -169,8 +177,11 @@ function getPossibleMovesDepth(gameState, depth, visited) {
 
   for (let index = 0; index < safeMoves.length; index++) {
     let newHead = newSquare(gameState.you.head, safeMoves[index]);
-    if (visited.filter(h => h.x == newHead.x && h.y == newHead.y).length == 0) {
-      newVisited = JSON.parse(JSON.stringify(visited));
+    if (
+      visited.filter((h) => h.x == newHead.x && h.y == newHead.y).length == 0
+    ) {
+      // newVisited = JSON.parse(JSON.stringify(visited));
+      const newVisited = deepCopy(visited);
       newVisited.push(newHead);
       let newGameState = applyMove(gameState, newHead);
       let newPossibleMoves = getPossibleMovesDepth(
@@ -193,25 +204,25 @@ function pickMove(safeMoves) {
   return safeMoves[Math.floor(Math.random() * safeMoves.length)];
 }
 
-function move(gameState) {
-  console.log("\nTURN " + gameState.turn);
+function closerFoodAndDistance(myHead, boardfood) {
+  if (boardfood.length == 0) return [{}, 999];
 
-  let possibleMoves = getPossibleMovesDepth(gameState, 50, []);
+  const distances = boardfood.map((f) => distance(myHead, f));
+  const index = distances.indexOf(Math.min(...distances));
+  if (index == -1) return [{}, 999];
+  return [boardfood[index], distances[index]];
+}
 
-  const myHead = gameState.you.head;
-  const snakes = gameState.board.snakes;
+function minFoodDistanceFromOtherSnakes(gameState, food) {
+  const otherHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id)
+    .map((s) => s.head);
+  return Math.min(...otherHeads.map((h) => distance(h, food)));
+}
 
-  // TODO: Step 4 - Find food.
-  // Use information in gameState to seek out and find food.
-
+function movesTowardsClosestFood(gameState) {
   // TODO:
   //  Find food that is closer to you than to any other snake.
-
-  let minDistanceFoodIndex = undefined;
-  const boardfood = gameState.board.food;
-  const distances = boardfood.map((f) => distance(myHead, f));
-  minDistanceFoodIndex = distances.indexOf(Math.min(...distances));
-
   let towardsFoodMoves = {
     up: false,
     down: false,
@@ -219,16 +230,54 @@ function move(gameState) {
     right: false,
   };
 
-  console.log("DIST " + distances);
-  console.log("MIN: " + minDistanceFoodIndex);
-  console.log("TOW FOOD: " + JSON.stringify(towardsFoodMoves));
+  const boardfood = gameState.board.food;
+  const myHead = gameState.you.head;
+  const otherHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id)
+    .map((s) => s.head);
 
-  if (minDistanceFoodIndex != -1) {
+  const foodNotCloseToOthers = boardfood.filter(
+    (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
+  );
+
+  // boardfood.forEach((f) => {
+  //   console.log("My DIST: " + JSON.stringify(f) + distance(myHead, f));
+  //   console.log(
+  //     "MIN DIST: " +
+  //       JSON.stringify(f) +
+  //       minFoodDistanceFromOtherSnakes(gameState, f)
+  //   );
+  // });
+  // console.log("ALL FOOD: " + JSON.stringify(boardfood));
+  // console.log("FOOD: " + JSON.stringify(foodNotCloseToOthers));
+
+  let [minDistanceFood, distanceToCloserFood] =
+    foodNotCloseToOthers.length > 0
+      ? closerFoodAndDistance(myHead, foodNotCloseToOthers)
+      : closerFoodAndDistance(myHead, boardfood);
+
+  if (minDistanceFood != {}) {
     towardsFoodMoves = moveTowardsTarget(
       myHead,
-      boardfood[minDistanceFoodIndex]
+      minDistanceFood
     );
   }
+
+  return [towardsFoodMoves, distanceToCloserFood];
+}
+
+function move(gameState) {
+  console.log("\nTURN " + gameState.turn);
+
+  let possibleMoves = getPossibleMovesDepth(gameState, 7, []);
+
+  const myHead = gameState.you.head;
+  const snakes = gameState.board.snakes;
+
+  // TODO: Step 4 - Find food.
+  // Use information in gameState to seek out and find food.
+  const [towardsFoodMoves, distanceToCloserFood] =
+    movesTowardsClosestFood(gameState);
 
   const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
 
@@ -257,7 +306,6 @@ function move(gameState) {
   }
 
   let isAttacking = snakes.length > 1 && gameState.you.length > longest;
-
   let target = undefined;
   let safeTargetMoves = undefined;
 
@@ -290,7 +338,7 @@ function move(gameState) {
 
   let moveToMake = undefined;
 
-  if (safeFoodMoves.length > 0 && distances[minDistanceFoodIndex] < 3) {
+  if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
     moveToMake = pickMove(safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
     moveToMake = pickMove(safeTargetMoves);
