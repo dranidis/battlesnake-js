@@ -170,12 +170,13 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   for (let index = 0; index < safeMoves.length; index++) {
     let newHead = newSquare(gameState.you.head, safeMoves[index]);
     if (visited.filter(h => h.x == newHead.x && h.y == newHead.y).length == 0) {
-      visited.push(newHead);
+      newVisited = JSON.parse(JSON.stringify(visited));
+      newVisited.push(newHead);
       let newGameState = applyMove(gameState, newHead);
       let newPossibleMoves = getPossibleMovesDepth(
         newGameState,
         depth - 1,
-        visited
+        newVisited
       );
       let newSafeMoves = Object.keys(newPossibleMoves).filter(
         (key) => newPossibleMoves[key]
