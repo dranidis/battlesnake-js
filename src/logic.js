@@ -27,7 +27,13 @@ function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
 
 function collideWithSnake(myHead, mybody, possibleMoves) {
   for (let index = 0; index < mybody.length; index++) {
-    collideSquare(myHead.x, myHead.y, mybody[index].x, mybody[index].y, possibleMoves);
+    collideSquare(
+      myHead.x,
+      myHead.y,
+      mybody[index].x,
+      mybody[index].y,
+      possibleMoves
+    );
   }
 }
 
@@ -197,12 +203,16 @@ function move(gameState) {
     right: false,
   };
 
-  // if (minDistanceFoodIndex != undefined)
-  towardsFoodMoves = moveTowardsTarget(myHead, boardfood[minDistanceFoodIndex]);
-
   console.log("DIST " + distances);
   console.log("MIN: " + minDistanceFoodIndex);
   console.log("TOW FOOD: " + JSON.stringify(towardsFoodMoves));
+
+  if (minDistanceFoodIndex != -1) {
+    towardsFoodMoves = moveTowardsTarget(
+      myHead,
+      boardfood[minDistanceFoodIndex]
+    );
+  }
 
   const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
 
@@ -264,7 +274,9 @@ function move(gameState) {
 
   let moveToMake = undefined;
 
-  if (isAttacking && safeTargetMoves.length > 0) {
+  if (safeFoodMoves.length > 0 && distances[minDistanceFoodIndex] < 3) {
+    moveToMake = pickMove(safeFoodMoves);
+  } else if (isAttacking && safeTargetMoves.length > 0) {
     moveToMake = pickMove(safeTargetMoves);
   } else if (safeFoodMoves.length > 0) {
     moveToMake = pickMove(safeFoodMoves);
@@ -273,8 +285,9 @@ function move(gameState) {
   }
 
   if (moveToMake == undefined) {
-    moveToMake = pickMove(Object.keys(possibleMoves).filter(
-   key => possibleMoves[key]))
+    moveToMake = pickMove(
+      Object.keys(possibleMoves).filter((key) => possibleMoves[key])
+    );
   }
 
   response = {
