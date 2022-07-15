@@ -148,10 +148,8 @@ function newSquare(sq, aMove) {
   return { x: x, y: y };
 }
 
-function applyMove(gameState, aMove) {
+function applyMove(gameState, newHead) {
   let newGameState = JSON.parse(JSON.stringify(gameState));
-
-  const newHead = newSquare(gameState.you.head, aMove);
 
   newGameState.you.body.unshift(newHead);
   newGameState.you.body.pop();
@@ -170,7 +168,8 @@ function getPossibleMovesDepth(gameState, depth) {
   );
 
   for (let index = 0; index < safeMoves.length; index++) {
-    let newGameState = applyMove(gameState, safeMoves[index]);
+    let newHead = newSquare(gameState.you.head, safeMoves[index])
+    let newGameState = applyMove(gameState, newHead);
     let newPossibleMoves = getPossibleMovesDepth(newGameState, depth - 1);
     let newSafeMoves = Object.keys(newPossibleMoves).filter(
       (key) => newPossibleMoves[key]
