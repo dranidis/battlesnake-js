@@ -272,6 +272,11 @@ function move(gameState) {
     moveToMake = pickMove(safeMoves);
   }
 
+  if (moveToMake == undefined) {
+    moveToMake = pickMove(Object.keys(possibleMoves).filter(
+   key => possibleMoves[key]))
+  }
+
   response = {
     move: moveToMake,
   };
