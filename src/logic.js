@@ -121,10 +121,9 @@ function getPossibleMoves(gameState) {
 
   // TODO: Step 3 - Don't collide with others.
   // Use information in gameState to prevent your Battlesnake from colliding with others.
-  const snakes = gameState.board.snakes;
-  for (let index = 0; index < snakes.length; index++) {
-    if (snakes[index].id != gameState.you.id)
-      collideWithSnake(myHead, snakes[index].body, possibleMoves);
+  const otherSnakes = gameState.otherSnakes;
+  for (let index = 0; index < otherSnakes.length; index++) {
+    collideWithSnake(myHead, otherSnakes[index].body, possibleMoves);
   }
 
   return possibleMoves;
@@ -172,7 +171,7 @@ function deepCopy(arrayCoord) {
 }
 
 function getPossibleMovesDepth(gameState, depth, visited) {
-  let possibleMoves = getPossibleMoves(gameState);
+  const possibleMoves = getPossibleMoves(gameState);
   if (depth == 0) {
     return possibleMoves;
   }
@@ -181,15 +180,15 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   );
 
   for (let index = 0; index < safeMoves.length; index++) {
-    let newHead = newSquare(gameState.you.head, safeMoves[index]);
+    const newHead = newSquare(gameState.you.head, safeMoves[index]);
     if (
       visited.filter((h) => h.x == newHead.x && h.y == newHead.y).length == 0
     ) {
       // newVisited = JSON.parse(JSON.stringify(visited));
       const newVisited = deepCopy(visited);
       newVisited.push(newHead);
-      let newGameState = applyMove(gameState, newHead);
-      let newPossibleMoves = getPossibleMovesDepth(
+      const newGameState = applyMove(gameState, newHead);
+      const newPossibleMoves = getPossibleMovesDepth(
         newGameState,
         depth - 1,
         newVisited
@@ -266,9 +265,39 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
+function getDeadlyMoveToSnake(gameState, mySnake, snake) {
+  if (mySnake.head.x >= snake.head.x + 2) {
+    if (mySnake.head.y == snake.head.y + 1) {
+      if (snake.head.y == 0) {
+        return "down"
+      }
+    } else if (mySnake.head.y == snake.head.y - 1) {
+      if (snake.head.y == gameState.board.height - 1) {
+        return "up"
+      }
+    }
+  } else   if (mySnake.head.y >= snake.head.y + 2) {
+    if (mySnake.head.x == snake.head.x + 1) {
+      if (snake.head.x == 0) {
+        return "left"
+      }
+    } else if (mySnake.head.x == snake.head.x - 1) {
+      if (snake.head.x == gameState.board.width - 1) {
+        return "right"
+      }
+    }
+  }
+
+}
+
 function getDeadlyMove(gameState) {
-  const myHead = gameState.you.head;
   const snakes = gameState.otherSnakes;
+  const mySnake = gameState.you;
+
+  for (let i = 0; i < snakes.length; i++) {
+    const dMove = getDeadlyMoveToSnake(gameState, mySnake, snakes[i]);
+    if (dMove != undefined) return dMove;
+  }
 
   return undefined;
 }
@@ -350,7 +379,7 @@ function move(gameState) {
   }
 
   if (moveToMake == undefined) {
-    console.log("Desperate move!")
+    console.log("Desperate move!");
     const pMoves = getPossibleMoves(gameState);
     moveToMake = pickMove(Object.keys(pMoves).filter((key) => pMoves[key]));
   }

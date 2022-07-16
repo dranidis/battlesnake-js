@@ -1,6 +1,8 @@
 const { info, move } = require("../src/logic");
 
-const TIMES = 10;
+const TIMES = 100;
+const boardHeight = 5
+const boardWidth = 5
 
 function createGameState(myBattlesnake, allSnakes) {
   return {
@@ -11,8 +13,8 @@ function createGameState(myBattlesnake, allSnakes) {
     },
     turn: 0,
     board: {
-      height: 5,
-      width: 5,
+      height: boardHeight,
+      width: boardWidth,
       food: [],
       snakes: allSnakes,
       hazards: [],
@@ -56,10 +58,12 @@ describe("Battlesnake Moves", () => {
     ]);
     const gameState = createGameState(me, [me]);
 
-    const moveResponse = move(gameState);
-    // In this state, we should NEVER move left.
-    const allowedMoves = ["up", "down", "right"];
-    expect(allowedMoves).toContain(moveResponse.move);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["up", "down", "right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
   });
 
   test("should never get trapped inside its own body", () => {
@@ -74,10 +78,12 @@ describe("Battlesnake Moves", () => {
     ]);
     const gameState = createGameState(me, [me]);
 
-    const moveResponse = move(gameState);
-    // In this state, we should NEVER move left.
-    const allowedMoves = ["right"];
-    expect(allowedMoves).toContain(moveResponse.move);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
   });
 
   test("can escape due to its length", () => {
@@ -91,10 +97,12 @@ describe("Battlesnake Moves", () => {
     ]);
     const gameState = createGameState(me, [me]);
 
-    const moveResponse = move(gameState);
-    // In this state, we should NEVER move left.
-    const allowedMoves = ["right", "left"];
-    expect(allowedMoves).toContain(moveResponse.move);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["right", "left"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
   });
 
   test("goes towards closest food", () => {
@@ -127,7 +135,7 @@ describe("Battlesnake Moves", () => {
     expect(allowedMoves).toContain(moveResponse.move);
   });
 
-  test("deadly attack", () => {
+  test("deadly attack down", () => {
     // Arrange
     console.log("deadly attack");
 
@@ -149,4 +157,76 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+
+  test("deadly attack up", () => {
+    // Arrange
+    console.log("deadly attack");
+
+    const me = createBattlesnake("me", [
+      { x: 3, y: boardHeight - 2 },
+      { x: 2, y: boardHeight - 2 },
+      { x: 1, y: boardHeight - 2 },
+    ]);
+    // other back 2 squares
+    const other = createBattlesnake("other", [
+      { x: 1, y: boardHeight - 1 },
+      { x: 0, y: boardHeight - 1 },
+      { x: 0, y: boardHeight - 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("deadly attack left", () => {
+    // Arrange
+    console.log("deadly attack");
+
+    const me = createBattlesnake("me", [
+      { y: 3, x: 1 },
+      { y: 2, x: 1 },
+      { y: 1, x: 1 },
+    ]);
+    // other back 2 squares
+    const other = createBattlesnake("other", [
+      { y: 1, x: 0 },
+      { y: 0, x: 0 },
+      { y: 0, x: 1 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["left"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+
+  test("deadly attack right", () => {
+    // Arrange
+    console.log("deadly attack");
+
+    const me = createBattlesnake("me", [
+      { y: 3, x: boardWidth - 2 },
+      { y: 2, x: boardWidth - 2 },
+      { y: 1, x: boardWidth - 2 },
+    ]);
+    // other back 2 squares
+    const other = createBattlesnake("other", [
+      { y: 1, x: boardWidth - 1 },
+      { y: 0, x: boardWidth - 1 },
+      { y: 0, x: boardWidth - 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+
 });
