@@ -45,9 +45,7 @@ function avoidLongerHeads(gameState) {
     right: true,
   };
   const myHead = gameState.you.head;
-  const snakes = gameState.board.snakes;
-  const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
-  const longerSnakeHeads = otherSnakes
+  const longerSnakeHeads = gameState.otherSnakes
     .filter((s) => s.length >= gameState.you.length)
     .map((s) => s.head);
 
@@ -221,9 +219,7 @@ function closerFoodAndDistance(myHead, boardfood) {
 }
 
 function minFoodDistanceFromOtherSnakes(gameState, food) {
-  const otherHeads = gameState.board.snakes
-    .filter((s) => s.id != gameState.you.id)
-    .map((s) => s.head);
+  const otherHeads = gameState.otherSnakes.map((s) => s.head);
   return Math.min(...otherHeads.map((h) => distance(h, food)));
 }
 
@@ -270,16 +266,28 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
+function getDeadlyMove(gameState) {
+  const myHead = gameState.you.head;
+  const snakes = gameState.otherSnakes;
+
+  return undefined;
+}
+
+function preprocess(gameState) {
+  const snakes = gameState.board.snakes;
+  const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
+  gameState.otherSnakes = otherSnakes;
+}
+
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
+  preprocess(gameState);
 
   const possibleMoves = getPossibleMovesDepth(gameState, 7, []);
 
   const myHead = gameState.you.head;
-  const snakes = gameState.board.snakes;
 
-  const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
-  const longest = Math.max(...otherSnakes.map((s) => s.length));
+  const longest = Math.max(...gameState.otherSnakes.map((s) => s.length));
 
   const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
@@ -292,7 +300,8 @@ function move(gameState) {
       ? totallySafeMoves
       : Object.keys(possibleMoves).filter((key) => possibleMoves[key]);
 
-  let isAttacking = snakes.length > 1 && gameState.you.length > longest;
+  let isAttacking =
+    gameState.otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
   let safeTargetMoves = undefined;
 
@@ -326,7 +335,11 @@ function move(gameState) {
 
   let moveToMake = undefined;
 
-  if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
+  const deadlyMove = getDeadlyMove(gameState);
+
+  if (deadlyMove && safeMoves.includes(deadlyMove)) {
+    moveToMake = deadlyMove;
+  } else if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
     moveToMake = pickMove(safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
     moveToMake = pickMove(safeTargetMoves);
