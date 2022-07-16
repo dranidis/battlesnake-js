@@ -37,13 +37,20 @@ function collideWithSnake(myHead, mybody, possibleMoves) {
   }
 }
 
-function avoidLongHeads(myHead, longerSnakeHeads) {
+function avoidLongerHeads(gameState) {
   let possibleMovesAvoidingHeads = {
     up: true,
     down: true,
     left: true,
     right: true,
   };
+  const myHead = gameState.you.head;
+  const snakes = gameState.board.snakes;
+  const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
+  const longerSnakeHeads = otherSnakes
+    .filter((s) => s.length >= gameState.you.length)
+    .map((s) => s.head);
+
   for (let index = 0; index < longerSnakeHeads.length; index++) {
     x = longerSnakeHeads[index].x;
     y = longerSnakeHeads[index].y;
@@ -257,10 +264,7 @@ function movesTowardsClosestFood(gameState) {
       : closerFoodAndDistance(myHead, boardfood);
 
   if (minDistanceFood != {}) {
-    towardsFoodMoves = moveTowardsTarget(
-      myHead,
-      minDistanceFood
-    );
+    towardsFoodMoves = moveTowardsTarget(myHead, minDistanceFood);
   }
 
   return [towardsFoodMoves, distanceToCloserFood];
@@ -269,33 +273,21 @@ function movesTowardsClosestFood(gameState) {
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
 
-  let possibleMoves = getPossibleMovesDepth(gameState, 7, []);
+  const possibleMoves = getPossibleMovesDepth(gameState, 7, []);
 
   const myHead = gameState.you.head;
   const snakes = gameState.board.snakes;
 
-  // TODO: Step 4 - Find food.
-  // Use information in gameState to seek out and find food.
-  const [towardsFoodMoves, distanceToCloserFood] =
-    movesTowardsClosestFood(gameState);
-
   const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
-
-  const snakeLengths = otherSnakes.map((s) => s.length);
-
-  const longest = Math.max(...snakeLengths);
+  const longest = Math.max(...otherSnakes.map((s) => s.length));
 
   // avoid losing head-to-head
-  longerSnakeHeads = otherSnakes
-    .filter((s) => s.length >= gameState.you.length)
-    .map((s) => s.head);
-  console.log("LONGER SNAKE HEADS" + JSON.stringify(longerSnakeHeads));
 
-  let possibleMovesAvoidingHeads = avoidLongHeads(myHead, longerSnakeHeads);
+  const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
   // TODO: Step 5 - Select a move to make based on strategy, rather than random.
   const totallySafeMoves = Object.keys(possibleMoves).filter(
-    (key) => possibleMoves[key] && possibleMovesAvoidingHeads[key]
+    (key) => possibleMoves[key] && possibleMovesAvoidingLongerHeads[key]
   );
 
   let safeMoves = undefined;
@@ -317,16 +309,19 @@ function move(gameState) {
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
         possibleMoves[key] &&
-        possibleMovesAvoidingHeads[key] &&
+        possibleMovesAvoidingLongerHeads[key] &&
         towardsSnake[key]
     );
   }
+
+  const [towardsFoodMoves, distanceToCloserFood] =
+    movesTowardsClosestFood(gameState);
 
   let safeFoodMoves = Object.keys(possibleMoves).filter(
     (key) =>
       possibleMoves[key] &&
       towardsFoodMoves[key] &&
-      possibleMovesAvoidingHeads[key]
+      possibleMovesAvoidingLongerHeads[key]
   );
 
   console.log("SAF FOOD MOVES: " + safeFoodMoves);

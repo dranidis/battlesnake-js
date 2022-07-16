@@ -1,5 +1,7 @@
 const { info, move } = require("../src/logic");
 
+const TIMES = 10;
+
 function createGameState(myBattlesnake, allSnakes) {
   return {
     game: {
@@ -123,5 +125,28 @@ describe("Battlesnake Moves", () => {
     const moveResponse = move(gameState);
     const allowedMoves = ["up"];
     expect(allowedMoves).toContain(moveResponse.move);
+  });
+
+  test("deadly attack", () => {
+    // Arrange
+    console.log("deadly attack");
+
+    const me = createBattlesnake("me", [
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+    ]);
+    // other back 2 squares
+    const other = createBattlesnake("other", [
+      { x: 1, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 1 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["down"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
   });
 });
