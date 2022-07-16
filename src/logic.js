@@ -269,28 +269,38 @@ function movesTowardsClosestFood(gameState) {
 }
 
 function getDeadlyMoveToSnake(gameState, mySnake, snake) {
-  if (mySnake.head.x >= snake.head.x + 2) {
+  const xDistance = mySnake.head.x - snake.head.x;
+  const yDistance = mySnake.head.y - snake.head.y;
+  const halfHeight = Math.floor(gameState.board.height / 2);
+  const halfWidth = Math.floor(gameState.board.width / 2);
+  if (
+    (xDistance >= 2 && mySnake.head.x <= gameState.board.width - 2) || // there is still room to maneavure
+    (xDistance <= -2 && mySnake.head.x >= 1) // there is still room to maneavure
+  ) {
     if (mySnake.head.y == snake.head.y + 1) {
-      // if (snake.head.y == 0) {
-      return "down";
-      // }
+      if (snake.head.y < halfHeight) {
+        return ["down", xDistance];
+      }
     } else if (mySnake.head.y == snake.head.y - 1) {
-      // if (snake.head.y == gameState.board.height - 1) {
-      return "up";
-      // }
+      if (snake.head.y > halfHeight) {
+        return ["up", xDistance];
+      }
     }
-  } else if (mySnake.head.y >= snake.head.y + 2) {
+  } else if (
+    (yDistance >= 2 && mySnake.head.y <= gameState.board.height - 2) || // there is still room to maneavure
+    (yDistance <= -2 && mySnake.head.y >= 1) // there is still room to maneavure
+  ) {
     if (mySnake.head.x == snake.head.x + 1) {
-      // if (snake.head.x == 0) {
-      return "left";
-      // }
+      if (snake.head.x < halfWidth) {
+        return ["left", yDistance];
+      }
     } else if (mySnake.head.x == snake.head.x - 1) {
-      // if (snake.head.x == gameState.board.width - 1) {
-      return "right";
-      // }
+      if (snake.head.x > halfWidth) {
+        return ["right", yDistance];
+      }
     }
   }
-  return undefined;
+  return [undefined, undefined];
 }
 
 function getDeadlyMove(gameState) {
@@ -298,8 +308,37 @@ function getDeadlyMove(gameState) {
   const mySnake = gameState.you;
 
   for (let i = 0; i < snakes.length; i++) {
-    const dMove = getDeadlyMoveToSnake(gameState, mySnake, snakes[i]);
+    const [dMove, distance] = getDeadlyMoveToSnake(
+      gameState,
+      mySnake,
+      snakes[i]
+    );
     if (dMove != undefined) return dMove;
+  }
+
+  return undefined;
+}
+
+function detectDeadlyMove(gameState) {
+  const snakes = gameState.otherSnakes;
+  const mySnake = gameState.you;
+
+  for (let i = 0; i < snakes.length; i++) {
+    const [dMove, distance] = getDeadlyMoveToSnake(
+      gameState,
+      snakes[i],
+      mySnake
+    );
+    if (dMove != undefined) {
+      switch (dMove) {
+        case "up":
+        case "down":
+          return distance < 0 ? "right" : "left";
+        case "left":
+        case "right":
+          return distance < 0 ? "up" : "down";
+      }
+    }
   }
 
   return undefined;
@@ -367,9 +406,13 @@ function move(gameState) {
 
   let moveToMake = undefined;
 
+  const detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
   const deadlyMove = getDeadlyMove(gameState);
 
-  if (deadlyMove && safeMoves.includes(deadlyMove)) {
+  if (detectedDeadlyMoveFrom && safeMoves.includes(detectedDeadlyMoveFrom)) {
+    console.log("AVOID DEADLY MOVE blocking");
+    moveToMake = detectedDeadlyMoveFrom;
+  } else if (deadlyMove && safeMoves.includes(deadlyMove)) {
     console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
   } else if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
