@@ -345,7 +345,7 @@ function move(gameState) {
 
   if (moveToMake == undefined) {
     moveToMake = pickMove(
-      Object.keys(possibleMoves).filter((key) => possibleMoves[key])
+      Object.keys(posgetPossibleMoves(gameState)).filter((key) => possibleMoves[key])
     );
   }
 
