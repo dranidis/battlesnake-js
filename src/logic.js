@@ -504,9 +504,19 @@ function preprocess(gameState) {
   );
 
   gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
-  gameState.you.body.forEach((b) => gameState.blocks.set(b.x, b.y));
+
+  // gameState.you.body.forEach((b) => gameState.blocks.set(b.x, b.y));
+  for (let i = 0; i < gameState.you.body.length - 1; i++) {
+    gameState.blocks.set(gameState.you.body[i].x, gameState.you.body[i].y);
+  }
+
   gameState.otherSnakes.forEach((s) =>
-    s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
+    // s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
+    {
+      for (let i = 0; i < s.body.length - 1; i++) {
+        gameState.blocks.set(s.body[i].x, s.body[i].y);
+      }
+    }
   );
 }
 
@@ -616,4 +626,6 @@ module.exports = {
   start: start,
   move: move,
   end: end,
+  getPossibleMoves: getPossibleMoves,
+  preprocess: preprocess,
 };

@@ -1,4 +1,4 @@
-const { info, move, configuration } = require("../src/logic");
+const { info, move, configuration, getPossibleMoves, preprocess } = require("../src/logic");
 
 const TIMES = 10;
 const boardHeight = 5;
@@ -68,9 +68,7 @@ describe("Battlesnake Moves", () => {
 
   test("should never move outside the board bottom left", () => {
     // Arrange
-    const me = createBattlesnake("me", [
-      { x: 0, y: 0 },
-    ]);
+    const me = createBattlesnake("me", [{ x: 0, y: 0 }]);
     const gameState = createGameState(me, [me]);
 
     for (let i = 0; i < TIMES; i++) {
@@ -83,9 +81,7 @@ describe("Battlesnake Moves", () => {
 
   test("should never move outside the board top left", () => {
     // Arrange
-    const me = createBattlesnake("me", [
-      { x: 0, y: boardHeight - 1 },
-    ]);
+    const me = createBattlesnake("me", [{ x: 0, y: boardHeight - 1 }]);
     const gameState = createGameState(me, [me]);
 
     for (let i = 0; i < TIMES; i++) {
@@ -99,7 +95,7 @@ describe("Battlesnake Moves", () => {
   test("should never move outside the board top right", () => {
     // Arrange
     const me = createBattlesnake("me", [
-      { x: boardWidth-1, y: boardHeight-1 },
+      { x: boardWidth - 1, y: boardHeight - 1 },
     ]);
     const gameState = createGameState(me, [me]);
 
@@ -113,9 +109,7 @@ describe("Battlesnake Moves", () => {
 
   test("should never move outside the board bottom right", () => {
     // Arrange
-    const me = createBattlesnake("me", [
-      { x: boardWidth-1, y: 0 },
-    ]);
+    const me = createBattlesnake("me", [{ x: boardWidth - 1, y: 0 }]);
     const gameState = createGameState(me, [me]);
 
     for (let i = 0; i < TIMES; i++) {
@@ -128,9 +122,7 @@ describe("Battlesnake Moves", () => {
 
   test("should never move to another snake", () => {
     // Arrange
-    const me = createBattlesnake("me", [
-      { x: 3, y: 3 },
-    ]);
+    const me = createBattlesnake("me", [{ x: 3, y: 3 }]);
     const other = createBattlesnake("other", [
       { x: 2, y: 3 },
       { x: 3, y: 2 },
@@ -144,7 +136,6 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
-
 
   test("should never get trapped inside its own body", () => {
     // Arrange
@@ -207,7 +198,6 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
-
 
   test("goes towards closest food", () => {
     // Arrange
@@ -363,11 +353,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 1", () => {
-
     // other back 2 squares
-    const me = createBattlesnake("me", [
-      { x: 1, y: 1 },
-    ]);
+    const me = createBattlesnake("me", [{ x: 1, y: 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
       const moveResponse = move(gameState);
@@ -377,11 +364,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 2", () => {
-
     // other back 2 squares
-    const me = createBattlesnake("me", [
-      { x: 1, y: boardHeight - 1 },
-    ]);
+    const me = createBattlesnake("me", [{ x: 1, y: boardHeight - 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
       const moveResponse = move(gameState);
@@ -391,11 +375,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 1", () => {
-
     // other back 2 squares
-    const me = createBattlesnake("me", [
-      { x: boardWidth - 1, y: 1 },
-    ]);
+    const me = createBattlesnake("me", [{ x: boardWidth - 1, y: 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
       const moveResponse = move(gameState);
@@ -405,7 +386,6 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 2", () => {
-
     // other back 2 squares
     const me = createBattlesnake("me", [
       { x: boardWidth - 1, y: boardHeight - 1 },
@@ -417,4 +397,26 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+
+  test("can eat it's tail", () => {
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+      { x: 1, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    preprocess(gameState);
+
+    const moves = getPossibleMoves(gameState);
+    const exp = {
+      up: true,
+      down: true,
+      left: true,
+      right: false,
+    };
+    expect(moves).toBe(exp);
+  })
+  
 });
