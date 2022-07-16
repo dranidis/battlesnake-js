@@ -1,8 +1,13 @@
+const {
+  Matrix,
+  // createMatrix, toString, set, and
+} = require("./bitmatrix");
+
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: false,
   CHECK_DEADLY_ATTACK: false,
   CHECK_DEADLY_DEFENCE: false,
-  BFS_DEPTH: 8,
+  BFS_DEPTH: 7,
 };
 
 function info() {
@@ -93,48 +98,122 @@ function getPossibleMoves(gameState) {
     left: true,
     right: true,
   };
-  // Step 0: Don't let your Battlesnake move back on its own neck
+  // // Step 0: Don't let your Battlesnake move back on its own neck
   const myHead = gameState.you.head;
 
-  // const myNeck = gameState.you.body[1]
-  // if (myNeck.x < myHead.x) {
-  //     possibleMoves.left = false
-  // } else if (myNeck.x > myHead.x) {
-  //     possibleMoves.right = false
-  // } else if (myNeck.y < myHead.y) {
-  //     possibleMoves.down = false
-  // } else if (myNeck.y > myHead.y) {
-  //     possibleMoves.up = false
+  // // const myNeck = gameState.you.body[1]
+  // // if (myNeck.x < myHead.x) {
+  // //     possibleMoves.left = false
+  // // } else if (myNeck.x > myHead.x) {
+  // //     possibleMoves.right = false
+  // // } else if (myNeck.y < myHead.y) {
+  // //     possibleMoves.down = false
+  // // } else if (myNeck.y > myHead.y) {
+  // //     possibleMoves.up = false
+  // // }
+
+  // // TODO: Step 1 - Don't hit walls.
+  // // Use information in gameState to prevent your Battlesnake from moving beyond the boundaries of the board.
+  // const boardWidth = gameState.board.width;
+  // const boardHeight = gameState.board.height;
+  // // console.log("SNAKE " + myHead.x + " " + myHead.y)
+
+  // if (myHead.x == 0) possibleMoves.left = false;
+  // if (myHead.x == boardWidth - 1) possibleMoves.right = false;
+  // if (myHead.y == 0) possibleMoves.down = false;
+  // if (myHead.y == boardHeight - 1) possibleMoves.up = false;
+
+  // // TODO: Step 2 - Don't hit yourself.
+  // // Use information in gameState to prevent your Battlesnake from colliding with itself.
+
+  // // this can be covered by next step
+  // // but the algorithm or lookahead needs it separately!!
+  // const mybody = gameState.you.body;
+  // collideWithSnake(myHead, mybody, possibleMoves);
+
+  // // TODO: Step 3 - Don't collide with others.
+  // // Use information in gameState to prevent your Battlesnake from colliding with others.
+  // const otherSnakes = gameState.otherSnakes;
+  // for (let index = 0; index < otherSnakes.length; index++) {
+  //   collideWithSnake(myHead, otherSnakes[index].body, possibleMoves);
   // }
 
-  // TODO: Step 1 - Don't hit walls.
-  // Use information in gameState to prevent your Battlesnake from moving beyond the boundaries of the board.
-  const boardWidth = gameState.board.width;
-  const boardHeight = gameState.board.height;
-  // console.log("SNAKE " + myHead.x + " " + myHead.y)
+  const w = gameState.board.width;
+  const h = gameState.board.height;
 
-  if (myHead.x == 0) possibleMoves.left = false;
-  if (myHead.x == boardWidth - 1) possibleMoves.right = false;
-  if (myHead.y == 0) possibleMoves.down = false;
-  if (myHead.y == boardHeight - 1) possibleMoves.up = false;
+  possibleMoves.right =
+    myHead.x + 1 < w &&
+    new Matrix(w, h).set(myHead.x + 1, myHead.y).and(gameState.blocks).data ==
+      0n;
 
-  // TODO: Step 2 - Don't hit yourself.
-  // Use information in gameState to prevent your Battlesnake from colliding with itself.
+  possibleMoves.left =
+    myHead.x - 1 >= 0 &&
+    new Matrix(w, h).set(myHead.x - 1, myHead.y).and(gameState.blocks).data ==
+      0n;
 
-  // this can be covered by next step
-  // but the algorithm or lookahead needs it separately!!
-  const mybody = gameState.you.body;
-  collideWithSnake(myHead, mybody, possibleMoves);
+  possibleMoves.up =
+    myHead.y + 1 < h &&
+    new Matrix(w, h).set(myHead.x, myHead.y + 1).and(gameState.blocks).data ==
+      0n;
 
-  // TODO: Step 3 - Don't collide with others.
-  // Use information in gameState to prevent your Battlesnake from colliding with others.
-  const otherSnakes = gameState.otherSnakes;
-  for (let index = 0; index < otherSnakes.length; index++) {
-    collideWithSnake(myHead, otherSnakes[index].body, possibleMoves);
-  }
+  possibleMoves.down =
+    myHead.y - 1 >= 0 &&
+    new Matrix(w, h).set(myHead.x, myHead.y - 1).and(gameState.blocks).data ==
+      0n;
 
   return possibleMoves;
 }
+
+// function getPossibleMoves(gameState) {
+//   let possibleMoves = {
+//     up: true,
+//     down: true,
+//     left: true,
+//     right: true,
+//   };
+//   const myHead = gameState.you.head;
+
+//   // Step 0: Don't let your Battlesnake move back on its own neck
+
+//   // const myNeck = gameState.you.body[1]
+//   // if (myNeck.x < myHead.x) {
+//   //     possibleMoves.left = false
+//   // } else if (myNeck.x > myHead.x) {
+//   //     possibleMoves.right = false
+//   // } else if (myNeck.y < myHead.y) {
+//   //     possibleMoves.down = false
+//   // } else if (myNeck.y > myHead.y) {
+//   //     possibleMoves.up = false
+//   // }
+
+//   // TODO: Step 1 - Don't hit walls.
+//   // Use information in gameState to prevent your Battlesnake from moving beyond the boundaries of the board.
+//   const boardWidth = gameState.board.width;
+//   const boardHeight = gameState.board.height;
+//   // console.log("SNAKE " + myHead.x + " " + myHead.y)
+
+//   if (myHead.x == 0) possibleMoves.left = false;
+//   if (myHead.x == boardWidth - 1) possibleMoves.right = false;
+//   if (myHead.y == 0) possibleMoves.down = false;
+//   if (myHead.y == boardHeight - 1) possibleMoves.up = false;
+
+//   // TODO: Step 2 - Don't hit yourself.
+//   // Use information in gameState to prevent your Battlesnake from colliding with itself.
+
+//   // this can be covered by next step
+//   // but the algorithm or lookahead needs it separately!!
+//   const mybody = gameState.you.body;
+//   collideWithSnake(myHead, mybody, possibleMoves);
+
+//   // TODO: Step 3 - Don't collide with others.
+//   // Use information in gameState to prevent your Battlesnake from colliding with others.
+//   const otherSnakes = gameState.otherSnakes;
+//   for (let index = 0; index < otherSnakes.length; index++) {
+//     collideWithSnake(myHead, otherSnakes[index].body, possibleMoves);
+//   }
+
+//   return possibleMoves;
+// }
 
 function newSquare(sq, aMove) {
   let x = sq.x;
@@ -160,7 +239,12 @@ function newSquare(sq, aMove) {
 }
 
 function applyMove(gameState, newHead) {
-  let newGameState = JSON.parse(JSON.stringify(gameState));
+  let newGameState = JSON.parse(
+    JSON.stringify(
+      gameState,
+      (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
+    )
+  );
 
   newGameState.you.body.unshift(newHead);
   newGameState.you.body.pop();
@@ -168,6 +252,8 @@ function applyMove(gameState, newHead) {
 
   // just remove the tail, don't know where the head is heading
   newGameState.otherSnakes.forEach((s) => s.body.pop());
+
+  preprocess(newGameState);
 
   return newGameState;
 }
@@ -387,15 +473,23 @@ function preprocess(gameState) {
     (s) => s.id != gameState.you.id
   );
 
-  // TODO:
-  // find all squares blocked by snakes
+  gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
+  gameState.you.body.forEach((b) => gameState.blocks.set(b.x, b.y));
+  gameState.otherSnakes.forEach((s) =>
+    s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
+  );
+  console.log(toString(gameState.blocks));
 }
 
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
 
-  const possibleMoves = getPossibleMovesDepth(gameState, configuration.BFS_DEPTH, []);
+  const possibleMoves = getPossibleMovesDepth(
+    gameState,
+    configuration.BFS_DEPTH,
+    []
+  );
 
   const myHead = gameState.you.head;
 

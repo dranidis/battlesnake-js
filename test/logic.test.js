@@ -66,6 +66,86 @@ describe("Battlesnake Moves", () => {
     }
   });
 
+  test("should never move outside the board bottom left", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: 0, y: 0 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["up", "right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("should never move outside the board top left", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: 0, y: boardHeight - 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["down", "right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("should never move outside the board top right", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: boardWidth-1, y: boardHeight-1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["down", "left"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("should never move outside the board bottom right", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: boardWidth-1, y: 0 },
+    ]);
+    const gameState = createGameState(me, [me]);
+
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["up", "left"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("should never move to another snake", () => {
+    // Arrange
+    const me = createBattlesnake("me", [
+      { x: 3, y: 3 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 3 },
+      { x: 3, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      // In this state, we should NEVER move left.
+      const allowedMoves = ["up", "right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+
   test("should never get trapped inside its own body", () => {
     // Arrange
     const me = createBattlesnake("me", [
