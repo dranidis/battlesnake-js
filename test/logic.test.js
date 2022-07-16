@@ -138,6 +138,7 @@ describe("Battlesnake Moves", () => {
   });
 
   test("deadly attack down", () => {
+    if (!configuration.CHECK_DEADLY_ATTACK) return;
     // Arrange
     console.log("deadly attack");
 
@@ -161,6 +162,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("deadly attack up", () => {
+    if (!configuration.CHECK_DEADLY_ATTACK) return;
+
     // Arrange
     console.log("deadly attack");
 
@@ -184,6 +187,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("deadly attack left", () => {
+    if (!configuration.CHECK_DEADLY_ATTACK) return;
+
     // Arrange
     console.log("deadly attack");
 
@@ -207,6 +212,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("deadly attack right", () => {
+    if (!configuration.CHECK_DEADLY_ATTACK) return;
+
     // Arrange
     console.log("deadly attack");
 
@@ -230,6 +237,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("avoid deadly attack down", () => {
+    if (!configuration.CHECK_DEADLY_DEFENCE) return;
+
     const other = createBattlesnake("other", [
       { x: 3, y: 1 },
       { x: 2, y: 1 },

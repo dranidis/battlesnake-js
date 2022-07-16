@@ -1,4 +1,8 @@
-const configuration = { CHECK_FOOD_CLOSER_TO_OTHERS: false };
+const configuration = {
+  CHECK_FOOD_CLOSER_TO_OTHERS: false,
+  CHECK_DEADLY_ATTACK: false,
+  CHECK_DEADLY_DEFENCE: false,
+};
 
 function info() {
   console.log("INFO");
@@ -269,14 +273,32 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
+function blockFilled(fromX, toX, fromY, toY) {
+  return true;
+}
+
 function getDeadlyMoveToSnake(gameState, mySnake, snake) {
   const xDistance = mySnake.head.x - snake.head.x;
   const yDistance = mySnake.head.y - snake.head.y;
   const halfHeight = Math.floor(gameState.board.height / 2);
   const halfWidth = Math.floor(gameState.board.width / 2);
   if (
-    (xDistance >= 2 && mySnake.head.x <= gameState.board.width - 2) || // there is still room to maneavure
-    (xDistance <= -2 && mySnake.head.x >= 1) // there is still room to maneavure
+    (xDistance >= 2 &&
+      blockFilled(
+        mySnake.head.x - xDistance,
+        mySnake.head.x,
+        mySnake.head.y,
+        mySnake.head.y
+      ) &&
+      mySnake.head.x <= gameState.board.width - 2) || // there is still room to maneavure
+    (xDistance <= -2 &&
+      blockFilled(
+        mySnake.head.x,
+        mySnake.head.x - xDistance,
+        mySnake.head.y,
+        mySnake.head.y
+      ) &&
+      mySnake.head.x >= 1) // there is still room to maneavure
   ) {
     if (mySnake.head.y == snake.head.y + 1) {
       if (snake.head.y < halfHeight) {
@@ -288,8 +310,22 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
       }
     }
   } else if (
-    (yDistance >= 2 && mySnake.head.y <= gameState.board.height - 2) || // there is still room to maneavure
-    (yDistance <= -2 && mySnake.head.y >= 1) // there is still room to maneavure
+    (yDistance >= 2 &&
+      blockFilled(
+        mySnake.head.x,
+        mySnake.head.x,
+        mySnake.head.y - yDistance,
+        mySnake.head.y
+      ) &&
+      mySnake.head.y <= gameState.board.height - 2) || // there is still room to maneavure
+    (yDistance <= -2 &&
+      blockFilled(
+        mySnake.head.x,
+        mySnake.head.x,
+        mySnake.head.y,
+        mySnake.head.y - yDistance
+      ) &&
+      mySnake.head.y >= 1) // there is still room to maneavure
   ) {
     if (mySnake.head.x == snake.head.x + 1) {
       if (snake.head.x < halfWidth) {
@@ -349,6 +385,9 @@ function preprocess(gameState) {
   gameState.otherSnakes = gameState.board.snakes.filter(
     (s) => s.id != gameState.you.id
   );
+
+  // TODO:
+  // find all squares blocked by snakes
 }
 
 function move(gameState) {
@@ -406,9 +445,13 @@ function move(gameState) {
   console.log("SAF TARG MOVES: " + safeTargetMoves);
 
   let moveToMake = undefined;
+  let detectedDeadlyMoveFrom = undefined;
+  let deadlyMove = undefined;
 
-  const detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
-  const deadlyMove = getDeadlyMove(gameState);
+  if (configuration.CHECK_DEADLY_ATTACK) deadlyMove = getDeadlyMove(gameState);
+
+  if (configuration.CHECK_DEADLY_DEFENCE)
+    detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
 
   if (detectedDeadlyMoveFrom && safeMoves.includes(detectedDeadlyMoveFrom)) {
     console.log("AVOID DEADLY MOVE blocking");
