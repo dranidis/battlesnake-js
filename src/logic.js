@@ -281,21 +281,16 @@ function move(gameState) {
   const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
   const longest = Math.max(...otherSnakes.map((s) => s.length));
 
-  // avoid losing head-to-head
-
   const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
-  // TODO: Step 5 - Select a move to make based on strategy, rather than random.
   const totallySafeMoves = Object.keys(possibleMoves).filter(
     (key) => possibleMoves[key] && possibleMovesAvoidingLongerHeads[key]
   );
 
-  let safeMoves = undefined;
-  if (totallySafeMoves.length > 0) {
-    safeMoves = totallySafeMoves;
-  } else {
-    safeMoves = Object.keys(possibleMoves).filter((key) => possibleMoves[key]);
-  }
+  const safeMoves =
+    totallySafeMoves.length > 0
+      ? totallySafeMoves
+      : Object.keys(possibleMoves).filter((key) => possibleMoves[key]);
 
   let isAttacking = snakes.length > 1 && gameState.you.length > longest;
   let target = undefined;
@@ -303,7 +298,7 @@ function move(gameState) {
 
   if (isAttacking) {
     console.log("isAttacking");
-    // todo: now picks first other snake as target
+    // TODO: now picks first other snake as target
     target = otherSnakes[0].head;
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
@@ -329,8 +324,6 @@ function move(gameState) {
   console.log("FIN SAFE MOVES: " + safeMoves);
   console.log("SAF TARG MOVES: " + safeTargetMoves);
 
-  // console.log("SAFE TO FOOD " + JSON.stringify(safeFoodMoves))
-
   let moveToMake = undefined;
 
   if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
@@ -345,7 +338,9 @@ function move(gameState) {
 
   if (moveToMake == undefined) {
     moveToMake = pickMove(
-      Object.keys(posgetPossibleMoves(gameState)).filter((key) => possibleMoves[key])
+      Object.keys(getPossibleMoves(gameState)).filter(
+        (key) => possibleMoves[key]
+      )
     );
   }
 
