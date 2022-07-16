@@ -252,6 +252,7 @@ function applyMove(gameState, newHead) {
 
   // just remove the tail, don't know where the head is heading
   newGameState.otherSnakes.forEach((s) => s.body.pop());
+  newGameState.board.snakes.forEach((s) => s.body.pop());
 
   preprocess(newGameState);
 
@@ -284,6 +285,12 @@ function getPossibleMovesDepth(gameState, depth, visited) {
       const newVisited = deepCopy(visited);
       newVisited.push(newHead);
       const newGameState = applyMove(gameState, newHead);
+      // console.log(
+      //   "AFTER MOVE: " +
+      //     safeMoves[index] +
+      //     " at state " +
+      //     newGameState.blocks.toString()
+      // );
       const newPossibleMoves = getPossibleMovesDepth(
         newGameState,
         depth - 1,
@@ -487,7 +494,6 @@ function preprocess(gameState) {
   gameState.otherSnakes.forEach((s) =>
     s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
   );
-  // console.log(gameState.blocks.toString());
 }
 
 function move(gameState) {

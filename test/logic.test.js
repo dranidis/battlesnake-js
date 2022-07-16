@@ -185,6 +185,30 @@ describe("Battlesnake Moves", () => {
     }
   });
 
+  test("can escape because other snake's tail is reduced", () => {
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+      { x: 3, y: 2 },
+      { x: 2, y: 2 },
+      { x: 1, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+
+    for (let i = 0; i < 1; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+
   test("goes towards closest food", () => {
     // Arrange
     console.log("goes towards closest food");
