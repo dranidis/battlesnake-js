@@ -228,5 +228,25 @@ describe("Battlesnake Moves", () => {
     }
   });
 
+  test("avoid deadly attack down", () => {
+    const other = createBattlesnake("other", [
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ]);
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["left"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
 
 });

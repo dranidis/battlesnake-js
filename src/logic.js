@@ -159,6 +159,9 @@ function applyMove(gameState, newHead) {
   newGameState.you.body.pop();
   newGameState.you.head = newHead;
 
+  // just remove the tail, don't know where the head is heading
+  newGameState.otherSnakes.forEach((s) => s.body.pop());
+
   return newGameState;
 }
 
@@ -269,21 +272,21 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
   if (mySnake.head.x >= snake.head.x + 2) {
     if (mySnake.head.y == snake.head.y + 1) {
       // if (snake.head.y == 0) {
-        return "down";
+      return "down";
       // }
     } else if (mySnake.head.y == snake.head.y - 1) {
       // if (snake.head.y == gameState.board.height - 1) {
-        return "up";
+      return "up";
       // }
     }
   } else if (mySnake.head.y >= snake.head.y + 2) {
     if (mySnake.head.x == snake.head.x + 1) {
       // if (snake.head.x == 0) {
-        return "left";
+      return "left";
       // }
     } else if (mySnake.head.x == snake.head.x - 1) {
       // if (snake.head.x == gameState.board.width - 1) {
-        return "right";
+      return "right";
       // }
     }
   }
@@ -367,6 +370,7 @@ function move(gameState) {
   const deadlyMove = getDeadlyMove(gameState);
 
   if (deadlyMove && safeMoves.includes(deadlyMove)) {
+    console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
   } else if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
     moveToMake = pickMove(safeFoodMoves);
