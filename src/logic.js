@@ -15,9 +15,9 @@ function info() {
   const response = {
     apiversion: "1",
     author: "DDmits2",
-    color: "#ff00ff",
-    head: "default",
-    tail: "bolt",
+    color: "#736CCB",
+    head: "tongue",
+    tail: "freckled",
   };
   return response;
 }
