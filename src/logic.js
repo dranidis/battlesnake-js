@@ -268,26 +268,26 @@ function movesTowardsClosestFood(gameState) {
 function getDeadlyMoveToSnake(gameState, mySnake, snake) {
   if (mySnake.head.x >= snake.head.x + 2) {
     if (mySnake.head.y == snake.head.y + 1) {
-      if (snake.head.y == 0) {
-        return "down"
-      }
+      // if (snake.head.y == 0) {
+        return "down";
+      // }
     } else if (mySnake.head.y == snake.head.y - 1) {
-      if (snake.head.y == gameState.board.height - 1) {
-        return "up"
-      }
+      // if (snake.head.y == gameState.board.height - 1) {
+        return "up";
+      // }
     }
-  } else   if (mySnake.head.y >= snake.head.y + 2) {
+  } else if (mySnake.head.y >= snake.head.y + 2) {
     if (mySnake.head.x == snake.head.x + 1) {
-      if (snake.head.x == 0) {
-        return "left"
-      }
+      // if (snake.head.x == 0) {
+        return "left";
+      // }
     } else if (mySnake.head.x == snake.head.x - 1) {
-      if (snake.head.x == gameState.board.width - 1) {
-        return "right"
-      }
+      // if (snake.head.x == gameState.board.width - 1) {
+        return "right";
+      // }
     }
   }
-
+  return undefined;
 }
 
 function getDeadlyMove(gameState) {
