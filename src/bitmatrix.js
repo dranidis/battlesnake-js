@@ -22,6 +22,11 @@ class Matrix {
     return (this.data >> i) & 1n;
   }
 
+  is(x, y) {
+    const i = BigInt(y * this.width + x);
+    return ((this.data >> i) & 1n) == 1n;
+  }
+
   and(m2) {
     this.data &= BigInt(m2.data);
     return this;

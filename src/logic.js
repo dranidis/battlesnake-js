@@ -5,8 +5,8 @@ const {
 
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: false,
-  CHECK_DEADLY_ATTACK: false,
-  CHECK_DEADLY_DEFENCE: false,
+  CHECK_DEADLY_ATTACK: true,
+  CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 7,
 };
 
@@ -360,7 +360,12 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
-function blockFilled(fromX, toX, fromY, toY) {
+function blockFilled(gameState, fromX, toX, fromY, toY) {
+  for (let x = fromX; x <= toX; x++) {
+    for (let y = fromY; y <= toY; y++) {
+      if (!gameState.blocks.is(x, y)) return false;
+    }
+  }
   return true;
 }
 
@@ -372,6 +377,7 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
   if (
     (xDistance >= 2 &&
       blockFilled(
+        gameState,
         mySnake.head.x - xDistance,
         mySnake.head.x,
         mySnake.head.y,
@@ -380,6 +386,7 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
       mySnake.head.x <= gameState.board.width - 2) || // there is still room to maneavure
     (xDistance <= -2 &&
       blockFilled(
+        gameState,
         mySnake.head.x,
         mySnake.head.x - xDistance,
         mySnake.head.y,
@@ -399,6 +406,7 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
   } else if (
     (yDistance >= 2 &&
       blockFilled(
+        gameState,
         mySnake.head.x,
         mySnake.head.x,
         mySnake.head.y - yDistance,
@@ -407,6 +415,7 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
       mySnake.head.y <= gameState.board.height - 2) || // there is still room to maneavure
     (yDistance <= -2 &&
       blockFilled(
+        gameState,
         mySnake.head.x,
         mySnake.head.x,
         mySnake.head.y,
@@ -478,7 +487,7 @@ function preprocess(gameState) {
   gameState.otherSnakes.forEach((s) =>
     s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
   );
-  console.log(toString(gameState.blocks));
+  // console.log(gameState.blocks.toString());
 }
 
 function move(gameState) {

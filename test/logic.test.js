@@ -1,6 +1,6 @@
 const { info, move, configuration } = require("../src/logic");
 
-const TIMES = 100;
+const TIMES = 10;
 const boardHeight = 5;
 const boardWidth = 5;
 
