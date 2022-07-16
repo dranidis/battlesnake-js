@@ -274,9 +274,9 @@ function getDeadlyMove(gameState) {
 }
 
 function preprocess(gameState) {
-  const snakes = gameState.board.snakes;
-  const otherSnakes = snakes.filter((s) => s.id != gameState.you.id);
-  gameState.otherSnakes = otherSnakes;
+  gameState.otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
 }
 
 function move(gameState) {
@@ -308,7 +308,7 @@ function move(gameState) {
   if (isAttacking) {
     console.log("isAttacking");
     // TODO: now picks first other snake as target
-    target = otherSnakes[0].head;
+    target = gameState.otherSnakes[0].head;
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
