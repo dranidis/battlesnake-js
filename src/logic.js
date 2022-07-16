@@ -2,6 +2,7 @@ const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: false,
   CHECK_DEADLY_ATTACK: false,
   CHECK_DEADLY_DEFENCE: false,
+  BFS_DEPTH: 8,
 };
 
 function info() {
@@ -394,7 +395,7 @@ function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
 
-  const possibleMoves = getPossibleMovesDepth(gameState, 7, []);
+  const possibleMoves = getPossibleMovesDepth(gameState, configuration.BFS_DEPTH, []);
 
   const myHead = gameState.you.head;
 
