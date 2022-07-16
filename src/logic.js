@@ -350,11 +350,9 @@ function move(gameState) {
   }
 
   if (moveToMake == undefined) {
-    moveToMake = pickMove(
-      Object.keys(getPossibleMoves(gameState)).filter(
-        (key) => possibleMoves[key]
-      )
-    );
+    console.log("Desperate move!")
+    const pMoves = getPossibleMoves(gameState);
+    moveToMake = pickMove(Object.keys(pMoves).filter((key) => pMoves[key]));
   }
 
   response = {
