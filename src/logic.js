@@ -307,7 +307,21 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   return possibleMoves;
 }
 
-function pickMove(safeMoves) {
+function pickMove(gameState, safeMoves) {
+  let newSafeMoves = safeMoves;
+  if (gameState.you.head.x < gameState.board.width / 2) {
+    newSafeMoves = newSafeMoves.filter((m) => m != "left");
+  } else {
+    newSafeMoves = newSafeMoves.filter((m) => m != "right");
+  }
+  if (gameState.you.head.y < gameState.board.height / 2) {
+    newSafeMoves = newSafeMoves.filter((m) => m != "down");
+  } else {
+    newSafeMoves = newSafeMoves.filter((m) => m != "up");
+  }
+  if (newSafeMoves.length > 0)
+    return newSafeMoves[Math.floor(Math.random() * newSafeMoves.length)];
+
   return safeMoves[Math.floor(Math.random() * safeMoves.length)];
 }
 
@@ -570,19 +584,22 @@ function move(gameState) {
     console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
   } else if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
-    moveToMake = pickMove(safeFoodMoves);
+    moveToMake = pickMove(gameState, safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
-    moveToMake = pickMove(safeTargetMoves);
+    moveToMake = pickMove(gameState, safeTargetMoves);
   } else if (safeFoodMoves.length > 0) {
-    moveToMake = pickMove(safeFoodMoves);
+    moveToMake = pickMove(gameState, safeFoodMoves);
   } else {
-    moveToMake = pickMove(safeMoves);
+    moveToMake = pickMove(gameState, safeMoves);
   }
 
   if (moveToMake == undefined) {
     console.log("Desperate move!");
     const pMoves = getPossibleMoves(gameState);
-    moveToMake = pickMove(Object.keys(pMoves).filter((key) => pMoves[key]));
+    moveToMake = pickMove(
+      gameState,
+      Object.keys(pMoves).filter((key) => pMoves[key])
+    );
   }
 
   response = {

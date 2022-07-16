@@ -361,4 +361,60 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+
+  test("prefer going towards the center 1", () => {
+
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: 1, y: 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["right", "up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("prefer going towards the center 2", () => {
+
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: 1, y: boardHeight - 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["right", "down"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("prefer going towards the center 1", () => {
+
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: boardWidth - 1, y: 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["left", "up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+  test("prefer going towards the center 2", () => {
+
+    // other back 2 squares
+    const me = createBattlesnake("me", [
+      { x: boardWidth - 1, y: boardHeight - 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["left", "down"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
 });
