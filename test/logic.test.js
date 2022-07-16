@@ -1,8 +1,8 @@
-const { info, move } = require("../src/logic");
+const { info, move, configuration } = require("../src/logic");
 
 const TIMES = 100;
-const boardHeight = 5
-const boardWidth = 5
+const boardHeight = 5;
+const boardWidth = 5;
 
 function createGameState(myBattlesnake, allSnakes) {
   return {
@@ -132,7 +132,9 @@ describe("Battlesnake Moves", () => {
 
     const moveResponse = move(gameState);
     const allowedMoves = ["up"];
-    expect(allowedMoves).toContain(moveResponse.move);
+
+    if (configuration.CHECK_FOOD_CLOSER_TO_OTHERS)
+      expect(allowedMoves).toContain(moveResponse.move);
   });
 
   test("deadly attack down", () => {
@@ -204,7 +206,6 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-
   test("deadly attack right", () => {
     // Arrange
     console.log("deadly attack");
@@ -247,6 +248,4 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
-
-
 });

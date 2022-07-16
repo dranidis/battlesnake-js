@@ -1,3 +1,5 @@
+const configuration = { CHECK_FOOD_CLOSER_TO_OTHERS: false };
+
 function info() {
   console.log("INFO");
   const response = {
@@ -237,29 +239,28 @@ function movesTowardsClosestFood(gameState) {
 
   const boardfood = gameState.board.food;
   const myHead = gameState.you.head;
-  const otherHeads = gameState.board.snakes
-    .filter((s) => s.id != gameState.you.id)
-    .map((s) => s.head);
 
-  const foodNotCloseToOthers = boardfood.filter(
-    (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
-  );
+  let [minDistanceFood, distanceToCloserFood] = [-1, {}];
 
-  // boardfood.forEach((f) => {
-  //   console.log("My DIST: " + JSON.stringify(f) + distance(myHead, f));
-  //   console.log(
-  //     "MIN DIST: " +
-  //       JSON.stringify(f) +
-  //       minFoodDistanceFromOtherSnakes(gameState, f)
-  //   );
-  // });
-  // console.log("ALL FOOD: " + JSON.stringify(boardfood));
-  // console.log("FOOD: " + JSON.stringify(foodNotCloseToOthers));
+  if (configuration.CHECK_FOOD_CLOSER_TO_OTHERS) {
+    const otherHeads = gameState.board.snakes
+      .filter((s) => s.id != gameState.you.id)
+      .map((s) => s.head);
 
-  let [minDistanceFood, distanceToCloserFood] =
-    foodNotCloseToOthers.length > 0
-      ? closerFoodAndDistance(myHead, foodNotCloseToOthers)
-      : closerFoodAndDistance(myHead, boardfood);
+    const foodNotCloseToOthers = boardfood.filter(
+      (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
+    );
+
+    [minDistanceFood, distanceToCloserFood] =
+      foodNotCloseToOthers.length > 0
+        ? closerFoodAndDistance(myHead, foodNotCloseToOthers)
+        : closerFoodAndDistance(myHead, boardfood);
+  } else {
+    [minDistanceFood, distanceToCloserFood] = closerFoodAndDistance(
+      myHead,
+      boardfood
+    );
+  }
 
   if (minDistanceFood != {}) {
     towardsFoodMoves = moveTowardsTarget(myHead, minDistanceFood);
@@ -440,6 +441,7 @@ function move(gameState) {
 }
 
 module.exports = {
+  configuration: configuration,
   info: info,
   start: start,
   move: move,
