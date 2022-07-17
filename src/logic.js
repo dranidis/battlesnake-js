@@ -9,6 +9,11 @@ const configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
+  /**
+   * number of extra squares in the area for the snake 
+  // to safely enter. 1.5 * length
+   */
+  FLOOD_FILL_FACTOR: 1.5,
 };
 
 function info() {
@@ -311,13 +316,15 @@ function getPossibleMovesFloodFill(gameState) {
     boardFill.fill();
     const squares = boardFill.get();
     moveSquares[safeMoves[index]] = squares;
-    possibleMoves[safeMoves[index]] = squares > gameState.you.length;
+    possibleMoves[safeMoves[index]] =
+      squares > configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   }
   console.log("FloodFill: " + JSON.stringify(moveSquares));
 
   if (
-    Object.keys(possibleMoves).filter((key) => possibleMoves[key]).length == 0
-    && safeMoves.length > 0
+    Object.keys(possibleMoves).filter((key) => possibleMoves[key]).length ==
+      0 &&
+    safeMoves.length > 0
   ) {
     const maxMove = Object.keys(moveSquares).reduce(function (a, b) {
       return moveSquares[a] > moveSquares[b] ? a : b;
