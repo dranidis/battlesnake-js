@@ -1,4 +1,10 @@
-const { info, move, configuration, getPossibleMoves, preprocess } = require("../src/logic");
+const {
+  info,
+  move,
+  configuration,
+  getPossibleMoves,
+  preprocess,
+} = require("../src/logic");
 
 const TIMES = 10;
 const boardHeight = 5;
@@ -239,11 +245,11 @@ describe("Battlesnake Moves", () => {
     // Arrange
     console.log("deadly attack");
 
-    // 4        
-    // 3        
-    // 2   X       
-    // 1 o X X > 
-    // 0 o )        
+    // 4
+    // 3
+    // 2   X
+    // 1 o X X >
+    // 0 o )
     //   0 1 2 3 4
     const me = createBattlesnake("me", [
       { x: 3, y: 1 },
@@ -276,7 +282,6 @@ describe("Battlesnake Moves", () => {
       { x: 2, y: boardHeight - 2 },
       { x: 1, y: boardHeight - 2 },
       { x: 1, y: boardHeight - 3 },
-
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -329,7 +334,6 @@ describe("Battlesnake Moves", () => {
       { y: 2, x: boardWidth - 2 },
       { y: 1, x: boardWidth - 2 },
       { y: 1, x: boardHeight - 3 },
-
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -412,8 +416,10 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+});
 
-  test("can eat it's tail", () => {
+describe("getPossibleMoves", () => {
+  test("can go to it's tail", () => {
     // other back 2 squares
     const me = createBattlesnake("me", [
       { x: 1, y: 1 },
@@ -432,6 +438,33 @@ describe("Battlesnake Moves", () => {
       right: false,
     };
     expect(moves).toStrictEqual(exp);
-  })
-  
+  });
+
+  test("can go to it's tail 2", () => {
+    // other back 2 squares
+
+    // 4
+    // 3
+    // 2
+    // 1 [ X
+    // 0 < X
+    //   0 1 2 3 4
+    const me = createBattlesnake("me", [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ]);
+    const gameState = createGameState(me, [me]);
+    preprocess(gameState);
+
+    const moves = getPossibleMoves(gameState);
+    const exp = {
+      up: true,
+      down: false,
+      left: false,
+      right: false,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
 });
