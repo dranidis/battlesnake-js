@@ -7,7 +7,7 @@ const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: false,
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
-  BFS_DEPTH: 9,
+  BFS_DEPTH: 8, // max with Heroku
 };
 
 function info() {
