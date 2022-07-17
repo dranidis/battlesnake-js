@@ -514,12 +514,15 @@ function move(gameState) {
   let isAttacking =
     gameState.otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
+  let targetDistance = 999;
   let safeTargetMoves = undefined;
 
   if (isAttacking) {
     console.log("isAttacking");
     // TODO: now picks first other snake as target
-    target = gameState.otherSnakes[0].head;
+    // target = gameState.otherSnakes[0].head;
+    target = gameState.otherSnakes.sort(s => distance(myHead, s.head))[0].head;
+    targetDistance = distance(myHead, target)
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
@@ -559,7 +562,7 @@ function move(gameState) {
   } else if (deadlyMove && safeMoves.includes(deadlyMove)) {
     console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
-  } else if (safeFoodMoves.length > 0 && distanceToCloserFood < 3) {
+  } else if (safeFoodMoves.length > 0 && distanceToCloserFood < targetDistance) {
     moveToMake = pickMove(gameState, safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
     moveToMake = pickMove(gameState, safeTargetMoves);
