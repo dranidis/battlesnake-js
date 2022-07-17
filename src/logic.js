@@ -295,11 +295,11 @@ function closerFoodAndDistance(myHead, boardfood) {
   return [boardfood[index], distances[index]];
 }
 
-function minFoodDistanceFromOtherSnakes(gameState, food) {
-  const otherHeads = gameState.otherSnakes
+function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
+  const longerOrSameHeads = gameState.otherSnakes
     .filter((s) => s.length >= gameState.you.length)
     .map((s) => s.head);
-  return Math.min(...otherHeads.map((h) => distance(h, food)));
+  return Math.min(...longerOrSameHeads.map((h) => distance(h, food)));
 }
 
 function movesTowardsClosestFood(gameState) {
@@ -322,14 +322,14 @@ function movesTowardsClosestFood(gameState) {
       .filter((s) => s.id != gameState.you.id)
       .map((s) => s.head);
 
-    const foodNotCloseToOthers = boardfood.filter(
-      (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
-      // (f) => minFoodDistanceFromOtherSnakes(gameState, f) > 1
+    const foodNotCloserToLongerSnakes = boardfood.filter(
+      (f) => distance(myHead, f) < minFoodDistanceFromLongerOrSameSnakes(gameState, f)
+      // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
     [minDistanceFood, distanceToCloserFood] =
-      foodNotCloseToOthers.length > 0
-        ? closerFoodAndDistance(myHead, foodNotCloseToOthers)
+    foodNotCloserToLongerSnakes.length > 0
+        ? closerFoodAndDistance(myHead, foodNotCloserToLongerSnakes)
         : closerFoodAndDistance(myHead, boardfood);
   } else {
     [minDistanceFood, distanceToCloserFood] = closerFoodAndDistance(
