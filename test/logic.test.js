@@ -120,12 +120,15 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-  test("should never move to another snake", () => {
+  test("should never move to another snake, except to its tail", () => {
     // Arrange
     const me = createBattlesnake("me", [{ x: 3, y: 3 }]);
     const other = createBattlesnake("other", [
       { x: 2, y: 3 },
+      { x: 2, y: 2 },
       { x: 3, y: 2 },
+      { x: 4, y: 2 },
+      { x: 4, y: 3 }, // this will go away
     ]);
     const gameState = createGameState(me, [me, other]);
 
@@ -236,10 +239,17 @@ describe("Battlesnake Moves", () => {
     // Arrange
     console.log("deadly attack");
 
+    // 4        
+    // 3        
+    // 2   X       
+    // 1 o X X > 
+    // 0 o )        
+    //   0 1 2 3 4
     const me = createBattlesnake("me", [
       { x: 3, y: 1 },
       { x: 2, y: 1 },
       { x: 1, y: 1 },
+      { x: 1, y: 2 },
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -265,6 +275,8 @@ describe("Battlesnake Moves", () => {
       { x: 3, y: boardHeight - 2 },
       { x: 2, y: boardHeight - 2 },
       { x: 1, y: boardHeight - 2 },
+      { x: 1, y: boardHeight - 3 },
+
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -290,6 +302,7 @@ describe("Battlesnake Moves", () => {
       { y: 3, x: 1 },
       { y: 2, x: 1 },
       { y: 1, x: 1 },
+      { y: 1, x: 2 },
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -315,6 +328,8 @@ describe("Battlesnake Moves", () => {
       { y: 3, x: boardWidth - 2 },
       { y: 2, x: boardWidth - 2 },
       { y: 1, x: boardWidth - 2 },
+      { y: 1, x: boardHeight - 3 },
+
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -416,7 +431,7 @@ describe("Battlesnake Moves", () => {
       left: true,
       right: false,
     };
-    expect(moves).toBe(exp);
+    expect(moves).toStrictEqual(exp);
   })
   
 });
