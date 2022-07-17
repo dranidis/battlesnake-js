@@ -416,6 +416,43 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+
+  test("can move to a snake's tail 1", () => {
+    // other back 2 squares
+
+    // 4
+    // 3
+    // 2 ~ ~ ~
+    // 1 X > ] ] ]
+    // 0 X [ [ [
+    //   0 1 2 3 4
+    const me = createBattlesnake("me", [
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 0 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 1 },
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+    ]);
+    const other2 = createBattlesnake("other2", [
+      { x: 1, y: 0 },
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ]);
+    const other3 = createBattlesnake("other3", [
+      { x: 2, y: 2 },
+      { x: 1, y: 2 },
+      { x: 0, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other, other2, other3]);
+    for (let i = 0; i < TIMES; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["right"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
 });
 
 describe("getPossibleMoves", () => {
@@ -467,4 +504,37 @@ describe("getPossibleMoves", () => {
     };
     expect(moves).toStrictEqual(exp);
   });
+
+  test("can go to a snake's tail 1", () => {
+    // other back 2 squares
+
+    // 4
+    // 3
+    // 2
+    // 1 X > ] X >
+    // 0 X
+    //   0 1 2 3 4
+    const me = createBattlesnake("me", [
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 0, y: 0 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 1 },
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+
+    const moves = getPossibleMoves(gameState);
+    const exp = {
+      up: true,
+      down: true,
+      left: false,
+      right: true,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
+
 });

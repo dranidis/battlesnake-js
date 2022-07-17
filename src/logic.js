@@ -4,7 +4,7 @@ const {
 } = require("./bitmatrix");
 
 const configuration = {
-  CHECK_FOOD_CLOSER_TO_OTHERS: false,
+  CHECK_FOOD_CLOSER_TO_OTHERS: true,
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
@@ -321,8 +321,9 @@ function movesTowardsClosestFood(gameState) {
       .map((s) => s.head);
 
     const foodNotCloseToOthers = boardfood.filter(
-      (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
-    );
+      // (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
+      (f) => minFoodDistanceFromOtherSnakes(gameState, f) > 1
+      );
 
     [minDistanceFood, distanceToCloserFood] =
       foodNotCloseToOthers.length > 0
