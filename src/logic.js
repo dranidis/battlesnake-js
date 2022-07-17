@@ -91,6 +91,18 @@ function moveTowardsTarget(myHead, target) {
   return towardsTargetMoves;
 }
 
+function isEmpty(gameState, coord) {
+  const w = gameState.board.width;
+  const h = gameState.board.height;
+  return (
+    coord.x >= 0 &&
+    coord.x < w &&
+    coord.y >= 0 &&
+    coord.y < h &&
+    new Matrix(w, h).set(coord.x, coord.y).and(gameState.blocks).data == 0n
+  );
+}
+
 function getPossibleMoves(gameState) {
   let possibleMoves = {
     up: true,
@@ -323,12 +335,14 @@ function movesTowardsClosestFood(gameState) {
       .map((s) => s.head);
 
     const foodNotCloserToLongerSnakes = boardfood.filter(
-      (f) => distance(myHead, f) < minFoodDistanceFromLongerOrSameSnakes(gameState, f)
+      (f) =>
+        distance(myHead, f) <
+        minFoodDistanceFromLongerOrSameSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
     [minDistanceFood, distanceToCloserFood] =
-    foodNotCloserToLongerSnakes.length > 0
+      foodNotCloserToLongerSnakes.length > 0
         ? closerFoodAndDistance(myHead, foodNotCloserToLongerSnakes)
         : closerFoodAndDistance(myHead, boardfood);
   } else {
@@ -490,7 +504,12 @@ function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
 
-  const possibleMoves = getPossibleMovesDepth(
+  const possibleMoves = getPossibleMoves(gameState);
+  const nextMoves = Object.keys(possibleMoves).filter(
+    (key) => possibleMoves[key]
+  );
+
+  const possibleMovesBFS = getPossibleMovesDepth(
     gameState,
     configuration.BFS_DEPTH,
     []
@@ -502,14 +521,14 @@ function move(gameState) {
 
   const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
-  const totallySafeMoves = Object.keys(possibleMoves).filter(
-    (key) => possibleMoves[key] && possibleMovesAvoidingLongerHeads[key]
+  const totallySafeMoves = Object.keys(possibleMovesBFS).filter(
+    (key) => possibleMovesBFS[key] && possibleMovesAvoidingLongerHeads[key]
   );
 
   const safeMoves =
     totallySafeMoves.length > 0
       ? totallySafeMoves
-      : Object.keys(possibleMoves).filter((key) => possibleMoves[key]);
+      : Object.keys(possibleMovesBFS).filter((key) => possibleMovesBFS[key]);
 
   let isAttacking =
     gameState.otherSnakes.length > 0 && gameState.you.length > longest;
@@ -521,12 +540,13 @@ function move(gameState) {
     console.log("isAttacking");
     // TODO: now picks first other snake as target
     // target = gameState.otherSnakes[0].head;
-    target = gameState.otherSnakes.sort(s => distance(myHead, s.head))[0].head;
-    targetDistance = distance(myHead, target)
+    target = gameState.otherSnakes.sort((s) => distance(myHead, s.head))[0]
+      .head;
+    targetDistance = distance(myHead, target);
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
-        possibleMoves[key] &&
+        possibleMovesBFS[key] &&
         possibleMovesAvoidingLongerHeads[key] &&
         towardsSnake[key]
     );
@@ -535,13 +555,14 @@ function move(gameState) {
   const [towardsFoodMoves, distanceToCloserFood] =
     movesTowardsClosestFood(gameState);
 
-  let safeFoodMoves = Object.keys(possibleMoves).filter(
+  let safeFoodMoves = Object.keys(possibleMovesBFS).filter(
     (key) =>
-      possibleMoves[key] &&
+      possibleMovesBFS[key] &&
       towardsFoodMoves[key] &&
       possibleMovesAvoidingLongerHeads[key]
   );
 
+  console.log("NEXT MOVES:     " + nextMoves);
   console.log("SAF FOOD MOVES: " + safeFoodMoves);
   console.log("TOT SAFE MOVES: " + totallySafeMoves);
   console.log("FIN SAFE MOVES: " + safeMoves);
@@ -562,7 +583,10 @@ function move(gameState) {
   } else if (deadlyMove && safeMoves.includes(deadlyMove)) {
     console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
-  } else if (safeFoodMoves.length > 0 && distanceToCloserFood < targetDistance) {
+  } else if (
+    safeFoodMoves.length > 0 &&
+    distanceToCloserFood < targetDistance
+  ) {
     moveToMake = pickMove(gameState, safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
     moveToMake = pickMove(gameState, safeTargetMoves);
@@ -574,11 +598,7 @@ function move(gameState) {
 
   if (moveToMake == undefined) {
     console.log("Desperate move!");
-    const pMoves = getPossibleMoves(gameState);
-    moveToMake = pickMove(
-      gameState,
-      Object.keys(pMoves).filter((key) => pMoves[key])
-    );
+    moveToMake = pickMove(gameState, nextMoves);
   }
 
   response = {
