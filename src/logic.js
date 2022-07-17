@@ -2,6 +2,7 @@ const {
   Matrix,
   // createMatrix, toString, set, and
 } = require("./bitmatrix");
+const { BoardFill } = require("./boardfill");
 
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
@@ -280,6 +281,52 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   return possibleMoves;
 }
 
+function getPossibleMovesFloodFill(gameState) {
+  const possibleMoves = getPossibleMoves(gameState);
+  const myHead = gameState.you.head;
+
+  const safeMoves = Object.keys(possibleMoves).filter(
+    (key) => possibleMoves[key]
+  );
+
+  let moveSquares = {};
+
+  let start = undefined;
+  for (let index = 0; index < safeMoves.length; index++) {
+    switch (safeMoves[index]) {
+      case "up":
+        start = { x: myHead.x, y: myHead.y + 1 };
+        break;
+      case "down":
+        start = { x: myHead.x, y: myHead.y - 1 };
+        break;
+      case "right":
+        start = { x: myHead.x + 1, y: myHead.y };
+        break;
+      case "left":
+        start = { x: myHead.x - 1, y: myHead.y };
+        break;
+    }
+    const boardFill = new BoardFill(gameState.blocks, start);
+    boardFill.fill();
+    const squares = boardFill.get();
+    moveSquares[safeMoves[index]] = squares;
+    possibleMoves[safeMoves[index]] = squares > gameState.you.length;
+  }
+  console.log("FloodFill: " + JSON.stringify(moveSquares));
+
+  if (
+    Object.keys(possibleMoves).filter((key) => possibleMoves[key]).length == 0
+    && safeMoves.length > 0
+  ) {
+    const maxMove = Object.keys(moveSquares).reduce(function (a, b) {
+      return moveSquares[a] > moveSquares[b] ? a : b;
+    });
+    possibleMoves[maxMove] = true;
+  }
+  return possibleMoves;
+}
+
 function pickMove(gameState, safeMoves) {
   let newSafeMoves = safeMoves;
   if (gameState.you.head.x < gameState.board.width / 2) {
@@ -509,11 +556,13 @@ function move(gameState) {
     (key) => possibleMoves[key]
   );
 
-  const possibleMovesBFS = getPossibleMovesDepth(
-    gameState,
-    configuration.BFS_DEPTH,
-    []
-  );
+  // const possibleMovesLookAhead = getPossibleMovesDepth(
+  //   gameState,
+  //   configuration.BFS_DEPTH,
+  //   []
+  // );
+
+  const possibleMovesLookAhead = getPossibleMovesFloodFill(gameState);
 
   const myHead = gameState.you.head;
 
@@ -521,14 +570,17 @@ function move(gameState) {
 
   const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
-  const totallySafeMoves = Object.keys(possibleMovesBFS).filter(
-    (key) => possibleMovesBFS[key] && possibleMovesAvoidingLongerHeads[key]
+  const totallySafeMoves = Object.keys(possibleMovesLookAhead).filter(
+    (key) =>
+      possibleMovesLookAhead[key] && possibleMovesAvoidingLongerHeads[key]
   );
 
   const safeMoves =
     totallySafeMoves.length > 0
       ? totallySafeMoves
-      : Object.keys(possibleMovesBFS).filter((key) => possibleMovesBFS[key]);
+      : Object.keys(possibleMovesLookAhead).filter(
+          (key) => possibleMovesLookAhead[key]
+        );
 
   let isAttacking =
     gameState.otherSnakes.length > 0 && gameState.you.length > longest;
@@ -546,7 +598,7 @@ function move(gameState) {
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
-        possibleMovesBFS[key] &&
+        possibleMovesLookAhead[key] &&
         possibleMovesAvoidingLongerHeads[key] &&
         towardsSnake[key]
     );
@@ -555,9 +607,9 @@ function move(gameState) {
   const [towardsFoodMoves, distanceToCloserFood] =
     movesTowardsClosestFood(gameState);
 
-  let safeFoodMoves = Object.keys(possibleMovesBFS).filter(
+  let safeFoodMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>
-      possibleMovesBFS[key] &&
+      possibleMovesLookAhead[key] &&
       towardsFoodMoves[key] &&
       possibleMovesAvoidingLongerHeads[key]
   );
