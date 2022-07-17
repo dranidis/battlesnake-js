@@ -240,6 +240,33 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
   });
 
+  test("goes towards closest food when there is shorter snake with same distance", () => {
+    // Arrange
+    if (!configuration.CHECK_FOOD_CLOSER_TO_OTHERS) return;
+    console.log(
+      "goes towards closest food when there is shorter snake with same distance"
+    );
+
+    const me = createBattlesnake("me", [
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+    ]);
+    const other = createBattlesnake("other", [{ x: 4, y: 1 }]);
+    const longer = createBattlesnake("longer", [
+      { x: 0, y: 4 },
+      { x: 1, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other,longer]);
+    addFood(gameState, { x: 3, y: 1 });
+    addFood(gameState, { x: 2, y: 0 });
+
+    const moveResponse = move(gameState);
+    const allowedMoves = ["right"];
+
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
   test("deadly attack down", () => {
     if (!configuration.CHECK_DEADLY_ATTACK) return;
     // Arrange
@@ -536,5 +563,4 @@ describe("getPossibleMoves", () => {
     };
     expect(moves).toStrictEqual(exp);
   });
-
 });

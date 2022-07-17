@@ -296,7 +296,9 @@ function closerFoodAndDistance(myHead, boardfood) {
 }
 
 function minFoodDistanceFromOtherSnakes(gameState, food) {
-  const otherHeads = gameState.otherSnakes.map((s) => s.head);
+  const otherHeads = gameState.otherSnakes
+    .filter((s) => s.length >= gameState.you.length)
+    .map((s) => s.head);
   return Math.min(...otherHeads.map((h) => distance(h, food)));
 }
 
@@ -321,9 +323,9 @@ function movesTowardsClosestFood(gameState) {
       .map((s) => s.head);
 
     const foodNotCloseToOthers = boardfood.filter(
-      // (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
-      (f) => minFoodDistanceFromOtherSnakes(gameState, f) > 1
-      );
+      (f) => distance(myHead, f) < minFoodDistanceFromOtherSnakes(gameState, f)
+      // (f) => minFoodDistanceFromOtherSnakes(gameState, f) > 1
+    );
 
     [minDistanceFood, distanceToCloserFood] =
       foodNotCloseToOthers.length > 0
