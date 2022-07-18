@@ -129,8 +129,8 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   // TODO
   // no evaluation of dead snakes takes place
   for (let i = 0; i < otherHeadList.length; i++) {
-    newGameState.board.snakes[i].unshift(otherHeadList[i]);
-    newGameState.otherSnakes[i].unshift(otherHeadList[i]);
+    newGameState.board.snakes[i].body.unshift(otherHeadList[i]);
+    newGameState.otherSnakes[i].body.unshift(otherHeadList[i]);
   }
 
   preprocess(newGameState);
@@ -202,7 +202,9 @@ function getMinMaxFlodFill(gameState, start, depth) {
 
   if (gameState.otherSnakes.length == 1) {
     const otherHead = gameState.otherSnakes[0].head;
-    const otherMoves = getHeadPossibleMoves(gameState, otherHead);
+    console.log(`Other head ${JSON.stringify(otherHead)}`)
+    const otherMovesMap = getHeadPossibleMoves(gameState, otherHead);
+    const otherMoves = getTrueKeys(otherMovesMap);
     // create an array
     let maxSquaresCountList = [];
     // get all combinations of moves
@@ -215,6 +217,7 @@ function getMinMaxFlodFill(gameState, start, depth) {
       const maxSquaresCount = Math.max(...Object.values(squaresCount));
       maxSquaresCountList.push(maxSquaresCount);
     }
+    console.log(`Max sq list ${maxSquaresCountList}`)
     return Math.min(...maxSquaresCountList);
   }
 
@@ -239,9 +242,7 @@ function getSquaresCountPerMove(gameState, depth) {
 
     const squares = getMinMaxFlodFill(gameState, start, depth);
     console.log(
-      `MM depth ${depth} move ${safeMoves[index]} squaresCount ${JSON.stringify(
-        squares
-      )}`
+      `MM depth ${depth} move ${safeMoves[index]} squaresCount ${squares}`
     );
 
     squaresCount[safeMoves[index]] = squares;

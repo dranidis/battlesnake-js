@@ -298,7 +298,7 @@ describe("Battlesnake Moves", () => {
       { x: 0, y: 1 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    for (let i = 0; i < TIMES; i++) {
+    for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
       const allowedMoves = ["down"];
       expect(allowedMoves).toContain(moveResponse.move);
