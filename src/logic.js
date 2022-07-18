@@ -358,8 +358,19 @@ function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
     .filter((s) => s.length >= gameState.you.length)
     .map((s) => s.head);
   return Math.min(
-    ...longerOrSameHeads.map((h) => pathToFoodAStar(gameState, h, food).length)
+    ...longerOrSameHeads.map((h) => distanceOfPath(pathToFoodAStar(gameState, h, food)))
   );
+}
+
+/**
+ * If path is empty there is no route, so distance is infinite
+ * @param {*} path 
+ * @returns 
+ */
+function distanceOfPath(path) {
+  if (path.length == 0)
+  return Infinity;
+  return path.length;
 }
 
 function movesTowardsClosestFood(gameState) {
@@ -386,11 +397,13 @@ function movesTowardsClosestFood(gameState) {
 
     const foodNotCloserToLongerSnakes = boardfood.filter(
       (f) =>
-        pathToFoodAStar(gameState, myHead, f).length <
+      distanceOfPath(pathToFoodAStar(gameState, myHead, f)) <
         minFoodDistanceFromLongerOrSameSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
+    console.log("foodNotCloserToLongerSnakes: " + JSON.stringify(foodNotCloserToLongerSnakes));
+    
     [minDistanceFood, distanceToCloserFood, pathToFood] =
       foodNotCloserToLongerSnakes.length > 0
         ? closerFoodAndDistance(gameState, myHead, foodNotCloserToLongerSnakes)
