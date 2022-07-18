@@ -126,9 +126,14 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   newGameState.board.snakes.forEach((s) => s.body.pop());
 
   // if the argument of new heads is given add the info about heads
-  // TODO
+
+  // TODO!!!!
+ // is the order of snakes relevant???
+ 
   // no evaluation of dead snakes takes place
-  const otherSnakes = newGameState.board.snakes.filter(s => s.id != newGameState.you.id)
+  const otherSnakes = newGameState.board.snakes.filter(
+    (s) => s.id != newGameState.you.id
+  );
 
   for (let i = 0; i < otherHeadList.length; i++) {
     otherSnakes[i].head = otherHeadList[i];
@@ -138,11 +143,11 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   }
 
   preprocess(newGameState);
-  console.log(
-    `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
-      newHead.y
-    } and ${JSON.stringify(newGameState.board.snakes)}`
-  );
+  // console.log(
+  //   `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
+  //     newHead.y
+  //   } and ${JSON.stringify(newGameState.board.snakes)}`
+  // );
 
   return newGameState;
 }
@@ -376,10 +381,17 @@ function movesTowardsClosestFood(gameState) {
         JSON.stringify(foodNotCloserToLongerSnakes)
     );
 
-    [minDistanceFood, distanceToCloserFood, pathToFood] =
-      foodNotCloserToLongerSnakes.length > 0
-        ? closerFoodAndDistance(gameState, myHead, foodNotCloserToLongerSnakes)
-        : closerFoodAndDistance(gameState, myHead, boardfood);
+    // [minDistanceFood, distanceToCloserFood, pathToFood] =
+    //   foodNotCloserToLongerSnakes.length > 0
+    //     ? closerFoodAndDistance(gameState, myHead, foodNotCloserToLongerSnakes)
+    //     : closerFoodAndDistance(gameState, myHead, boardfood);
+
+    [minDistanceFood, distanceToCloserFood, pathToFood] = closerFoodAndDistance(
+      gameState,
+      myHead,
+      foodNotCloserToLongerSnakes
+    );
+
   } else {
     [minDistanceFood, distanceToCloserFood, pathToFood] = closerFoodAndDistance(
       gameState,
