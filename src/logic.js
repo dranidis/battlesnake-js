@@ -128,10 +128,11 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   // if the argument of new heads is given add the info about heads
   // TODO
   // no evaluation of dead snakes takes place
-  // assumes that "you" is always the first
+  const otherSnakes = newGameState.board.snakes.filter(s => s.id != newGameState.you.id)
+
   for (let i = 0; i < otherHeadList.length; i++) {
-    newGameState.board.snakes[i + 1].head = otherHeadList[i];
-    newGameState.board.snakes[i + 1].body.unshift(otherHeadList[i]);
+    otherSnakes[i].head = otherHeadList[i];
+    otherSnakes[i].body.unshift(otherHeadList[i]);
     newGameState.otherSnakes[i].head = otherHeadList[i];
     newGameState.otherSnakes[i].body.unshift(otherHeadList[i]);
   }
@@ -263,7 +264,7 @@ function getPossibleMovesFloodFill(gameState) {
 
   ["up", "down", "right", "left"].forEach((direction) => {
     possibleMoves[direction] =
-      squaresCount[direction] &&
+      squaresCount[direction] != undefined &&
       squaresCount[direction] >
         configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   });
