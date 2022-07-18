@@ -1,6 +1,6 @@
 const { distance } = require("./util");
 const { Matrix } = require("./bitmatrix");
-const { BoardFill } = require("./boardfill");
+const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
 
 const configuration = {
@@ -182,26 +182,28 @@ function getPossibleMovesFloodFill(gameState) {
     (key) => possibleMoves[key]
   );
 
-  let moveSquares = {};
+  let squaresCount = {};
 
   for (let index = 0; index < safeMoves.length; index++) {
     const start = squareAfterMove(gameState.you.head, safeMoves[index]);
-    const boardFill = new BoardFill(gameState.blocks, start);
-    boardFill.fill();
-    const squares = boardFill.get();
-    moveSquares[safeMoves[index]] = squares;
+
+    // WIP
+    const squares = getFloodFillSquares(gameState, start);
+
+    squaresCount[safeMoves[index]] = squares;
+
     possibleMoves[safeMoves[index]] =
       squares > configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   }
-  console.log("FloodFill: " + JSON.stringify(moveSquares));
+  console.log("FloodFill: " + JSON.stringify(squaresCount));
 
   if (
     Object.keys(possibleMoves).filter((key) => possibleMoves[key]).length ==
       0 &&
     safeMoves.length > 0
   ) {
-    const maxMove = Object.keys(moveSquares).reduce(function (a, b) {
-      return moveSquares[a] > moveSquares[b] ? a : b;
+    const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
+      return squaresCount[a] > squaresCount[b] ? a : b;
     });
     possibleMoves[maxMove] = true;
   }
@@ -553,7 +555,6 @@ function move(gameState) {
 
   if (configuration.CHECK_DEADLY_DEFENCE)
     detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
-
 
   if (previousDeadlyMove && safeMoves.includes(previousDeadlyMove)) {
     console.log("CONTINUE ATTACK!!!");

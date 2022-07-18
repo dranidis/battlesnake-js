@@ -40,8 +40,15 @@ class BoardFill {
   }
 }
 
+function getFloodFillSquares(gameState, start) {
+  const boardFill = new BoardFill(gameState.blocks, start);
+  boardFill.fill();
+  const squares = boardFill.get();  
+  return squares;
+}
 
 module.exports = {
   BoardFill,
+  getFloodFillSquares: getFloodFillSquares,
 };
 
