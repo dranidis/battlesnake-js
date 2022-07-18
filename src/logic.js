@@ -8,6 +8,7 @@ const configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
+  MINMAX_DEPTH: 0,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -174,7 +175,18 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   return possibleMoves;
 }
 
-function getPossibleMovesFloodFill(gameState) {
+function getMinMaxFlodFill(gameState, start, depth) {
+  if (depth == 0) {
+    return getFloodFillSquares(gameState, start);
+  }
+
+  // for each snake get possible moves
+  // get all combinations of moves
+
+  // create a new game state by applying all moves (also mine)
+}
+
+function getSquaresCountPerMove(gameState) {
   const possibleMoves = getPossibleMoves(gameState);
   const myHead = gameState.you.head;
 
@@ -186,26 +198,39 @@ function getPossibleMovesFloodFill(gameState) {
 
   for (let index = 0; index < safeMoves.length; index++) {
     const start = squareAfterMove(gameState.you.head, safeMoves[index]);
-
-    // WIP
-    const squares = getFloodFillSquares(gameState, start);
+    const squares = getMinMaxFlodFill(
+      gameState,
+      start,
+      configuration.MINMAX_DEPTH
+    );
 
     squaresCount[safeMoves[index]] = squares;
-
-    possibleMoves[safeMoves[index]] =
-      squares > configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   }
+  return squaresCount;
+}
+
+function getPossibleMovesFloodFill(gameState) {
+  const squaresCount = getSquaresCountPerMove(gameState);
+
+  let possibleMoves = {};
+  ["up", "down", "right", "left"].forEach((direction) => {
+    possibleMoves[direction] =
+      squaresCount[direction] &&
+      squaresCount[direction] >
+        configuration.FLOOD_FILL_FACTOR * gameState.you.length;
+  });
+
   console.log("FloodFill: " + JSON.stringify(squaresCount));
 
   if (
     Object.keys(possibleMoves).filter((key) => possibleMoves[key]).length ==
       0 &&
-    safeMoves.length > 0
+    Object.keys(squaresCount).length > 0
   ) {
     const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
       return squaresCount[a] > squaresCount[b] ? a : b;
     });
-    possibleMoves[maxMove] = true;
+    possibleMoves[maxMove] = true; // get the max move when all moves look bad
   }
   return possibleMoves;
 }
