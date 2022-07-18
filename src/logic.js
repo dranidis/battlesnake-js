@@ -188,7 +188,7 @@ function getPossibleMoves(gameState) {
 //   return possibleMoves;
 // }
 
-function newSquare(sq, aMove) {
+function squareAfterMove(sq, aMove) {
   let x = sq.x;
   let y = sq.y;
 
@@ -250,7 +250,7 @@ function getPossibleMovesDepth(gameState, depth, visited) {
   );
 
   for (let index = 0; index < safeMoves.length; index++) {
-    const newHead = newSquare(gameState.you.head, safeMoves[index]);
+    const newHead = squareAfterMove(gameState.you.head, safeMoves[index]);
     if (
       visited.filter((h) => h.x == newHead.x && h.y == newHead.y).length == 0
     ) {
@@ -290,22 +290,8 @@ function getPossibleMovesFloodFill(gameState) {
 
   let moveSquares = {};
 
-  let start = undefined;
   for (let index = 0; index < safeMoves.length; index++) {
-    switch (safeMoves[index]) {
-      case "up":
-        start = { x: myHead.x, y: myHead.y + 1 };
-        break;
-      case "down":
-        start = { x: myHead.x, y: myHead.y - 1 };
-        break;
-      case "right":
-        start = { x: myHead.x + 1, y: myHead.y };
-        break;
-      case "left":
-        start = { x: myHead.x - 1, y: myHead.y };
-        break;
-    }
+    const start = squareAfterMove(gameState.you.head, safeMoves[index]);
     const boardFill = new BoardFill(gameState.blocks, start);
     boardFill.fill();
     const squares = boardFill.get();
@@ -605,6 +591,8 @@ function move(gameState) {
     );
   }
 
+  const boardfood = gameState.board.food;
+  
   const [towardsFoodMoves, distanceToCloserFood] =
     movesTowardsClosestFood(gameState);
 
