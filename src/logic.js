@@ -1,7 +1,5 @@
-const {
-  Matrix,
-  // createMatrix, toString, set, and
-} = require("./bitmatrix");
+const { distance } = require("./util");
+const { Matrix } = require("./bitmatrix");
 const { BoardFill } = require("./boardfill");
 
 const configuration = {
@@ -76,10 +74,6 @@ function avoidLongerHeads(gameState) {
     collideSquare(myHead.x, myHead.y, x, y - 1, possibleMovesAvoidingHeads);
   }
   return possibleMovesAvoidingHeads;
-}
-
-function distance(from, to) {
-  return Math.abs(from.x - to.x) + Math.abs(from.y - to.y);
 }
 
 function moveTowardsTarget(myHead, target) {
