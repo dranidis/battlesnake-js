@@ -184,7 +184,7 @@ describe("Battlesnake Moves", () => {
     ]);
     const gameState = createGameState(me, [me]);
 
-    for (let i = 0; i < TIMES; i++) {
+    for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
       // In this state, we should NEVER move left.
       const allowedMoves = ["right", "left"];

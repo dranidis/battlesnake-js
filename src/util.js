@@ -3,17 +3,22 @@ function distance(from, to) {
 }
 
 function coordToIndex(width, coord) {
-  return coord.y * width + coord.x
+  return coord.y * width + coord.x;
 }
 
 function indexToCoord(width, n) {
-  const x = n % width
-  const y = Math.floor(n / width)
-  return {x:x, y:y}
+  const x = n % width;
+  const y = Math.floor(n / width);
+  return { x: x, y: y };
+}
+
+function getTrueKeys(obj) {
+  return Object.keys(obj).filter((key) => obj[key]);
 }
 
 module.exports = {
   distance,
   coordToIndex,
-  indexToCoord
+  indexToCoord,
+  getTrueKeys,
 };
