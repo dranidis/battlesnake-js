@@ -333,20 +333,33 @@ function pickMove(gameState, safeMoves) {
   return safeMoves[Math.floor(Math.random() * safeMoves.length)];
 }
 
-function closerFoodAndDistance(myHead, boardfood) {
-  if (boardfood.length == 0) return [{}, 999];
+function closerFoodAndDistance(gameState, myHead, boardfood) {
+  if (boardfood.length == 0) {
+    return [{}, 999, []];
+  }
 
-  const distances = boardfood.map((f) => distance(myHead, f));
-  const index = distances.indexOf(Math.min(...distances));
-  if (index == -1) return [{}, 999];
-  return [boardfood[index], distances[index]];
+  const paths = boardfood.map((f) => pathToFoodAStar(gameState, myHead, f));
+  console.log("PATHS: " + JSON.stringify(paths));
+  const distances = paths.map((p) => p.length);
+  const minIndex = distances.indexOf(Math.min(...distances));
+  if (minIndex == -1) return [{}, 999, []];
+  return [boardfood[minIndex], distances[minIndex], paths[minIndex]];
+}
+
+function pathToFoodAStar(gameState, h, food) {
+  // TODO: Cache these calculations
+  const path = bsAStar(gameState.blocks, h, food);
+  // console.log("PATH to food " + JSON.stringify(path));
+  return path;
 }
 
 function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
   const longerOrSameHeads = gameState.otherSnakes
     .filter((s) => s.length >= gameState.you.length)
     .map((s) => s.head);
-  return Math.min(...longerOrSameHeads.map((h) => distance(h, food)));
+  return Math.min(
+    ...longerOrSameHeads.map((h) => pathToFoodAStar(gameState, h, food).length)
+  );
 }
 
 function movesTowardsClosestFood(gameState) {
@@ -362,7 +375,9 @@ function movesTowardsClosestFood(gameState) {
   const boardfood = gameState.board.food;
   const myHead = gameState.you.head;
 
-  let [minDistanceFood, distanceToCloserFood] = [-1, {}];
+  let minDistanceFood = {};
+  let distanceToCloserFood = 999;
+  let pathToFood = [];
 
   if (configuration.CHECK_FOOD_CLOSER_TO_OTHERS) {
     const otherHeads = gameState.board.snakes
@@ -371,24 +386,26 @@ function movesTowardsClosestFood(gameState) {
 
     const foodNotCloserToLongerSnakes = boardfood.filter(
       (f) =>
-        distance(myHead, f) <
+        pathToFoodAStar(gameState, myHead, f).length <
         minFoodDistanceFromLongerOrSameSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
-    [minDistanceFood, distanceToCloserFood] =
+    [minDistanceFood, distanceToCloserFood, pathToFood] =
       foodNotCloserToLongerSnakes.length > 0
-        ? closerFoodAndDistance(myHead, foodNotCloserToLongerSnakes)
-        : closerFoodAndDistance(myHead, boardfood);
+        ? closerFoodAndDistance(gameState, myHead, foodNotCloserToLongerSnakes)
+        : closerFoodAndDistance(gameState, myHead, boardfood);
   } else {
-    [minDistanceFood, distanceToCloserFood] = closerFoodAndDistance(
+    [minDistanceFood, distanceToCloserFood, pathToFood] = closerFoodAndDistance(
+      gameState,
       myHead,
       boardfood
     );
   }
 
-  if (minDistanceFood != {}) {
-    towardsFoodMoves = moveTowardsTarget(myHead, minDistanceFood);
+  if (pathToFood.length > 0) {
+    // towardsFoodMoves = moveTowardsTarget(myHead, minDistanceFood);
+    towardsFoodMoves[pathToFood[0]] = true;
   }
 
   return [towardsFoodMoves, distanceToCloserFood];
@@ -409,14 +426,16 @@ function foodPathsAStar(gameState) {
   for (let i = 0; i < boardfood.length; i++) {
     const path = bsAStar(gameState.blocks, myHead, boardfood[i]);
     paths.push(path);
-    console.log("PATH to " + JSON.stringify(boardfood[i]) + " " + JSON.stringify(path));
+    console.log(
+      "PATH to " + JSON.stringify(boardfood[i]) + " " + JSON.stringify(path)
+    );
   }
 
   if (paths.length > 0) {
-    const lengths = paths.map(p => p.length);
+    const lengths = paths.map((p) => p.length);
     const shortestIndex = lengths.indexOf(Math.min(...lengths));
     distanceToCloserFood = paths[shortestIndex].length;
-  
+
     towardsFoodMoves[paths[shortestIndex][0]] = true;
   }
 
@@ -621,9 +640,9 @@ function move(gameState) {
     );
   }
 
-  // const [towardsFoodMoves, distanceToCloserFood] =
-  //   movesTowardsClosestFood(gameState);
-  const [towardsFoodMoves, distanceToCloserFood] = foodPathsAStar(gameState);
+  const [towardsFoodMoves, distanceToCloserFood] =
+    movesTowardsClosestFood(gameState);
+  // const [towardsFoodMoves, distanceToCloserFood] = foodPathsAStar(gameState);
 
   let safeFoodMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>
