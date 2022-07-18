@@ -9,6 +9,16 @@ function reconstructPath(cameFrom, current) {
   return totalPath;
 }
 
+/**
+ * A* star algorithm implementation using a priority queue
+ * 
+ * @param {*} start 
+ * @param {*} goal 
+ * @param {*} h function h is the heuristic function. h(n, goal) estimates the cost to reach goal from node n
+ * @param {*} neighbors function neighbors(current) should return a list of neighbors of current
+ * @param {*} d function d(current, neighbor) is the weight of the edge from current to neighbor
+ * @returns a list of nodes from start to goal. The list is empty if there is no path.
+ */
 function aStar(start, goal, h, neighbors, d) {
   openSet = new PriorityQueue();
   cameFrom = new Map();
@@ -31,33 +41,21 @@ function aStar(start, goal, h, neighbors, d) {
     }
     openSet.dequeue();
 
-    // console.log("Current " + JSON.stringify(current));
-    // console.log("Neighbors " + JSON.stringify(neighbors(current)));
-
     neighbors(current).forEach(function (neighbor) {
-      // console.log("Neighbor: " + JSON.stringify(neighbor));
       tentativeGScore = getGScore(current) + d(current, neighbor);
-      // console.log("tentativeGScore" + tentativeGScore)
       if (tentativeGScore < getGScore(neighbor)) {
-        // console.log("Updating")
         cameFrom.set(neighbor, current);
         gScore.set(neighbor, tentativeGScore);
         fScore.set(neighbor, tentativeGScore + h(neighbor, goal));
         if (!openSet.contains(neighbor)) {
-          // console.log("ADD neighbor")
           addToOpenSet(neighbor);
         }
       }
     });
-    // console.log("OPEN SET: " + JSON.stringify(openSet))
   }
+  
   return [];
 }
-
-// function neighbors(current) should return a list of neighbors
-// function d(current, neighbor) is the weight of the edge from current to neighbor
-
-// function h is the heuristic function. h(n, goal) estimates the cost to reach goal from node n
 
 module.exports = {
   aStar,
