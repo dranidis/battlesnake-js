@@ -8,7 +8,7 @@ const configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 3,
+  MINMAX_DEPTH: 2,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -128,17 +128,20 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   // if the argument of new heads is given add the info about heads
   // TODO
   // no evaluation of dead snakes takes place
+  // assumes that "you" is always the first
   for (let i = 0; i < otherHeadList.length; i++) {
-    newGameState.board.snakes[i].body.unshift(otherHeadList[i]);
+    newGameState.board.snakes[i + 1].head = otherHeadList[i];
+    newGameState.board.snakes[i + 1].body.unshift(otherHeadList[i]);
+    newGameState.otherSnakes[i].head = otherHeadList[i];
     newGameState.otherSnakes[i].body.unshift(otherHeadList[i]);
   }
 
   preprocess(newGameState);
-  // console.log(
-  //   `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
-  //     newHead.y
-  //   }`
-  // );
+  console.log(
+    `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
+      newHead.y
+    } and ${JSON.stringify(newGameState.board.snakes)}`
+  );
 
   return newGameState;
 }
@@ -256,7 +259,8 @@ function getPossibleMovesFloodFill(gameState) {
     configuration.MINMAX_DEPTH
   );
 
-  let possibleMoves = {};
+  let possibleMoves = { up: false, down: false, left: false, right: false };
+
   ["up", "down", "right", "left"].forEach((direction) => {
     possibleMoves[direction] =
       squaresCount[direction] &&
@@ -666,4 +670,6 @@ module.exports = {
   getPossibleMoves: getMyPossibleMoves,
   preprocess: preprocess,
   resetPreviousDeadlyMove,
+  getPossibleMovesFloodFill,
+  applyMove,
 };

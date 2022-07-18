@@ -3,14 +3,16 @@ const {
   configuration,
   getPossibleMoves,
   preprocess,
-  resetPreviousDeadlyMove
+  resetPreviousDeadlyMove,
+  getPossibleMovesFloodFill,
+  applyMove,
 } = require("../src/logic");
 
-const { info} = require("../src/bs_info")
+const { info } = require("../src/bs_info");
 
 const TIMES = 10;
-const boardHeight = 5;
-const boardWidth = 5;
+var boardHeight = 5;
+var boardWidth = 5;
 
 function createGameState(myBattlesnake, allSnakes) {
   return {
@@ -264,7 +266,7 @@ describe("Battlesnake Moves", () => {
       { x: 1, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other,longer]);
+    const gameState = createGameState(me, [me, other, longer]);
     addFood(gameState, { x: 3, y: 1 });
     addFood(gameState, { x: 2, y: 0 });
 
@@ -569,5 +571,76 @@ describe("getPossibleMoves", () => {
       right: true,
     };
     expect(moves).toStrictEqual(exp);
+  });
+});
+
+describe("getPossibleMovesFloodFill", () => {
+  test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+    boardWidth = 8;
+    boardHeight = 8;
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const moves = getPossibleMovesFloodFill(gameState);
+    const exp = {
+      up: false,
+      down: false,
+      left: true,
+      right: false,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
+});
+
+describe("applyMove", () => {
+  test("applyMove changes right head of other snake", () => {
+    boardWidth = 8;
+    boardHeight = 8;
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const newHead = { x: 6, y: 4 };
+    const newOtherHead = { x: 6, y: 2 };
+    const newGameState = applyMove(gameState, newHead, [newOtherHead]);
+
+    expect(
+      newGameState.board.snakes.filter((s) => s.id == "other")[0].body[0]
+    ).toBe(newOtherHead);
   });
 });
