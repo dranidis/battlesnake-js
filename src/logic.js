@@ -8,7 +8,7 @@ const configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 2,
+  MINMAX_DEPTH: 3,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -134,11 +134,11 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   }
 
   preprocess(newGameState);
-  console.log(
-    `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
-      newHead.y
-    }`
-  );
+  // console.log(
+  //   `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
+  //     newHead.y
+  //   }`
+  // );
 
   return newGameState;
 }
@@ -202,7 +202,7 @@ function getMinMaxFlodFill(gameState, start, depth) {
 
   if (gameState.otherSnakes.length == 1) {
     const otherHead = gameState.otherSnakes[0].head;
-    console.log(`Other head ${JSON.stringify(otherHead)}`)
+    // console.log(`Other head ${JSON.stringify(otherHead)}`)
     const otherMovesMap = getHeadPossibleMoves(gameState, otherHead);
     const otherMoves = getTrueKeys(otherMovesMap);
     // create an array
@@ -217,7 +217,6 @@ function getMinMaxFlodFill(gameState, start, depth) {
       const maxSquaresCount = Math.max(...Object.values(squaresCount));
       maxSquaresCountList.push(maxSquaresCount);
     }
-    console.log(`Max sq list ${maxSquaresCountList}`)
     return Math.min(...maxSquaresCountList);
   }
 
@@ -241,9 +240,9 @@ function getSquaresCountPerMove(gameState, depth) {
     const start = squareAfterMove(gameState.you.head, safeMoves[index]);
 
     const squares = getMinMaxFlodFill(gameState, start, depth);
-    console.log(
-      `MM depth ${depth} move ${safeMoves[index]} squaresCount ${squares}`
-    );
+    // console.log(
+    //   `MM depth ${depth} move ${safeMoves[index]} squaresCount ${squares}`
+    // );
 
     squaresCount[safeMoves[index]] = squares;
   }
@@ -251,7 +250,7 @@ function getSquaresCountPerMove(gameState, depth) {
 }
 
 function getPossibleMovesFloodFill(gameState) {
-  console.log(`INIT STATE ${gameState.blocks.toString()}`);
+  // console.log(`INIT STATE ${gameState.blocks.toString()}`);
   const squaresCount = getSquaresCountPerMove(
     gameState,
     configuration.MINMAX_DEPTH
@@ -303,7 +302,7 @@ function closerFoodAndDistance(gameState, myHead, boardfood) {
   }
 
   const paths = boardfood.map((f) => pathToFoodAStar(gameState, myHead, f));
-  console.log("PATHS: " + JSON.stringify(paths));
+  // console.log("PATHS: " + JSON.stringify(paths));
   const distances = paths.map((p) => p.length);
   const minIndex = distances.indexOf(Math.min(...distances));
   if (minIndex == -1) return [{}, 999, []];
