@@ -358,18 +358,19 @@ function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
     .filter((s) => s.length >= gameState.you.length)
     .map((s) => s.head);
   return Math.min(
-    ...longerOrSameHeads.map((h) => distanceOfPath(pathToFoodAStar(gameState, h, food)))
+    ...longerOrSameHeads.map((h) =>
+      distanceOfPath(pathToFoodAStar(gameState, h, food))
+    )
   );
 }
 
 /**
  * If path is empty there is no route, so distance is infinite
- * @param {*} path 
- * @returns 
+ * @param {*} path
+ * @returns
  */
 function distanceOfPath(path) {
-  if (path.length == 0)
-  return Infinity;
+  if (path.length == 0) return Infinity;
   return path.length;
 }
 
@@ -397,13 +398,16 @@ function movesTowardsClosestFood(gameState) {
 
     const foodNotCloserToLongerSnakes = boardfood.filter(
       (f) =>
-      distanceOfPath(pathToFoodAStar(gameState, myHead, f)) <
+        distanceOfPath(pathToFoodAStar(gameState, myHead, f)) <
         minFoodDistanceFromLongerOrSameSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
-    console.log("foodNotCloserToLongerSnakes: " + JSON.stringify(foodNotCloserToLongerSnakes));
-    
+    console.log(
+      "foodNotCloserToLongerSnakes: " +
+        JSON.stringify(foodNotCloserToLongerSnakes)
+    );
+
     [minDistanceFood, distanceToCloserFood, pathToFood] =
       foodNotCloserToLongerSnakes.length > 0
         ? closerFoodAndDistance(gameState, myHead, foodNotCloserToLongerSnakes)
@@ -596,6 +600,9 @@ function preprocess(gameState) {
   );
 }
 
+// cache previous move
+var previousDeadlyMove = undefined;
+
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
@@ -674,10 +681,20 @@ function move(gameState) {
   let detectedDeadlyMoveFrom = undefined;
   let deadlyMove = undefined;
 
-  if (configuration.CHECK_DEADLY_ATTACK) deadlyMove = getDeadlyMove(gameState);
+  if (configuration.CHECK_DEADLY_ATTACK) {
+    deadlyMove = getDeadlyMove(gameState);
+  }
 
   if (configuration.CHECK_DEADLY_DEFENCE)
     detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
+
+    
+  if (previousDeadlyMove && safeMoves.includes(previousDeadlyMove)) {
+    console.log("CONTINUE ATTACK!!!");
+    deadlyMove = previousDeadlyMove;
+  } else {
+    previousDeadlyMove = undefined;
+  }
 
   if (detectedDeadlyMoveFrom && safeMoves.includes(detectedDeadlyMoveFrom)) {
     console.log("AVOID DEADLY MOVE blocking");
@@ -685,6 +702,7 @@ function move(gameState) {
   } else if (deadlyMove && safeMoves.includes(deadlyMove)) {
     console.log("DEADLY MOVE blocking");
     moveToMake = deadlyMove;
+    previousDeadlyMove = deadlyMove;
   } else if (
     safeFoodMoves.length > 0 &&
     distanceToCloserFood < targetDistance
