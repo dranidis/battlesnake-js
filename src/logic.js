@@ -1,6 +1,7 @@
 const { distance } = require("./util");
 const { Matrix } = require("./bitmatrix");
 const { BoardFill } = require("./boardfill");
+const { bsAStar } = require("./battlesnake_astar");
 
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
@@ -393,6 +394,35 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
+function foodPathsAStar(gameState) {
+  let towardsFoodMoves = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
+  let distanceToCloserFood = 999;
+  const boardfood = gameState.board.food;
+  const myHead = gameState.you.head;
+
+  let paths = [];
+  for (let i = 0; i < boardfood.length; i++) {
+    const path = bsAStar(gameState.blocks, myHead, boardfood[i]);
+    paths.push(path);
+    console.log("PATH to " + JSON.stringify(boardfood[i]) + " " + JSON.stringify(path));
+  }
+
+  if (paths.length > 0) {
+    const lengths = paths.map(p => p.length);
+    const shortestIndex = lengths.indexOf(Math.min(...lengths));
+    distanceToCloserFood = paths[shortestIndex].length;
+  
+    towardsFoodMoves[paths[shortestIndex][0]] = true;
+  }
+
+  return [towardsFoodMoves, distanceToCloserFood];
+}
+
 function blockFilled(gameState, fromX, toX, fromY, toY) {
   for (let x = fromX; x <= toX; x++) {
     for (let y = fromY; y <= toY; y++) {
@@ -591,10 +621,9 @@ function move(gameState) {
     );
   }
 
-  const boardfood = gameState.board.food;
-  
-  const [towardsFoodMoves, distanceToCloserFood] =
-    movesTowardsClosestFood(gameState);
+  // const [towardsFoodMoves, distanceToCloserFood] =
+  //   movesTowardsClosestFood(gameState);
+  const [towardsFoodMoves, distanceToCloserFood] = foodPathsAStar(gameState);
 
   let safeFoodMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>

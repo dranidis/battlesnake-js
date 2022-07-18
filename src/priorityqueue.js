@@ -35,7 +35,6 @@ class PriorityQueue {
   }
 
   contains(element) {
-    console.log("CONTAINS " + element)
     return this.items.map(i => i.item).includes(element)
   }
 }

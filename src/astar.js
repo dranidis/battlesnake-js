@@ -1,4 +1,4 @@
-const { PriorityQueue} = require("./priorityqueue")
+const { PriorityQueue } = require("./priorityqueue");
 
 function reconstructPath(cameFrom, current) {
   totalPath = [current];
@@ -17,14 +17,8 @@ function aStar(start, goal, h, neighbors, d) {
   fScore = new Map(); // default value inf
   fScore.set(start, h(start, goal));
 
-  const getGScore = (n) => 
-    gScore.has(n) ? gScore.get(n) : Infinity;
-  ;
-
-  const getFScore = (n) => 
-    fScore.has(n) ? fScore.get(n) : Infinity;
-  ;
-
+  const getGScore = (n) => (gScore.has(n) ? gScore.get(n) : Infinity);
+  const getFScore = (n) => (fScore.has(n) ? fScore.get(n) : Infinity);
   const addToOpenSet = (n) => openSet.add(n, getFScore(n));
 
   addToOpenSet(start);
@@ -37,25 +31,25 @@ function aStar(start, goal, h, neighbors, d) {
     }
     openSet.dequeue();
 
-    console.log("Current " + JSON.stringify(current));
-    console.log("Neighbors " + JSON.stringify(neighbors(current)));
+    // console.log("Current " + JSON.stringify(current));
+    // console.log("Neighbors " + JSON.stringify(neighbors(current)));
 
     neighbors(current).forEach(function (neighbor) {
-      console.log("Neighbor: " + JSON.stringify(neighbor));
+      // console.log("Neighbor: " + JSON.stringify(neighbor));
       tentativeGScore = getGScore(current) + d(current, neighbor);
-      console.log("tentativeGScore" + tentativeGScore)
+      // console.log("tentativeGScore" + tentativeGScore)
       if (tentativeGScore < getGScore(neighbor)) {
-        console.log("Updating")
-        cameFrom.set(neighbor,  current);
+        // console.log("Updating")
+        cameFrom.set(neighbor, current);
         gScore.set(neighbor, tentativeGScore);
         fScore.set(neighbor, tentativeGScore + h(neighbor, goal));
         if (!openSet.contains(neighbor)) {
-          console.log("ADD neighbor")
+          // console.log("ADD neighbor")
           addToOpenSet(neighbor);
         }
       }
     });
-    console.log("OPEN SET: " + JSON.stringify(openSet))
+    // console.log("OPEN SET: " + JSON.stringify(openSet))
   }
   return [];
 }
