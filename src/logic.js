@@ -15,43 +15,11 @@ const configuration = {
   FLOOD_FILL_FACTOR: 1.5,
 };
 
-function info() {
-  console.log("INFO");
-  const response = {
-    apiversion: "1",
-    author: "DDmits2",
-    color: "#736CCB",
-    head: "tongue",
-    tail: "freckled",
-  };
-  return response;
-}
-
-function start(gameState) {
-  console.log(`${gameState.game.id} START`);
-}
-
-function end(gameState) {
-  console.log(`${gameState.game.id} END\n`);
-}
-
 function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
   if (myX + 1 == xblock && myY == yblock) possibleMoves.right = false;
   if (myX - 1 == xblock && myY == yblock) possibleMoves.left = false;
   if (myX == xblock && myY + 1 == yblock) possibleMoves.up = false;
   if (myX == xblock && myY - 1 == yblock) possibleMoves.down = false;
-}
-
-function collideWithSnake(myHead, mybody, possibleMoves) {
-  for (let index = 0; index < mybody.length; index++) {
-    collideSquare(
-      myHead.x,
-      myHead.y,
-      mybody[index].x,
-      mybody[index].y,
-      possibleMoves
-    );
-  }
 }
 
 function avoidLongerHeads(gameState) {
@@ -105,89 +73,14 @@ function isEmpty(gameState, coord) {
 }
 
 function getPossibleMoves(gameState) {
-  let possibleMoves = {
-    up: true,
-    down: true,
-    left: true,
-    right: true,
-  };
   const myHead = gameState.you.head;
-  const w = gameState.board.width;
-  const h = gameState.board.height;
-
-  possibleMoves.right =
-    myHead.x + 1 < w &&
-    new Matrix(w, h).set(myHead.x + 1, myHead.y).and(gameState.blocks).data ==
-      0n;
-
-  possibleMoves.left =
-    myHead.x - 1 >= 0 &&
-    new Matrix(w, h).set(myHead.x - 1, myHead.y).and(gameState.blocks).data ==
-      0n;
-
-  possibleMoves.up =
-    myHead.y + 1 < h &&
-    new Matrix(w, h).set(myHead.x, myHead.y + 1).and(gameState.blocks).data ==
-      0n;
-
-  possibleMoves.down =
-    myHead.y - 1 >= 0 &&
-    new Matrix(w, h).set(myHead.x, myHead.y - 1).and(gameState.blocks).data ==
-      0n;
-
-  return possibleMoves;
+  return {
+    up: isEmpty(gameState, squareAfterMove(myHead, "up")),
+    down: isEmpty(gameState, squareAfterMove(myHead, "down")),
+    left: isEmpty(gameState, squareAfterMove(myHead, "left")),
+    right: isEmpty(gameState, squareAfterMove(myHead, "right")),
+  };
 }
-
-// function getPossibleMoves(gameState) {
-//   let possibleMoves = {
-//     up: true,
-//     down: true,
-//     left: true,
-//     right: true,
-//   };
-//   const myHead = gameState.you.head;
-
-//   // Step 0: Don't let your Battlesnake move back on its own neck
-
-//   // const myNeck = gameState.you.body[1]
-//   // if (myNeck.x < myHead.x) {
-//   //     possibleMoves.left = false
-//   // } else if (myNeck.x > myHead.x) {
-//   //     possibleMoves.right = false
-//   // } else if (myNeck.y < myHead.y) {
-//   //     possibleMoves.down = false
-//   // } else if (myNeck.y > myHead.y) {
-//   //     possibleMoves.up = false
-//   // }
-
-//   // TODO: Step 1 - Don't hit walls.
-//   // Use information in gameState to prevent your Battlesnake from moving beyond the boundaries of the board.
-//   const boardWidth = gameState.board.width;
-//   const boardHeight = gameState.board.height;
-//   // console.log("SNAKE " + myHead.x + " " + myHead.y)
-
-//   if (myHead.x == 0) possibleMoves.left = false;
-//   if (myHead.x == boardWidth - 1) possibleMoves.right = false;
-//   if (myHead.y == 0) possibleMoves.down = false;
-//   if (myHead.y == boardHeight - 1) possibleMoves.up = false;
-
-//   // TODO: Step 2 - Don't hit yourself.
-//   // Use information in gameState to prevent your Battlesnake from colliding with itself.
-
-//   // this can be covered by next step
-//   // but the algorithm or lookahead needs it separately!!
-//   const mybody = gameState.you.body;
-//   collideWithSnake(myHead, mybody, possibleMoves);
-
-//   // TODO: Step 3 - Don't collide with others.
-//   // Use information in gameState to prevent your Battlesnake from colliding with others.
-//   const otherSnakes = gameState.otherSnakes;
-//   for (let index = 0; index < otherSnakes.length; index++) {
-//     collideWithSnake(myHead, otherSnakes[index].body, possibleMoves);
-//   }
-
-//   return possibleMoves;
-// }
 
 function squareAfterMove(sq, aMove) {
   let x = sq.x;
@@ -428,37 +321,6 @@ function movesTowardsClosestFood(gameState) {
   return [towardsFoodMoves, distanceToCloserFood];
 }
 
-function foodPathsAStar(gameState) {
-  let towardsFoodMoves = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
-  };
-  let distanceToCloserFood = 999;
-  const boardfood = gameState.board.food;
-  const myHead = gameState.you.head;
-
-  let paths = [];
-  for (let i = 0; i < boardfood.length; i++) {
-    const path = bsAStar(gameState.blocks, myHead, boardfood[i]);
-    paths.push(path);
-    console.log(
-      "PATH to " + JSON.stringify(boardfood[i]) + " " + JSON.stringify(path)
-    );
-  }
-
-  if (paths.length > 0) {
-    const lengths = paths.map((p) => p.length);
-    const shortestIndex = lengths.indexOf(Math.min(...lengths));
-    distanceToCloserFood = paths[shortestIndex].length;
-
-    towardsFoodMoves[paths[shortestIndex][0]] = true;
-  }
-
-  return [towardsFoodMoves, distanceToCloserFood];
-}
-
 function blockFilled(gameState, fromX, toX, fromY, toY) {
   for (let x = fromX; x <= toX; x++) {
     for (let y = fromY; y <= toY; y++) {
@@ -603,6 +465,10 @@ function preprocess(gameState) {
 // cache previous move
 var previousDeadlyMove = undefined;
 
+function resetPreviousDeadlyMove() {
+  previousDeadlyMove = undefined;
+}
+
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
@@ -688,7 +554,7 @@ function move(gameState) {
   if (configuration.CHECK_DEADLY_DEFENCE)
     detectedDeadlyMoveFrom = detectDeadlyMove(gameState);
 
-    
+
   if (previousDeadlyMove && safeMoves.includes(previousDeadlyMove)) {
     console.log("CONTINUE ATTACK!!!");
     deadlyMove = previousDeadlyMove;
@@ -731,10 +597,8 @@ function move(gameState) {
 
 module.exports = {
   configuration: configuration,
-  info: info,
-  start: start,
   move: move,
-  end: end,
   getPossibleMoves: getPossibleMoves,
   preprocess: preprocess,
+  resetPreviousDeadlyMove,
 };

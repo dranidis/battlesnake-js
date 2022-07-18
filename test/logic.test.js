@@ -1,10 +1,12 @@
 const {
-  info,
   move,
   configuration,
   getPossibleMoves,
   preprocess,
+  resetPreviousDeadlyMove
 } = require("../src/logic");
+
+const { info} = require("../src/bs_info")
 
 const TIMES = 10;
 const boardHeight = 5;
@@ -46,6 +48,11 @@ function createBattlesnake(id, bodyCoords) {
 function addFood(gameState, coord) {
   gameState.board.food.push(coord);
 }
+
+// Applies to all tests in this file
+beforeEach(() => {
+  resetPreviousDeadlyMove();
+});
 
 describe("Battlesnake API Version", () => {
   test("should be api version 1", () => {

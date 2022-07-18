@@ -1,5 +1,6 @@
 const express = require("express");
-const { info, start, move, end } = require("./logic");
+const {  move } = require("./logic");
+const { info, start, end } = require("./bs_info");
 
 const app = express();
 app.use(express.json());
