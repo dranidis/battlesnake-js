@@ -392,6 +392,7 @@ describe("Battlesnake Moves", () => {
       { x: 3, y: 1 },
       { x: 2, y: 1 },
       { x: 2, y: 2 },
+      { x: 2, y: 3 },
     ]);
     // other back 2 squares
     const me = createBattlesnake("me", [
@@ -400,7 +401,9 @@ describe("Battlesnake Moves", () => {
       { x: 1, y: 2 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    for (let i = 0; i < TIMES; i++) {
+    preprocess(gameState);
+    console.log(gameState.blocks.toString())
+    for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
       const allowedMoves = ["left"];
       expect(allowedMoves).toContain(moveResponse.move);
@@ -576,6 +579,8 @@ describe("getPossibleMoves", () => {
 
 describe("getPossibleMovesFloodFill", () => {
   test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+    if (configuration.MINMAX_DEPTH < 2) return;
+
     boardWidth = 8;
     boardHeight = 8;
     const me = createBattlesnake("me", [
