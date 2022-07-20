@@ -15,7 +15,7 @@ var configuration = {
   // to safely enter. 1.5 * length
    */
   // FLOOD_FILL_FACTOR: 1.5,
-  FLOOD_FILL_FACTOR : 10
+  FLOOD_FILL_FACTOR : 2
 };
 
 function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
