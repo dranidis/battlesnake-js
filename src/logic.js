@@ -9,7 +9,7 @@ const configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 1,
+  MINMAX_DEPTH: 2,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -351,17 +351,20 @@ function getPossibleMovesFloodFill(gameState) {
       const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
 
       if (min < Infinity) {
-        const squaresCountValues = Object.values(squaresCount);
-        const myAvg =
-          squaresCountValues.reduce((a, b) => a + b) /
-          squaresCountValues.length;
+        // const squaresCountValues = Object.values(squaresCount);
+        // const myAvg =
+        //   squaresCountValues.reduce((a, b) => a + b) /
+        //   squaresCountValues.length;
 
         const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
 
         const move = Object.keys(oppSquaresCount).filter(
           (k) => oppSquaresCount[k] == min
         )[0];
-        if (squaresCount[move] > myAvg) {
+        if (squaresCount[move] > 
+          configuration.FLOOD_FILL_FACTOR * gameState.you.length
+          // myAvg
+          ) {
           console.log("ATTACKING move: " + move);
           possibleMoves[move] = true;
           return possibleMoves;
