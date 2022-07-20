@@ -1,4 +1,4 @@
-const { distance, getTrueKeys } = require("./util");
+const { distance, getTrueKeys, isEqual } = require("./util");
 const { Matrix } = require("./bitmatrix");
 const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
@@ -32,8 +32,9 @@ function avoidLongerHeads(gameState) {
     right: true,
   };
   const myHead = gameState.you.head;
-  const longerSnakeHeads = gameState.otherSnakes
-    .filter((s) => s.length >= gameState.you.length)
+
+  const longerSnakeHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id && s.length >= gameState.you.length)
     .map((s) => s.head);
 
   for (let index = 0; index < longerSnakeHeads.length; index++) {
@@ -74,17 +75,20 @@ function isEmpty(gameState, coord) {
   );
 }
 
-function getHeadPossibleMoves(gameState, head) {
+function getSnakePossibleMoves(gameState, snake) {
   return {
-    up: isEmpty(gameState, squareAfterMove(head, "up")),
-    down: isEmpty(gameState, squareAfterMove(head, "down")),
-    left: isEmpty(gameState, squareAfterMove(head, "left")),
-    right: isEmpty(gameState, squareAfterMove(head, "right")),
+    up: !snake.lost && isEmpty(gameState, squareAfterMove(snake.head, "up")),
+    down:
+      !snake.lost && isEmpty(gameState, squareAfterMove(snake.head, "down")),
+    left:
+      !snake.lost && isEmpty(gameState, squareAfterMove(snake.head, "left")),
+    right:
+      !snake.lost && isEmpty(gameState, squareAfterMove(snake.head, "right")),
   };
 }
 
 function getMyPossibleMoves(gameState) {
-  return getHeadPossibleMoves(gameState, gameState.you.head);
+  return getSnakePossibleMoves(gameState, gameState.you);
 }
 
 function squareAfterMove(sq, aMove) {
@@ -110,6 +114,14 @@ function squareAfterMove(sq, aMove) {
   return { x: x, y: y };
 }
 
+function applyMoveToSnake(newGameState, snake, newHead) {
+  if (!isFood(newGameState, newHead)) {
+    snake.body.pop();
+  }
+  snake.body.unshift(newHead);
+  snake.head = newHead;
+}
+
 function applyMove(gameState, newHead, otherHeadList = []) {
   let newGameState = JSON.parse(
     JSON.stringify(
@@ -118,44 +130,25 @@ function applyMove(gameState, newHead, otherHeadList = []) {
     )
   );
 
-  newGameState.you.body.unshift(newHead);
-  newGameState.you.body.pop();
-  newGameState.you.head = newHead;
+  const mySnake = newGameState.board.snakes.filter(
+    (s) => s.id == newGameState.you.id
+  )[0];
 
-  // just remove the tail, don't know where the head is heading
-  newGameState.otherSnakes.forEach((s) => s.body.pop());
-  newGameState.board.snakes.forEach((s) => s.body.pop());
+  applyMoveToSnake(newGameState, mySnake, newHead);
 
   const snakes = newGameState.board.snakes;
-
-  for (let i = 0; i < snakes.length; i++) {
-    if (snakes[i].id == newGameState.you.id) {
-      snakes[i].body.unshift(newHead);
-      snakes[i].head = newHead;
-      break;
-    }
-  }
-
-  // TODO!!!!
-  // Add food consumption
-  const otherSnakes = newGameState.board.snakes.filter(
+  const otherSnakes = snakes.filter(
     (s) => s.id != newGameState.you.id
   );
 
   for (let i = 0; i < otherHeadList.length; i++) {
-    otherSnakes[i].head = otherHeadList[i];
-    otherSnakes[i].body.unshift(otherHeadList[i]);
-    newGameState.otherSnakes[i].head = otherHeadList[i];
-    newGameState.otherSnakes[i].body.unshift(otherHeadList[i]);
+    applyMoveToSnake(newGameState, otherSnakes[i], otherHeadList[i])
   }
 
   // head-to-head collision
   for (let i = 0; i < snakes.length - 1; i++) {
     for (let j = i + 1; j < snakes.length; j++) {
-      if (
-        snakes[i].head.x == snakes[j].head.x &&
-        snakes[i].head.y == snakes[j].head.y
-      ) {
+      if (isEqual(snakes[i].head, snakes[j].head)) {
         if (snakes[i].body.length <= snakes[j].body.length) {
           snakes[i].lost = true;
         }
@@ -165,26 +158,20 @@ function applyMove(gameState, newHead, otherHeadList = []) {
       }
     }
   }
-  let newSnakes = [];
+
   for (let i = 0; i < snakes.length; i++) {
-    if (snakes[i].lost == undefined) {
-      newSnakes.push(snakes[i]);
-    } else {
-      if (snakes[i].id == newGameState.you.id) {
-        newGameState.you.lost = true;
-        return newGameState;
-      }
+    if (snakes[i].id == newGameState.you.id) {
+      newGameState.you = snakes[i];
+      break;
     }
   }
-
-  newGameState.board.snakes = newSnakes;
-
   preprocess(newGameState);
-  // console.log(
-  //   `STATE ${newGameState.blocks.toString()} after move ${newHead.x} ${
-  //     newHead.y
-  //   } and ${JSON.stringify(newGameState.board.snakes)}`
-  // );
+  console.log(
+    `STATE ${newGameState.blocks.toString()} after move ${JSON.stringify(
+      newHead
+    )} 
+    } and ${JSON.stringify(otherHeadList)}`
+  );
 
   return newGameState;
 }
@@ -206,9 +193,7 @@ function getPossibleMovesDepth(gameState, depth, visited) {
 
   for (let index = 0; index < safeMoves.length; index++) {
     const newHead = squareAfterMove(gameState.you.head, safeMoves[index]);
-    if (
-      visited.filter((h) => h.x == newHead.x && h.y == newHead.y).length == 0
-    ) {
+    if (visited.filter((h) => isEqual(h, newHead)).length == 0) {
       // newVisited = JSON.parse(JSON.stringify(visited));
       const newVisited = deepCopy(visited);
       newVisited.push(newHead);
@@ -242,10 +227,15 @@ function getPossibleMovesDepth(gameState, depth, visited) {
  * @returns
  */
 function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
-  if (gameState.otherSnakes.length == 1) {
-    const otherHead = gameState.otherSnakes[0].head;
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
+
+  if (otherSnakes.length == 1) {
+    const otherSnake = otherSnakes[0];
+    const otherHead = otherSnake.head;
     // console.log(`Other head ${JSON.stringify(otherHead)}`)
-    const otherMovesMap = getHeadPossibleMoves(gameState, otherHead);
+    const otherMovesMap = getSnakePossibleMoves(gameState, otherSnake);
     const otherMoves = getTrueKeys(otherMovesMap);
 
     if (depth == 0) {
@@ -256,7 +246,7 @@ function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
         const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
         ffMoves.push(getFloodFillSquares(gameState, newOtherHead));
       }
-      floodFilldata[gameState.otherSnakes[0].id] =
+      floodFilldata[otherSnake.id] =
         ffMoves.length > 0 ? Math.max(...ffMoves) : 0;
       return floodFilldata;
     }
@@ -282,7 +272,7 @@ function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
       }
     }
     // return Math.min(...maxSquaresCountList);
-    return { id: gameState.otherSnakes[0].id, data: maxSquaresCountList };
+    return { id: otherSnake.id, data: maxSquaresCountList };
   }
 
   if (depth == 0) {
@@ -396,8 +386,8 @@ function pathToFoodAStar(gameState, h, food) {
 }
 
 function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
-  const longerOrSameHeads = gameState.otherSnakes
-    .filter((s) => s.length >= gameState.you.length)
+  const longerOrSameHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id && s.length >= gameState.you.length)
     .map((s) => s.head);
   return Math.min(
     ...longerOrSameHeads.map((h) =>
@@ -553,14 +543,16 @@ function getDeadlyMoveToSnake(gameState, mySnake, snake) {
 }
 
 function getDeadlyMove(gameState) {
-  const snakes = gameState.otherSnakes;
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
   const mySnake = gameState.you;
 
-  for (let i = 0; i < snakes.length; i++) {
+  for (let i = 0; i < otherSnakes.length; i++) {
     const [dMove, distance] = getDeadlyMoveToSnake(
       gameState,
       mySnake,
-      snakes[i]
+      otherSnakes[i]
     );
     if (dMove != undefined) return dMove;
   }
@@ -569,13 +561,15 @@ function getDeadlyMove(gameState) {
 }
 
 function detectDeadlyMove(gameState) {
-  const snakes = gameState.otherSnakes;
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
   const mySnake = gameState.you;
 
-  for (let i = 0; i < snakes.length; i++) {
+  for (let i = 0; i < otherSnakes.length; i++) {
     const [dMove, distance] = getDeadlyMoveToSnake(
       gameState,
-      snakes[i],
+      otherSnakes[i],
       mySnake
     );
     if (dMove != undefined) {
@@ -594,10 +588,6 @@ function detectDeadlyMove(gameState) {
 }
 
 function preprocess(gameState) {
-  gameState.otherSnakes = gameState.board.snakes.filter(
-    (s) => s.id != gameState.you.id
-  );
-
   gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
 
   // gameState.you.body.forEach((b) => gameState.blocks.set(b.x, b.y));
@@ -606,15 +596,17 @@ function preprocess(gameState) {
     gameState.blocks.set(gameState.you.body[i].x, gameState.you.body[i].y);
   }
 
-  gameState.board.snakes.forEach((s) =>
-    // s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
-    // for each block except the last (tail)
-    {
-      for (let i = 0; i < s.body.length - 1; i++) {
-        gameState.blocks.set(s.body[i].x, s.body[i].y);
+  gameState.board.snakes
+    .filter((s) => !s.lost)
+    .forEach((s) =>
+      // s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
+      // for each block except the last (tail)
+      {
+        for (let i = 0; i < s.body.length - 1; i++) {
+          gameState.blocks.set(s.body[i].x, s.body[i].y);
+        }
       }
-    }
-  );
+    );
 }
 
 // cache previous move
@@ -622,6 +614,10 @@ var previousDeadlyMove = undefined;
 
 function resetPreviousDeadlyMove() {
   previousDeadlyMove = undefined;
+}
+
+function isFood(gameState, coord) {
+  return gameState.board.food.filter((f) => isEqual(f, coord)).length > 0;
 }
 
 function move(gameState) {
@@ -638,10 +634,12 @@ function move(gameState) {
   // );
 
   const possibleMovesLookAhead = getPossibleMovesFloodFill(gameState);
-
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
   const myHead = gameState.you.head;
 
-  const longest = Math.max(...gameState.otherSnakes.map((s) => s.length));
+  const longest = Math.max(...otherSnakes.map((s) => s.length));
 
   const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
 
@@ -655,8 +653,7 @@ function move(gameState) {
       ? totallySafeMoves
       : getTrueKeys(possibleMovesLookAhead);
 
-  let isAttacking =
-    gameState.otherSnakes.length > 0 && gameState.you.length > longest;
+  let isAttacking = otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
   let targetDistance = 999;
   let safeTargetMoves = undefined;
@@ -664,9 +661,8 @@ function move(gameState) {
   if (isAttacking) {
     console.log("isAttacking");
     // TODO: now picks first other snake as target
-    // target = gameState.otherSnakes[0].head;
-    target = gameState.otherSnakes.sort((s) => distance(myHead, s.head))[0]
-      .head;
+    // target = otherSnakes[0].head;
+    target = otherSnakes.sort((s) => distance(myHead, s.head))[0].head;
     targetDistance = distance(myHead, target);
     let towardsSnake = moveTowardsTarget(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
