@@ -14,7 +14,8 @@ var configuration = {
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
    */
-  FLOOD_FILL_FACTOR: 1.5,
+  // FLOOD_FILL_FACTOR: 1.5,
+  FLOOD_FILL_FACTOR : 10
 };
 
 function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
@@ -345,26 +346,30 @@ function getPossibleMovesFloodFill(gameState) {
 
     const oppSquaresCountValues = Object.values(oppSquaresCount);
     if (oppSquaresCountValues.length > 0) {
-      const avg =
-        oppSquaresCountValues.reduce((a, b) => a + b) /
-        oppSquaresCountValues.length;
-      const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+      // const avg =
+      //   oppSquaresCountValues.reduce((a, b) => a + b) /
+      //   oppSquaresCountValues.length;
 
-      if (min < Infinity) {
-        // const squaresCountValues = Object.values(squaresCount);
-        // const myAvg =
-        //   squaresCountValues.reduce((a, b) => a + b) /
-        //   squaresCountValues.length;
+      // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+      const min = Math.min(...oppSquaresCountValues);
+      const max = Math.max(...oppSquaresCountValues);
 
-        const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+      if (min < max/1.5) {
+        const squaresCountValues = Object.values(squaresCount);
+        const myAvg =
+          squaresCountValues.reduce((a, b) => a + b) /
+          squaresCountValues.length;
 
-        const move = Object.keys(oppSquaresCount).filter(
-          (k) => oppSquaresCount[k] == min
-        )[0];
-        if (squaresCount[move] > 
-          configuration.FLOOD_FILL_FACTOR * gameState.you.length
-          // myAvg
-          ) {
+        // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+
+        // const move = Object.keys(oppSquaresCount).filter(
+        //   (k) => oppSquaresCount[k] == min
+        // )[0];
+        if (
+          squaresCount[move] >
+          // configuration.FLOOD_FILL_FACTOR * gameState.you.length
+          myAvg
+        ) {
           console.log("ATTACKING move: " + move);
           possibleMoves[move] = true;
           return possibleMoves;
@@ -387,7 +392,7 @@ function getPossibleMovesFloodFill(gameState) {
     const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
       return squaresCount[a] > squaresCount[b] ? a : b;
     });
-    possibleMoves[maxMove] = true; // get the max move when all moves look bad
+    possibleMoves[maxMove] = squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
   }
   return possibleMoves;
 }
