@@ -164,10 +164,13 @@ describe("Battlesnake Moves", () => {
       { x: 0, y: 1 },
       { x: 0, y: 2 },
       { x: 0, y: 3 },
+      { x: 0, y: 4 },
     ]);
     const gameState = createGameState(me, [me]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
 
-    for (let i = 0; i < TIMES; i++) {
+    for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
       // In this state, we should NEVER move left.
       const allowedMoves = ["right"];
@@ -183,8 +186,11 @@ describe("Battlesnake Moves", () => {
       { x: 1, y: 1 },
       { x: 0, y: 1 },
       { x: 0, y: 2 },
+      { x: 0, y: 3 },
     ]);
     const gameState = createGameState(me, [me]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
 
     for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
@@ -200,6 +206,8 @@ describe("Battlesnake Moves", () => {
       { x: 0, y: 0 },
       { x: 0, y: 1 },
       { x: 0, y: 2 },
+      { x: 0, y: 3 },
+      { x: 0, y: 4 },
     ]);
     const other = createBattlesnake("other", [
       { x: 3, y: 0 },
@@ -207,8 +215,11 @@ describe("Battlesnake Moves", () => {
       { x: 3, y: 2 },
       { x: 2, y: 2 },
       { x: 1, y: 2 },
+      { x: 1, y: 3 },
     ]);
     const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
 
     for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
@@ -259,14 +270,24 @@ describe("Battlesnake Moves", () => {
     const me = createBattlesnake("me", [
       { x: 2, y: 1 },
       { x: 1, y: 1 },
+      { x: 0, y: 1 },
     ]);
-    const other = createBattlesnake("other", [{ x: 4, y: 1 }]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 1 },
+      { x: 4, y: 0 },
+    ]);
     const longer = createBattlesnake("longer", [
       { x: 0, y: 4 },
       { x: 1, y: 4 },
       { x: 2, y: 4 },
+      { x: 3, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other, longer]);
+    const gameState = createGameState(me, [me, other, 
+      // TODO: add the longer snake when look ahead for more than1 snake is implemented
+      // longer
+    ]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
     addFood(gameState, { x: 3, y: 1 });
     addFood(gameState, { x: 2, y: 0 });
 
@@ -402,7 +423,7 @@ describe("Battlesnake Moves", () => {
     ]);
     const gameState = createGameState(me, [me, other]);
     preprocess(gameState);
-    console.log(gameState.blocks.toString())
+    console.log(gameState.blocks.toString());
     for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
       const allowedMoves = ["left"];
@@ -647,5 +668,41 @@ describe("applyMove", () => {
     expect(
       newGameState.board.snakes.filter((s) => s.id == "other")[0].body[0]
     ).toBe(newOtherHead);
+  });
+
+  test("applyMove changes head of you and your snake in snakes", () => {
+    boardWidth = 8;
+    boardHeight = 8;
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const newHead = { x: 6, y: 4 };
+    const newOtherHead = { x: 6, y: 2 };
+    const newGameState = applyMove(gameState, newHead, [newOtherHead]);
+
+    expect(
+      newGameState.board.snakes.filter((s) => s.id == "me")[0].body[0]
+    ).toBe(newHead);
+    expect(newGameState.board.snakes.filter((s) => s.id == "me")[0].head).toBe(
+      newHead
+    );
   });
 });

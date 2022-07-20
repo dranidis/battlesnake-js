@@ -1,11 +1,10 @@
-function process(floodFillData) {
+function processMyFill(floodFillData) {
   const myMoves = Object.keys(floodFillData);
-
   let ffData = {};
 
-  for (let m = 0; m < myMoves.length; m++) {
-    ffData[myMoves[m]] = processMyMove(floodFillData[myMoves[m]]);
-  }
+  myMoves.forEach((myMove) => {
+    ffData[myMove] = processMyMove(floodFillData[myMove]);
+  });
 
   return ffData;
 }
@@ -13,7 +12,7 @@ function process(floodFillData) {
 function processMyMove(myMoveValue) {
   if (myMoveValue.you != undefined) {
     return myMoveValue.you;
-  } 
+  }
 
   if (!isNaN(myMoveValue)) {
     return myMoveValue;
@@ -31,5 +30,5 @@ function processOppMove(oppMoveValue) {
 }
 
 module.exports = {
-  process,
+  processMyFill
 };

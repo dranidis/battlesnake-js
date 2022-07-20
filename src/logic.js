@@ -2,15 +2,14 @@ const { distance, getTrueKeys } = require("./util");
 const { Matrix } = require("./bitmatrix");
 const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
-const { process } = require("./process_ffdata")
-
+const { processMyFill } = require("./process_ffdata");
 
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 2,
+  MINMAX_DEPTH: 1,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -127,15 +126,18 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   newGameState.otherSnakes.forEach((s) => s.body.pop());
   newGameState.board.snakes.forEach((s) => s.body.pop());
 
-  // if the argument of new heads is given add the info about heads
+  const snakes = newGameState.board.snakes;
+
+  for (let i = 0; i < snakes.length; i++) {
+    if (snakes[i].id == newGameState.you.id) {
+      snakes[i].body.unshift(newHead);
+      snakes[i].head = newHead;
+      break;
+    }
+  }
 
   // TODO!!!!
-  // Add head-to-head evaluation
   // Add food consumption
-
-  // is the order of snakes relevant???
-
-  // no evaluation of dead snakes takes place
   const otherSnakes = newGameState.board.snakes.filter(
     (s) => s.id != newGameState.you.id
   );
@@ -146,6 +148,36 @@ function applyMove(gameState, newHead, otherHeadList = []) {
     newGameState.otherSnakes[i].head = otherHeadList[i];
     newGameState.otherSnakes[i].body.unshift(otherHeadList[i]);
   }
+
+  // head-to-head collision
+  for (let i = 0; i < snakes.length - 1; i++) {
+    for (let j = i + 1; j < snakes.length; j++) {
+      if (
+        snakes[i].head.x == snakes[j].head.x &&
+        snakes[i].head.y == snakes[j].head.y
+      ) {
+        if (snakes[i].body.length <= snakes[j].body.length) {
+          snakes[i].lost = true;
+        }
+        if (snakes[i].body.length >= snakes[j].body.length) {
+          snakes[j].lost = true;
+        }
+      }
+    }
+  }
+  let newSnakes = [];
+  for (let i = 0; i < snakes.length; i++) {
+    if (snakes[i].lost == undefined) {
+      newSnakes.push(snakes[i]);
+    } else {
+      if (snakes[i].id == newGameState.you.id) {
+        newGameState.you.lost = true;
+        return newGameState;
+      }
+    }
+  }
+
+  newGameState.board.snakes = newSnakes;
 
   preprocess(newGameState);
   // console.log(
@@ -209,7 +241,7 @@ function getPossibleMovesDepth(gameState, depth, visited) {
  * @param {*} depth
  * @returns
  */
-function getMinMaxFlodFill(gameState, start, depth, otherHeads = []) {
+function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
   if (gameState.otherSnakes.length == 1) {
     const otherHead = gameState.otherSnakes[0].head;
     // console.log(`Other head ${JSON.stringify(otherHead)}`)
@@ -217,14 +249,15 @@ function getMinMaxFlodFill(gameState, start, depth, otherHeads = []) {
     const otherMoves = getTrueKeys(otherMovesMap);
 
     if (depth == 0) {
-      let floodFilldata = {you: getFloodFillSquares(gameState, start)};
+      let floodFilldata = { you: getFloodFillSquares(gameState, start) };
 
       let ffMoves = [];
       for (let i = 0; i < otherMoves.length; i++) {
         const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
         ffMoves.push(getFloodFillSquares(gameState, newOtherHead));
       }
-      floodFilldata[gameState.otherSnakes[0].id] = ffMoves.length> 0 ? Math.max(...ffMoves) : 0;
+      floodFilldata[gameState.otherSnakes[0].id] =
+        ffMoves.length > 0 ? Math.max(...ffMoves) : 0;
       return floodFilldata;
     }
 
@@ -239,10 +272,14 @@ function getMinMaxFlodFill(gameState, start, depth, otherHeads = []) {
       const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
 
       const newGameState = applyMove(gameState, start, [newOtherHead]);
-      const squaresCount = getSquaresCountPerMove(newGameState, depth - 1);
-      // const maxSquaresCount = Math.max(...Object.values(squaresCount));
-      // maxSquaresCountList.push(maxSquaresCount);
-      maxSquaresCountList[otherMoves[i]] = squaresCount;
+      if (newGameState.you.lost == undefined) {
+        const squaresCount = getSquaresCountPerMove(newGameState, depth - 1);
+        // const maxSquaresCount = Math.max(...Object.values(squaresCount));
+        // maxSquaresCountList.push(maxSquaresCount);
+        maxSquaresCountList[otherMoves[i]] = squaresCount;
+      } else {
+        maxSquaresCountList[otherMoves[i]] = {};
+      }
     }
     // return Math.min(...maxSquaresCountList);
     return { id: gameState.otherSnakes[0].id, data: maxSquaresCountList };
@@ -266,8 +303,7 @@ function getSquaresCountPerMove(gameState, depth) {
 
   const safeMoves = getTrueKeys(possibleMoves);
 
-  let squaresCount = {}; // = {up: null, down:null, right:null, left:null};
-
+  let squaresCount = {};
   for (let index = 0; index < safeMoves.length; index++) {
     const start = squareAfterMove(gameState.you.head, safeMoves[index]);
 
@@ -275,7 +311,7 @@ function getSquaresCountPerMove(gameState, depth) {
       .filter((s) => s.id != gameState.you.id)
       .map((s) => s.head);
 
-    const squares = getMinMaxFlodFill(gameState, start, depth, otherHeads);
+    const squares = getMinMaxFloodFill(gameState, start, depth, otherHeads);
     // console.log(
     //   `MM depth ${depth} move ${safeMoves[index]} squaresCount ${squares}`
     // );
@@ -283,16 +319,22 @@ function getSquaresCountPerMove(gameState, depth) {
     squaresCount[safeMoves[index]] = squares;
   }
 
-  // console.log(`Return squaresCount ${JSON.stringify(squaresCount,null,4)}`)
   return squaresCount;
 }
 
 function getPossibleMovesFloodFill(gameState) {
   // console.log(`INIT STATE ${gameState.blocks.toString()}`);
-  const squaresCount = process(getSquaresCountPerMove(
+
+  const getFloodFillData = getSquaresCountPerMove(
     gameState,
     configuration.MINMAX_DEPTH
-  ));
+  );
+  console.log(
+    `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
+  );
+
+  const squaresCount = processMyFill(getFloodFillData);
+  console.log("FloodFill: " + JSON.stringify(squaresCount, null, 2));
 
   let possibleMoves = { up: false, down: false, left: false, right: false };
 
@@ -302,8 +344,6 @@ function getPossibleMovesFloodFill(gameState) {
       squaresCount[direction] >
         configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   });
-
-  console.log("FloodFill: " + JSON.stringify(squaresCount, null, 2));
 
   if (
     getTrueKeys(possibleMoves).length == 0 &&

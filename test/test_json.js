@@ -583,4 +583,99 @@ floodFillData = {
   }
 }
 
-module.exports = {floodFillData}
+
+testData = {
+  "up": {
+      "id": "other",
+      "data": {
+          "left": {
+              "up": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "up": {
+                              "you": 15,
+                              "other": 15
+                          },
+                          "left": {
+                              "you": 15,
+                              "other": 15
+                          },
+                          "right": {
+                              "you": 15,
+                              "other": 15
+                          }
+                      }
+                  }
+              },
+              "right": {
+                  "id": "other",
+                  "data": {
+                      "up": {}
+                  }
+              }
+          },
+          "right": {
+              "up": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "up": {
+                              "you": 15,
+                              "other": 15
+                          },
+                          "left": {
+                              "you": 15,
+                              "other": 15
+                          },
+                          "right": {
+                              "you": 15,
+                              "other": 15
+                          }
+                      }
+                  }
+              },
+              "right": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "up": {
+                              "you": 14,
+                              "other": 14
+                          },
+                          "down": {
+                              "you": 1,
+                              "other": 14
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  },
+  "right": {
+      "id": "other",
+      "data": {
+          "left": {},
+          "right": {
+              "up": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "up": {
+                              "you": 15,
+                              "other": 15
+                          },
+                          "left": {
+                              "you": 15,
+                              "other": 15
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  }
+}
+
+module.exports = {floodFillData, testData}
