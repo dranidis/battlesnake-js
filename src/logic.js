@@ -4,12 +4,12 @@ const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
 const { processMyFill, processOppFill } = require("./process_ffdata");
 
-const configuration = {
+var configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 2,
+  MINMAX_DEPTH: 1,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
@@ -789,10 +789,10 @@ function move(gameState) {
 module.exports = {
   configuration: configuration,
   move: move,
-  getPossibleMoves: getMyPossibleMoves,
   preprocess: preprocess,
   resetPreviousDeadlyMove,
   getPossibleMovesFloodFill,
   applyMove,
   isFood,
+  getMyPossibleMoves,
 };

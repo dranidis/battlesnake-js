@@ -29,7 +29,7 @@ function processMyMove(myMoveValue, isMyFill) {
 
   const oppMoveValues = Object.values(myMoveValue.data);
   if (oppMoveValues.length == 0) {
-    return isMyFill ? 0: 0
+    return isMyFill ? 999: 0
   }
 
   const processed = oppMoveValues.map((mv) => processOppMove(mv, isMyFill));
@@ -40,7 +40,7 @@ function processMyMove(myMoveValue, isMyFill) {
 function processOppMove(oppMoveValue, isMyFill) {
   const oppMoves = Object.values(oppMoveValue);
   if (oppMoves.length == 0) {
-    return isMyFill ? 0: 0
+    return isMyFill ? 0: 999
   }
   const processed = oppMoves.map((mv) => processMyMove(mv, isMyFill));
 

@@ -1,11 +1,12 @@
 const {
   move,
   configuration,
-  getPossibleMoves,
   preprocess,
   resetPreviousDeadlyMove,
   getPossibleMovesFloodFill,
-  applyMove, isFood,
+  applyMove,
+  isFood,
+  getMyPossibleMoves,
 } = require("../src/logic");
 
 const { info } = require("../src/bs_info");
@@ -282,7 +283,9 @@ describe("Battlesnake Moves", () => {
       { x: 2, y: 4 },
       { x: 3, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other, 
+    const gameState = createGameState(me, [
+      me,
+      other,
       // TODO: add the longer snake when look ahead for more than1 snake is implemented
       // longer
     ]);
@@ -291,13 +294,12 @@ describe("Battlesnake Moves", () => {
     addFood(gameState, { x: 3, y: 1 });
     // addFood(gameState, { x: 2, y: 0 });
 
-    expect(isFood(gameState, {x:3, y:1})).toBe(true)
+    expect(isFood(gameState, { x: 3, y: 1 })).toBe(true);
 
     const moveResponse = move(gameState);
     const allowedMoves = ["right"];
 
     expect(allowedMoves).toContain(moveResponse.move);
-
   });
 
   test("deadly attack down", () => {
@@ -435,7 +437,6 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 1", () => {
-    // other back 2 squares
     const me = createBattlesnake("me", [{ x: 1, y: 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
@@ -456,8 +457,7 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-  test("prefer going towards the center 1", () => {
-    // other back 2 squares
+  test("prefer going towards the center 3", () => {
     const me = createBattlesnake("me", [{ x: boardWidth - 1, y: 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
@@ -467,7 +467,7 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-  test("prefer going towards the center 2", () => {
+  test("prefer going towards the center 4", () => {
     // other back 2 squares
     const me = createBattlesnake("me", [
       { x: boardWidth - 1, y: boardHeight - 1 },
@@ -517,14 +517,14 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-  test("null values in flood fill look ahead", () => {
-  // other back 2 squares
+  test("null values in flood fill look ahead (bothDie", () => {
+    // other back 2 squares
 
     // 4
     // 3
-    // 2 ~ ~ 
-    // 1     x x 
-    // 0 
+    // 2 ~ ~
+    // 1     x x
+    // 0
     //   0 1 2 3 4
     const me = createBattlesnake("me", [
       { x: 1, y: 2 },
@@ -536,7 +536,7 @@ describe("Battlesnake Moves", () => {
       { x: 3, y: 1 },
       { x: 4, y: 1 },
     ]);
-    
+
     const gameState = createGameState(me, [me, other]);
     for (let i = 0; i < 1; i++) {
       const moveResponse = move(gameState);
@@ -548,7 +548,7 @@ describe("Battlesnake Moves", () => {
 
 });
 
-describe("getPossibleMoves", () => {
+describe("getMyPossibleMoves", () => {
   test("can go to it's tail", () => {
     // other back 2 squares
     const me = createBattlesnake("me", [
@@ -560,7 +560,7 @@ describe("getPossibleMoves", () => {
     const gameState = createGameState(me, [me]);
     preprocess(gameState);
 
-    const moves = getPossibleMoves(gameState);
+    const moves = getMyPossibleMoves(gameState);
     const exp = {
       up: true,
       down: true,
@@ -588,7 +588,7 @@ describe("getPossibleMoves", () => {
     const gameState = createGameState(me, [me]);
     preprocess(gameState);
 
-    const moves = getPossibleMoves(gameState);
+    const moves = getMyPossibleMoves(gameState);
     const exp = {
       up: true,
       down: false,
@@ -620,7 +620,7 @@ describe("getPossibleMoves", () => {
     const gameState = createGameState(me, [me, other]);
     preprocess(gameState);
 
-    const moves = getPossibleMoves(gameState);
+    const moves = getMyPossibleMoves(gameState);
     const exp = {
       up: true,
       down: true,
@@ -666,6 +666,43 @@ describe("getPossibleMovesFloodFill", () => {
       right: false,
     };
     expect(moves).toStrictEqual(exp);
+  });
+
+  test("solving bug in FF 0 value is wrong for all moves (check with depth 1 and 2)", () => {
+    // other back 2 squares
+    configuration.MINMAX_DEPTH = 1;
+    const me = createBattlesnake("me", [
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 2, y: 3 },
+      { x: 2, y: 4 },
+      { x: 1, y: 4 },
+      { x: 0, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 2 },
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    for (let i = 1; i <= 2; i++) {
+      configuration.MINMAX_DEPTH = i;
+      console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH)
+      const moves = getPossibleMovesFloodFill(gameState);
+      const exp = {
+        up: false,
+        down: true,
+        left: false, // does not fit
+        right: false,
+      };
+      expect(moves).toStrictEqual(exp);
+    }
   });
 });
 
