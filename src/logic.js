@@ -9,7 +9,7 @@ var configuration = {
   CHECK_DEADLY_ATTACK: true,
   CHECK_DEADLY_DEFENCE: true,
   BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 1,
+  MINMAX_DEPTH: 2,
   /**
    * number of extra squares in the area for the snake 
   // to safely enter. 1.5 * length
