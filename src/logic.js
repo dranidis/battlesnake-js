@@ -15,7 +15,7 @@ var configuration = {
   // to safely enter. 1.5 * length
    */
   // FLOOD_FILL_FACTOR: 1.5,
-  FLOOD_FILL_FACTOR : 2
+  FLOOD_FILL_FACTOR: 2,
 };
 
 function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
@@ -354,7 +354,8 @@ function getPossibleMovesFloodFill(gameState) {
       const min = Math.min(...oppSquaresCountValues);
       const max = Math.max(...oppSquaresCountValues);
 
-      if (min < max/1.5) {
+      if (min < max / 2) {
+        console.log("BLOCKING OPPORTUNITY!");
         const squaresCountValues = Object.values(squaresCount);
         const myAvg =
           squaresCountValues.reduce((a, b) => a + b) /
@@ -362,18 +363,18 @@ function getPossibleMovesFloodFill(gameState) {
 
         // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
 
-        // const move = Object.keys(oppSquaresCount).filter(
-        //   (k) => oppSquaresCount[k] == min
-        // )[0];
-        if (
-          squaresCount[move] >
-          // configuration.FLOOD_FILL_FACTOR * gameState.you.length
-          myAvg
-        ) {
-          console.log("ATTACKING move: " + move);
-          possibleMoves[move] = true;
-          return possibleMoves;
-        }
+        const move = Object.keys(oppSquaresCount).filter(
+          (k) => oppSquaresCount[k] == min
+        )[0];
+        // if (
+        //   squaresCount[move] >
+        //   // configuration.FLOOD_FILL_FACTOR * gameState.you.length
+        //   myAvg
+        // ) {
+        console.log("ATTACKING move: " + move);
+        possibleMoves[move] = true;
+        return possibleMoves;
+        // }
       }
     }
   }

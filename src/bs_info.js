@@ -4,6 +4,7 @@ function info() {
     apiversion: "1",
     author: "DDmits2",
     color: "#736CCB",
+    // color: "#ff0000",
     head: "tongue",
     tail: "freckled",
   };
