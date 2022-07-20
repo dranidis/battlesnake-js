@@ -810,6 +810,106 @@ const goesTowardsFoodWhenShorterSnake = {
   }
 }
 
+const bothDie = {
+  "up": {
+      "id": "other",
+      "data": {
+          "up": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "down": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "left": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          }
+      }
+  },
+  "down": {
+      "id": "other",
+      "data": {
+          "up": {
+              "down": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "down": {
+              "down": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "left": {}
+      }
+  },
+  "right": {
+      "id": "other",
+      "data": {
+          "up": {},
+          "down": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "left": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          }
+      }
+  }
+}
 
-
-module.exports = {floodFillData, testData, goesTowardsFoodWhenShorterSnake}
+module.exports = {floodFillData, testData, goesTowardsFoodWhenShorterSnake, bothDie}

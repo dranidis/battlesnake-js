@@ -516,6 +516,36 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
+
+  test("null values in flood fill look ahead", () => {
+  // other back 2 squares
+
+    // 4
+    // 3
+    // 2 ~ ~ 
+    // 1     x x 
+    // 0 
+    //   0 1 2 3 4
+    const me = createBattlesnake("me", [
+      { x: 1, y: 2 },
+      { x: 0, y: 2 },
+      { x: 0, y: 3 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 1 },
+      { x: 3, y: 1 },
+      { x: 4, y: 1 },
+    ]);
+    
+    const gameState = createGameState(me, [me, other]);
+    for (let i = 0; i < 1; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
+
+
 });
 
 describe("getPossibleMoves", () => {

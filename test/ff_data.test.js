@@ -1,4 +1,4 @@
-const { floodFillData, testData, goesTowardsFoodWhenShorterSnake } = require("./test_json");
+const { floodFillData, testData, goesTowardsFoodWhenShorterSnake, bothDie } = require("./test_json");
 const { processMyFill, processOppFill } = require("../src/process_ffdata")
 
 describe("read ff data", () => {
@@ -15,7 +15,7 @@ describe("read ff data", () => {
   test("read file test_json testData", () => {
     const ffData = processMyFill(testData);
     console.log(ffData);
-    expect(ffData.right).toBe(-Infinity);
+    expect(ffData.right).toBe(0);
     expect(ffData.up).toBe(15);
     // expect(allowedMoves).toContain(moveResponse.move);
 
@@ -36,6 +36,26 @@ describe("read ff data", () => {
     console.log(ffData);
     expect(ffData.up).toBe(22);
     expect(ffData.down).toBe(22);
+    expect(ffData.right).toBe(21);
+    // expect(allowedMoves).toContain(moveResponse.move);
+
+  });
+
+  test("read file test_json bothDie me", () => {
+    const ffData = processMyFill(bothDie);
+    console.log(ffData);
+    expect(ffData.up).toBe(21);
+    expect(ffData.down).toBe(0);
+    expect(ffData.right).toBe(0);
+    // expect(allowedMoves).toContain(moveResponse.move);
+
+  });
+
+  test("read file test_json bothDie opp", () => {
+    const ffData = processOppFill(bothDie);
+    console.log(ffData);
+    expect(ffData.up).toBe(21);
+    expect(ffData.down).toBe(21);
     expect(ffData.right).toBe(21);
     // expect(allowedMoves).toContain(moveResponse.move);
 

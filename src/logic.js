@@ -344,17 +344,29 @@ function getPossibleMovesFloodFill(gameState) {
     console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
 
     const oppSquaresCountValues = Object.values(oppSquaresCount);
-    const avg =
-      oppSquaresCountValues.reduce((a, b) => a + b) /
-      oppSquaresCountValues.length;
-    const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
-    if (min < Infinity) {
-      console.log("ATTACKING!");
-      const move = Object.keys(oppSquaresCount).filter(
-        (k) => oppSquaresCount[k] == min
-      )[0];
-      possibleMoves[move] = true;
-      return possibleMoves;
+    if (oppSquaresCountValues.length > 0) {
+      const avg =
+        oppSquaresCountValues.reduce((a, b) => a + b) /
+        oppSquaresCountValues.length;
+      const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+
+      if (min < Infinity) {
+        const squaresCountValues = Object.values(squaresCount);
+        const myAvg =
+          squaresCountValues.reduce((a, b) => a + b) /
+          squaresCountValues.length;
+
+        const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+
+        const move = Object.keys(oppSquaresCount).filter(
+          (k) => oppSquaresCount[k] == min
+        )[0];
+        if (squaresCount[move] > myAvg) {
+          console.log("ATTACKING move: " + move);
+          possibleMoves[move] = true;
+          return possibleMoves;
+        }
+      }
     }
   }
 
