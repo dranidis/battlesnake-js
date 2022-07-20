@@ -2,7 +2,7 @@ const { distance, getTrueKeys, isEqual } = require("./util");
 const { Matrix } = require("./bitmatrix");
 const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
-const { processMyFill } = require("./process_ffdata");
+const { processMyFill, processOppFill } = require("./process_ffdata");
 
 const configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
@@ -117,6 +117,11 @@ function squareAfterMove(sq, aMove) {
 function applyMoveToSnake(newGameState, snake, newHead) {
   if (!isFood(newGameState, newHead)) {
     snake.body.pop();
+  } else {
+    // console.log(`FOOD CONSUMED at ${JSON.stringify(newHead)}`)
+    newGameState.board.food.filter((f) =>
+      isEqual(f, newHead)
+    )[0].consumed = true;
   }
   snake.body.unshift(newHead);
   snake.head = newHead;
@@ -137,12 +142,10 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   applyMoveToSnake(newGameState, mySnake, newHead);
 
   const snakes = newGameState.board.snakes;
-  const otherSnakes = snakes.filter(
-    (s) => s.id != newGameState.you.id
-  );
+  const otherSnakes = snakes.filter((s) => s.id != newGameState.you.id);
 
   for (let i = 0; i < otherHeadList.length; i++) {
-    applyMoveToSnake(newGameState, otherSnakes[i], otherHeadList[i])
+    applyMoveToSnake(newGameState, otherSnakes[i], otherHeadList[i]);
   }
 
   // head-to-head collision
@@ -165,13 +168,21 @@ function applyMove(gameState, newHead, otherHeadList = []) {
       break;
     }
   }
+
+  let newFood = [];
+  newGameState.board.food.forEach((f) => {
+    if (!f.consumed) newFood.push(f);
+  });
+
+  newGameState.board.food = newFood;
+
   preprocess(newGameState);
-  console.log(
-    `STATE ${newGameState.blocks.toString()} after move ${JSON.stringify(
-      newHead
-    )} 
-    } and ${JSON.stringify(otherHeadList)}`
-  );
+  // console.log(
+  //   `STATE ${newGameState.blocks.toString()} after move ${JSON.stringify(
+  //     newHead
+  //   )}
+  //   } and ${JSON.stringify(otherHeadList)}`
+  // );
 
   return newGameState;
 }
@@ -319,14 +330,33 @@ function getPossibleMovesFloodFill(gameState) {
     gameState,
     configuration.MINMAX_DEPTH
   );
-  console.log(
-    `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
-  );
+  // console.log(
+  //   `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
+  // );
 
   const squaresCount = processMyFill(getFloodFillData);
-  console.log("FloodFill: " + JSON.stringify(squaresCount, null, 2));
+  console.log("FloodFill me : " + JSON.stringify(squaresCount));
 
   let possibleMoves = { up: false, down: false, left: false, right: false };
+
+  if (gameState.board.snakes.length == 2) {
+    const oppSquaresCount = processOppFill(getFloodFillData);
+    console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
+
+    const oppSquaresCountValues = Object.values(oppSquaresCount);
+    const avg =
+      oppSquaresCountValues.reduce((a, b) => a + b) /
+      oppSquaresCountValues.length;
+    const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+    if (min < Infinity) {
+      console.log("ATTACKING!");
+      const move = Object.keys(oppSquaresCount).filter(
+        (k) => oppSquaresCount[k] == min
+      )[0];
+      possibleMoves[move] = true;
+      return possibleMoves;
+    }
+  }
 
   ["up", "down", "right", "left"].forEach((direction) => {
     possibleMoves[direction] =
@@ -749,4 +779,5 @@ module.exports = {
   resetPreviousDeadlyMove,
   getPossibleMovesFloodFill,
   applyMove,
+  isFood,
 };

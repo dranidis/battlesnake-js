@@ -1,4 +1,4 @@
-floodFillData = {
+const floodFillData = {
   "down": {
     "id": "other",
     "data": {
@@ -584,7 +584,7 @@ floodFillData = {
 }
 
 
-testData = {
+const testData = {
   "up": {
       "id": "other",
       "data": {
@@ -678,4 +678,138 @@ testData = {
   }
 }
 
-module.exports = {floodFillData, testData}
+const goesTowardsFoodWhenShorterSnake = {
+  "up": {
+      "id": "other",
+      "data": {
+          "up": {
+              "up": {
+                  "you": 22,
+                  "other": 22
+              },
+              "left": {
+                  "you": 22,
+                  "other": 22
+              },
+              "right": {
+                  "you": 22,
+                  "other": 22
+              }
+          },
+          "down": {
+              "up": {
+                  "you": 22,
+                  "other": 22
+              },
+              "left": {
+                  "you": 22,
+                  "other": 22
+              },
+              "right": {
+                  "you": 22,
+                  "other": 22
+              }
+          },
+          "left": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "left": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          }
+      }
+  },
+  "down": {
+      "id": "other",
+      "data": {
+          "up": {
+              "left": {
+                  "you": 22,
+                  "other": 22
+              },
+              "right": {
+                  "you": 22,
+                  "other": 22
+              }
+          },
+          "down": {
+              "left": {
+                  "you": 22,
+                  "other": 22
+              },
+              "right": {
+                  "you": 22,
+                  "other": 22
+              }
+          },
+          "left": {
+              "left": {
+                  "you": 19,
+                  "other": 19
+              },
+              "right": {
+                  "you": 2,
+                  "other": 19
+              }
+          }
+      }
+  },
+  "right": {
+      "id": "other",
+      "data": {
+          "up": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "down": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "down": {
+              "up": {
+                  "you": 21,
+                  "other": 21
+              },
+              "down": {
+                  "you": 21,
+                  "other": 21
+              },
+              "right": {
+                  "you": 21,
+                  "other": 21
+              }
+          },
+          "left": {
+              "up": {
+                  "you": 22,
+                  "other": 0
+              },
+              "down": {
+                  "you": 22,
+                  "other": 0
+              },
+              "right": {
+                  "you": 22,
+                  "other": 0
+              }
+          }
+      }
+  }
+}
+
+
+
+module.exports = {floodFillData, testData, goesTowardsFoodWhenShorterSnake}

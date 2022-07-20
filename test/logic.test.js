@@ -5,7 +5,7 @@ const {
   preprocess,
   resetPreviousDeadlyMove,
   getPossibleMovesFloodFill,
-  applyMove,
+  applyMove, isFood,
 } = require("../src/logic");
 
 const { info } = require("../src/bs_info");
@@ -289,12 +289,15 @@ describe("Battlesnake Moves", () => {
     preprocess(gameState);
     console.log(gameState.blocks.toString());
     addFood(gameState, { x: 3, y: 1 });
-    addFood(gameState, { x: 2, y: 0 });
+    // addFood(gameState, { x: 2, y: 0 });
+
+    expect(isFood(gameState, {x:3, y:1})).toBe(true)
 
     const moveResponse = move(gameState);
     const allowedMoves = ["right"];
 
     expect(allowedMoves).toContain(moveResponse.move);
+
   });
 
   test("deadly attack down", () => {
