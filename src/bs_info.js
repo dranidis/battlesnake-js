@@ -1,9 +1,15 @@
+var snakeColor;
+
+function setSnakeColor(color) {
+  snakeColor = color;
+}
+
 function info() {
   console.log("INFO");
   const response = {
     apiversion: "1",
     author: "DDmits2",
-    color: "#736CCB",
+    color: snakeColor || "#736CCB",
     // color: "#ff0000",
     head: "tongue",
     tail: "freckled",
@@ -20,6 +26,7 @@ function end(gameState) {
 }
 
 module.exports = {
+  setSnakeColor,
   info: info,
   start: start,
   end: end,

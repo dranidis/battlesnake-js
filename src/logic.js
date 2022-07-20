@@ -18,6 +18,8 @@ var configuration = {
   FLOOD_FILL_FACTOR: 2,
 };
 
+const MAX_DISTANCE = 999;
+
 function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
   if (myX + 1 == xblock && myY == yblock) possibleMoves.right = false;
   if (myX - 1 == xblock && myY == yblock) possibleMoves.left = false;
@@ -186,49 +188,6 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   // );
 
   return newGameState;
-}
-
-function deepCopy(arrayCoord) {
-  let copy = [];
-  for (let i = 0; i < arrayCoord.length; i++) {
-    copy.push(arrayCoord[i]);
-  }
-  return copy;
-}
-
-function getPossibleMovesDepth(gameState, depth, visited) {
-  const possibleMoves = getMyPossibleMoves(gameState);
-  if (depth == 0) {
-    return possibleMoves;
-  }
-  const safeMoves = getTrueKeys(possibleMoves);
-
-  for (let index = 0; index < safeMoves.length; index++) {
-    const newHead = squareAfterMove(gameState.you.head, safeMoves[index]);
-    if (visited.filter((h) => isEqual(h, newHead)).length == 0) {
-      // newVisited = JSON.parse(JSON.stringify(visited));
-      const newVisited = deepCopy(visited);
-      newVisited.push(newHead);
-      const newGameState = applyMove(gameState, newHead);
-      // console.log(
-      //   "AFTER MOVE: " +
-      //     safeMoves[index] +
-      //     " at state " +
-      //     newGameState.blocks.toString()
-      // );
-      const newPossibleMoves = getPossibleMovesDepth(
-        newGameState,
-        depth - 1,
-        newVisited
-      );
-      let newSafeMoves = getTrueKeys(newPossibleMoves);
-
-      if (newSafeMoves.length == 0) {
-        possibleMoves[safeMoves[index]] = false;
-      }
-    }
-  }
-  return possibleMoves;
 }
 
 /**
@@ -418,14 +377,14 @@ function pickMove(gameState, safeMoves) {
 
 function closerFoodAndDistance(gameState, myHead, boardfood) {
   if (boardfood.length == 0) {
-    return [{}, 999, []];
+    return [{}, MAX_DISTANCE, []];
   }
 
   const paths = boardfood.map((f) => pathToFoodAStar(gameState, myHead, f));
   // console.log("PATHS: " + JSON.stringify(paths));
   const distances = paths.map((p) => p.length);
   const minIndex = distances.indexOf(Math.min(...distances));
-  if (minIndex == -1) return [{}, 999, []];
+  if (minIndex == -1) return [{}, MAX_DISTANCE, []];
   return [boardfood[minIndex], distances[minIndex], paths[minIndex]];
 }
 
@@ -471,7 +430,7 @@ function movesTowardsClosestFood(gameState) {
   const myHead = gameState.you.head;
 
   let minDistanceFood = {};
-  let distanceToCloserFood = 999;
+  let distanceToCloserFood = MAX_DISTANCE;
   let pathToFood = [];
 
   if (configuration.CHECK_FOOD_CLOSER_TO_OTHERS) {
@@ -706,7 +665,7 @@ function move(gameState) {
 
   let isAttacking = otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
-  let targetDistance = 999;
+  let targetDistance = MAX_DISTANCE;
   let safeTargetMoves = undefined;
 
   if (isAttacking) {

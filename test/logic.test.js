@@ -9,8 +9,6 @@ const {
   getMyPossibleMoves,
 } = require("../src/logic");
 
-const { info } = require("../src/bs_info");
-
 const TIMES = 10;
 var boardHeight = 5;
 var boardWidth = 5;
@@ -55,13 +53,6 @@ function addFood(gameState, coord) {
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-});
-
-describe("Battlesnake API Version", () => {
-  test("should be api version 1", () => {
-    const result = info();
-    expect(result.apiversion).toBe("1");
-  });
 });
 
 describe("Battlesnake Moves", () => {

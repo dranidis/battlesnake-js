@@ -1,6 +1,9 @@
 const express = require("express");
 const {  move } = require("./logic");
-const { info, start, end } = require("./bs_info");
+const { info, start, end, setSnakeColor } = require("./bs_info");
+
+const argv = require('minimist')(process.argv.slice(2));
+setSnakeColor(argv.c)
 
 const app = express();
 app.use(express.json());
@@ -9,7 +12,8 @@ app.use(function (req, res, next) {
   next();
 });
 
-const port = process.env.PORT || 8092;
+const port = process.env.PORT || argv.p || 8092;
+
 
 app.get("/", (req, res) => {
   res.send(info());
