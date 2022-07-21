@@ -319,15 +319,16 @@ function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
       //   (k) => oppSquaresCount[k] == min
       // )[0];
 
-      const products = squaresCountValues.map((x, i) =>
-      x - oppSquaresCountValues[i]);
-      const maxProduct = Math.max(...products)
+      const products = squaresCountValues.map(
+        (x, i) => x - oppSquaresCountValues[i]
+      );
+      const maxProduct = Math.max(...products);
       const maxIndex = products.indexOf(maxProduct);
 
-      const move = Object.keys(oppSquaresCount)[maxIndex]
+      const move = Object.keys(oppSquaresCount)[maxIndex];
 
-      console.log(`Move ${move} ${squaresCount[move]} products ${products}`)
-      if (squaresCount[move] > myMax/1.5) {
+      console.log(`Move ${move} ${squaresCount[move]} products ${products}`);
+      if (squaresCount[move] > myMax / 1.5) {
         console.log("ATTACKING move: " + move);
         return move;
       }
@@ -379,7 +380,7 @@ function getPossibleMovesFloodFill(gameState) {
     const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
       return squaresCount[a] > squaresCount[b] ? a : b;
     });
-    possibleMoves[maxMove] = true
+    possibleMoves[maxMove] = true;
     // squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
   }
   return possibleMoves;
@@ -696,6 +697,10 @@ function isFood(gameState, coord) {
   return gameState.board.food.filter((f) => isEqual(f, coord)).length > 0;
 }
 
+function isHungry(gameState) {
+  return gameState.you.health < 30;
+}
+
 function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
@@ -793,7 +798,8 @@ function move(gameState) {
     previousDeadlyMove = deadlyMove;
   } else if (
     safeFoodMoves.length > 0 &&
-    distanceToCloserFood <= configuration.DISTANCE_TO_FOOD_WHILE_ATTACKING
+    (isHungry(gameState) ||
+      distanceToCloserFood <= configuration.DISTANCE_TO_FOOD_WHILE_ATTACKING)
   ) {
     moveToMake = pickMove(gameState, safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
