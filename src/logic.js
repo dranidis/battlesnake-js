@@ -236,7 +236,10 @@ function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
 
     if (depth == 0) {
       let floodFilldata = {
-        you: isTrapped(gameState) ? 0 : getFloodFillSquares(gameState, start),
+        you:
+          isTrapped(gameState) || isTrappedClose(gameState)
+            ? 0
+            : getFloodFillSquares(gameState, start),
       };
 
       let ffMoves = [];
@@ -702,6 +705,57 @@ function isTrapped(gameState) {
   return false;
 }
 
+function direction(snakeBody) {
+  if (snakeBody[0].x > snakeBody[1].x) return "right";
+  if (snakeBody[0].x < snakeBody[1].x) return "left";
+  if (snakeBody[0].y > snakeBody[1].y) return "up";
+  return "down";
+}
+
+function isTrappedClose(gameState) {
+  const myHead = gameState.you.head;
+  const myBody = gameState.you.body;
+  const myDirection = direction(myBody);
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
+
+  if (
+    (myHead.y == gameState.board.height - 1 &&
+      otherSnakes.some(
+        (snake) =>
+          snake.head.y == myHead.y - 1 &&
+          myDirection == direction(snake.body) &&
+          snake.head.x == myHead.x + (myDirection == "right" ? 1 : -1)
+      )) ||
+    (myHead.y == 0 &&
+      otherSnakes.some(
+        (snake) =>
+          snake.head.y == myHead.y + 1 &&
+          myDirection == direction(snake.body) &&
+          snake.head.x == myHead.x + (myDirection == "right" ? 1 : -1)
+      )) ||
+    (myHead.x == 0 &&
+      otherSnakes.some(
+        (snake) =>
+          snake.head.x == myHead.x + 1 &&
+          myDirection == direction(snake.body) &&
+          snake.head.y == myHead.y + (myDirection == "up" ? 1 : -1)
+      )) ||
+    (myHead.x == gameState.board.width - 1 &&
+      otherSnakes.some(
+        (snake) =>
+          snake.head.x == myHead.x - 1 &&
+          myDirection == direction(snake.body) &&
+          snake.head.y == myHead.y + (myDirection == "up" ? 1 : -1)
+      ))
+  ) {
+    console.log("TRAPPED CLOSE")
+    return true;
+  }
+  return false;
+}
+
 function preprocess(gameState) {
   gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
 
@@ -876,4 +930,5 @@ module.exports = {
   twoPlayerSuggestedAttackingMove,
   isTrapped,
   getMoveTowardsClosestTail: getPathTowardsClosestTail,
+  isTrappedClose,
 };

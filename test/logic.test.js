@@ -10,6 +10,7 @@ const {
   twoPlayerSuggestedAttackingMove,
   isTrapped,
   getMoveTowardsClosestTail,
+  isTrappedClose,
 } = require("../src/logic");
 
 const TIMES = 10;
@@ -134,7 +135,10 @@ describe("Battlesnake Moves", () => {
 
   test("should never move to another snake, except to its tail", () => {
     // Arrange
-    const me = createBattlesnake("me", [{ x: 3, y: 3 }]);
+    const me = createBattlesnake("me", [
+      { x: 3, y: 3 },
+      { x: 3, y: 4 },
+    ]);
     const other = createBattlesnake("other", [
       { x: 2, y: 3 },
       { x: 2, y: 2 },
@@ -244,8 +248,14 @@ describe("Battlesnake Moves", () => {
       "goes towards closest food unless there is another snake closer to the food"
     );
 
-    const me = createBattlesnake("me", [{ x: 1, y: 1 }]);
-    const other = createBattlesnake("other", [{ x: 4, y: 1 }]);
+    const me = createBattlesnake("me", [
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 1 },
+      { x: 4, y: 2 },
+    ]);
     const gameState = createGameState(me, [me, other]);
     addFood(gameState, { x: 3, y: 1 });
     addFood(gameState, { x: 1, y: 4 });
@@ -801,12 +811,11 @@ describe("getPossibleMovesFloodFill", () => {
     const exp = {
       up: false,
       down: false,
-      left: false, 
+      left: false,
       right: true, //chase the tail
     };
     expect(moves).toStrictEqual(exp);
   });
-
 });
 
 describe("applyMove", () => {
@@ -999,6 +1008,42 @@ describe("isTrapped ", () => {
   });
 });
 
+describe("isTrappedClose ", () => {
+  test("isTrappedClose top", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 1, y: 3 },
+      { x: 2, y: 3 },
+      { x: 2, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(isTrappedClose(gameState)).toBe(true);
+  });
+
+  test("isTrappedClose bottom", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(isTrappedClose(gameState)).toBe(true);
+  });
+});
+
 describe("getMoveTowardsClosestTail ", () => {
   test("getMoveTowardsClosestTail", () => {
     // happened in a game
@@ -1015,7 +1060,10 @@ describe("getMoveTowardsClosestTail ", () => {
     const gameState = createGameState(me, [me, other]);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(getMoveTowardsClosestTail(gameState)).toStrictEqual(["down", "down",]);
+    expect(getMoveTowardsClosestTail(gameState)).toStrictEqual([
+      "down",
+      "down",
+    ]);
   });
 
   test("getMoveTowardsClosestTail null", () => {
