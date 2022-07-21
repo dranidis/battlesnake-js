@@ -19,7 +19,7 @@ var configuration = {
   // to safely enter. 1.5 * length
    */
   // FLOOD_FILL_FACTOR: 1.5,
-  FLOOD_FILL_FACTOR: 2,
+  FLOOD_FILL_FACTOR: 1.5,
   DISTANCE_TO_FOOD_WHILE_ATTACKING: 1, // may pick up food next to it while attacking
   debug: false,
 };
@@ -194,6 +194,25 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   // );
 
   return newGameState;
+}
+
+function getPathTowardsClosestTail(gameState) {
+  const myHead = gameState.you.head;
+  const snakeTails = gameState.board.snakes.map((s) => s.body.slice(-1)[0]);
+  const pathsToSnakeTails = snakeTails.map((tail) =>
+    bsAStar(gameState.blocks, myHead, tail)
+  );
+  // console.log(`paths ${JSON.stringify(pathsToSnakeTails)}`);
+  const minLength = Math.min(
+    ...pathsToSnakeTails.filter((p) => p.length > 0).map((p) => p.length)
+  );
+  // console.log(`minLength ${minLength}`);
+
+  const shortestPathIndex = pathsToSnakeTails.findIndex(
+    (p) => p.length == minLength
+  );
+  // console.log(`shortestPathIndex ${shortestPathIndex}`);
+  return shortestPathIndex == -1 ? null : pathsToSnakeTails[shortestPathIndex];
 }
 
 /**
@@ -373,14 +392,33 @@ function getPossibleMovesFloodFill(gameState) {
         configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   });
 
+  // no moves satisfy the enter criteria
+  // follow the closest tail
+  // pick the maximum
   if (
     getTrueKeys(possibleMoves).length == 0 &&
     Object.keys(squaresCount).length > 0
   ) {
+    const pathTowardsClosestTail = getPathTowardsClosestTail(gameState);
+    if (pathTowardsClosestTail != null) {
+      console.log(
+        `Examine tail chase ${JSON.stringify(pathTowardsClosestTail)}`
+      );
+      const move = pathTowardsClosestTail[0];
+      if (pathTowardsClosestTail.length <= squaresCount[move]) {
+        console.log(`TAIL CHASE! `);
+        possibleMoves[move] = true;
+        return possibleMoves;
+      }
+    }
+    console.log(`MAX MOVE! `);
+
     const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
       return squaresCount[a] > squaresCount[b] ? a : b;
     });
+    console.log(`MAX MOVE! ${maxMove}`);
     possibleMoves[maxMove] = true;
+    return possibleMoves;
     // squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
   }
   return possibleMoves;
@@ -715,6 +753,9 @@ function move(gameState) {
   // );
 
   const possibleMovesLookAhead = getPossibleMovesFloodFill(gameState);
+  console.log(
+    `LOOK ahead moves: ${JSON.stringify(getTrueKeys(possibleMovesLookAhead))}`
+  );
   const otherSnakes = gameState.board.snakes.filter(
     (s) => s.id != gameState.you.id
   );
@@ -834,4 +875,5 @@ module.exports = {
   getMyPossibleMoves,
   twoPlayerSuggestedAttackingMove,
   isTrapped,
+  getMoveTowardsClosestTail: getPathTowardsClosestTail,
 };

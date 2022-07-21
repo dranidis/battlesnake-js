@@ -8,7 +8,8 @@ const {
   isFood,
   getMyPossibleMoves,
   twoPlayerSuggestedAttackingMove,
-  isTrapped
+  isTrapped,
+  getMoveTowardsClosestTail,
 } = require("../src/logic");
 
 const TIMES = 10;
@@ -55,8 +56,8 @@ function addFood(gameState, coord) {
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-  boardHeight = 5
-  boardWidth = 5
+  boardHeight = 5;
+  boardWidth = 5;
 });
 
 describe("Battlesnake Moves", () => {
@@ -735,8 +736,8 @@ describe("getPossibleMovesFloodFill", () => {
 
   test("left only one option, right more options", () => {
     // other back 2 squares
-    boardHeight = 7
-    boardWidth = 10
+    boardHeight = 7;
+    boardWidth = 10;
     configuration.MINMAX_DEPTH = 2;
     configuration.debug = true;
     const me = createBattlesnake("me", [
@@ -770,6 +771,42 @@ describe("getPossibleMovesFloodFill", () => {
     };
     expect(moves).toStrictEqual(exp);
   });
+
+  test("chase tail", () => {
+    configuration.MINMAX_DEPTH = 2;
+    const me = createBattlesnake("me", [
+      { x: 2, y: 3 },
+      { x: 2, y: 4 },
+      { x: 1, y: 4 },
+      { x: 0, y: 4 },
+      { x: 0, y: 3 },
+      { x: 1, y: 3 },
+      { x: 1, y: 2 },
+      { x: 0, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+      { x: 4, y: 2 },
+      { x: 4, y: 3 },
+    ]);
+
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const moves = getPossibleMovesFloodFill(gameState);
+    console.log(`moves ${JSON.stringify(moves)}`);
+    const exp = {
+      up: false,
+      down: false,
+      left: false, 
+      right: true, //chase the tail
+    };
+    expect(moves).toStrictEqual(exp);
+  });
+
 });
 
 describe("applyMove", () => {
@@ -870,7 +907,6 @@ describe("twoPlayerSuggestedAttackingMove", () => {
       "up"
     );
   });
-
 });
 
 describe("isTrapped ", () => {
@@ -886,11 +922,9 @@ describe("isTrapped ", () => {
       { x: 2, y: 0 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    preprocess(gameState)
+    preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(isTrapped(gameState)).toBe(
-      true
-    );
+    expect(isTrapped(gameState)).toBe(true);
   });
 
   test("isTrapped bottom", () => {
@@ -905,11 +939,9 @@ describe("isTrapped ", () => {
       { x: 2, y: 4 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    preprocess(gameState)
+    preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(isTrapped(gameState)).toBe(
-      true
-    );
+    expect(isTrapped(gameState)).toBe(true);
   });
 
   test("isTrapped left", () => {
@@ -924,11 +956,9 @@ describe("isTrapped ", () => {
       { y: 2, x: 4 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    preprocess(gameState)
+    preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(isTrapped(gameState)).toBe(
-      true
-    );
+    expect(isTrapped(gameState)).toBe(true);
   });
 
   test("isTrapped right", () => {
@@ -943,11 +973,9 @@ describe("isTrapped ", () => {
       { y: 2, x: 0 },
     ]);
     const gameState = createGameState(me, [me, other]);
-    preprocess(gameState)
+    preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(isTrapped(gameState)).toBe(
-      true
-    );
+    expect(isTrapped(gameState)).toBe(true);
   });
 
   test("isTrapped top false", () => {
@@ -965,11 +993,54 @@ describe("isTrapped ", () => {
       { x: 1, y: 3 },
     ]);
     const gameState = createGameState(me, [me, other, blocking]);
-    preprocess(gameState)
+    preprocess(gameState);
     console.log(gameState.blocks.toString());
-    expect(isTrapped(gameState)).toBe(
-      false
-    );
+    expect(isTrapped(gameState)).toBe(false);
+  });
+});
+
+describe("getMoveTowardsClosestTail ", () => {
+  test("getMoveTowardsClosestTail", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 0 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(getMoveTowardsClosestTail(gameState)).toStrictEqual(["down", "down",]);
   });
 
+  test("getMoveTowardsClosestTail null", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 4 },
+      { x: 2, y: 3 },
+      { x: 2, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 0, y: 4 },
+      { x: 1, y: 4 },
+      { x: 1, y: 3 },
+      { x: 1, y: 2 },
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 3, y: 1 },
+      { x: 3, y: 2 },
+      { x: 3, y: 3 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(getMoveTowardsClosestTail(gameState)).toBe(null);
+  });
 });
