@@ -20,6 +20,7 @@ var configuration = {
    */
   // FLOOD_FILL_FACTOR: 1.5,
   FLOOD_FILL_FACTOR: 2,
+  DISTANCE_TO_FOOD_WHILE_ATTACKING: 1, // may pick up food next to it while attacking
   debug: false,
 };
 
@@ -792,7 +793,7 @@ function move(gameState) {
     previousDeadlyMove = deadlyMove;
   } else if (
     safeFoodMoves.length > 0 &&
-    distanceToCloserFood < targetDistance
+    distanceToCloserFood <= configuration.DISTANCE_TO_FOOD_WHILE_ATTACKING
   ) {
     moveToMake = pickMove(gameState, safeFoodMoves);
   } else if (isAttacking && safeTargetMoves.length > 0) {
