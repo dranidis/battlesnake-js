@@ -1,4 +1,4 @@
-const MAX_VALUE = 999;
+const FF_MAX_VALUE = 999;
 
 function processMyFill(floodFillData) {
   return processFill(floodFillData, true);
@@ -32,7 +32,7 @@ function processMyMove(myMoveValue, isMyFill) {
 
   const oppMoveValues = Object.values(myMoveValue.data);
   if (oppMoveValues.length == 0) {
-    return isMyFill ? MAX_VALUE : 0;
+    return isMyFill ? FF_MAX_VALUE : 0;
   }
 
   const processed = oppMoveValues.map((mv) => processOppMove(mv, isMyFill));
@@ -43,7 +43,7 @@ function processMyMove(myMoveValue, isMyFill) {
 function processOppMove(oppMoveValue, isMyFill) {
   const oppMoves = Object.values(oppMoveValue);
   if (oppMoves.length == 0) {
-    return isMyFill ? 0 : MAX_VALUE;
+    return isMyFill ? 0 : FF_MAX_VALUE;
   }
   const processed = oppMoves.map((mv) => processMyMove(mv, isMyFill));
 
@@ -54,4 +54,5 @@ function processOppMove(oppMoveValue, isMyFill) {
 module.exports = {
   processMyFill,
   processOppFill,
+  FF_MAX_VALUE,
 };

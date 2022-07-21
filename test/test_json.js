@@ -1243,6 +1243,257 @@ const wrong_FF_values_2 = {
   },
 };
 
+const left_one_option =    {
+  "left": {
+      "id": "other",
+      "data": {
+          "up": {
+              "down": {
+                  "id": "other",
+                  "data": {
+                      "up": {},
+                      "left": {
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              },
+              "left": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              }
+          },
+          "down": {
+              "down": {
+                  "id": "other",
+                  "data": {
+                      "down": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "right": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              },
+              "left": {
+                  "id": "other",
+                  "data": {
+                      "down": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "right": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "left": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  },
+  "right": {
+      "id": "other",
+      "data": {
+          "up": {
+              "down": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              },
+              "right": {
+                  "id": "other",
+                  "data": {
+                      "up": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              }
+          },
+          "down": {
+              "down": {
+                  "id": "other",
+                  "data": {
+                      "down": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "right": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              },
+              "right": {
+                  "id": "other",
+                  "data": {
+                      "down": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "left": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      },
+                      "right": {
+                          "down": {
+                              "you": 61,
+                              "other": 61
+                          },
+                          "right": {
+                              "you": 61,
+                              "other": 61
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  }
+}
+
+
+
+
 module.exports = {
   floodFillData,
   testData,

@@ -2,7 +2,11 @@ const { distance, getTrueKeys, isEqual } = require("./util");
 const { Matrix } = require("./bitmatrix");
 const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
-const { processMyFill, processOppFill } = require("./process_ffdata");
+const {
+  processMyFill,
+  processOppFill,
+  FF_MAX_VALUE,
+} = require("./process_ffdata");
 
 var configuration = {
   CHECK_FOOD_CLOSER_TO_OTHERS: true,
@@ -16,6 +20,7 @@ var configuration = {
    */
   // FLOOD_FILL_FACTOR: 1.5,
   FLOOD_FILL_FACTOR: 2,
+  debug: false,
 };
 
 const MAX_DISTANCE = 999;
@@ -210,7 +215,9 @@ function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
     const otherMoves = getTrueKeys(otherMovesMap);
 
     if (depth == 0) {
-      let floodFilldata = { you: getFloodFillSquares(gameState, start) };
+      let floodFilldata = {
+        you: isTrapped(gameState) ? 0 : getFloodFillSquares(gameState, start),
+      };
 
       let ffMoves = [];
       for (let i = 0; i < otherMoves.length; i++) {
@@ -283,6 +290,51 @@ function getSquaresCountPerMove(gameState, depth) {
   return squaresCount;
 }
 
+function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
+  const oppSquaresCountValues = Object.values(oppSquaresCount);
+  if (oppSquaresCountValues.length > 0) {
+    // const avg =
+    //   oppSquaresCountValues.reduce((a, b) => a + b) /
+    //   oppSquaresCountValues.length;
+
+    // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+    const min = Math.min(...oppSquaresCountValues);
+    const max = Math.max(
+      ...oppSquaresCountValues.filter((v) => v != FF_MAX_VALUE)
+    );
+    console.log(`min: ${min} max: ${max}`);
+
+    if (max != -Infinity && min < max / 2) {
+      console.log("BLOCKING OPPORTUNITY!");
+      const squaresCountValues = Object.values(squaresCount);
+
+      const myMax = Math.max(...squaresCountValues);
+      const myAvg =
+        squaresCountValues.reduce((a, b) => a + b) / squaresCountValues.length;
+      console.log(`myAvg: ${myAvg} `);
+
+      // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
+      // const move = Object.keys(oppSquaresCount).filter(
+      //   (k) => oppSquaresCount[k] == min
+      // )[0];
+
+      const products = squaresCountValues.map((x, i) =>
+      x - oppSquaresCountValues[i]);
+      const maxProduct = Math.max(...products)
+      const maxIndex = products.indexOf(maxProduct);
+
+      const move = Object.keys(oppSquaresCount)[maxIndex]
+
+      console.log(`Move ${move} ${squaresCount[move]} products ${products}`)
+      if (squaresCount[move] > myMax/1.5) {
+        console.log("ATTACKING move: " + move);
+        return move;
+      }
+    }
+  }
+  return null;
+}
+
 function getPossibleMovesFloodFill(gameState) {
   // console.log(`INIT STATE ${gameState.blocks.toString()}`);
 
@@ -290,9 +342,10 @@ function getPossibleMovesFloodFill(gameState) {
     gameState,
     configuration.MINMAX_DEPTH
   );
-  // console.log(
-  //   `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
-  // );
+  if (configuration.debug)
+    console.log(
+      `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
+    );
 
   const squaresCount = processMyFill(getFloodFillData);
   console.log("FloodFill me : " + JSON.stringify(squaresCount));
@@ -303,38 +356,11 @@ function getPossibleMovesFloodFill(gameState) {
     const oppSquaresCount = processOppFill(getFloodFillData);
     console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
 
-    const oppSquaresCountValues = Object.values(oppSquaresCount);
-    if (oppSquaresCountValues.length > 0) {
-      // const avg =
-      //   oppSquaresCountValues.reduce((a, b) => a + b) /
-      //   oppSquaresCountValues.length;
+    const move = twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount);
 
-      // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
-      const min = Math.min(...oppSquaresCountValues);
-      const max = Math.max(...oppSquaresCountValues);
-
-      if (min < max / 2) {
-        console.log("BLOCKING OPPORTUNITY!");
-        const squaresCountValues = Object.values(squaresCount);
-        const myAvg =
-          squaresCountValues.reduce((a, b) => a + b) /
-          squaresCountValues.length;
-
-        // const min = Math.min(...oppSquaresCountValues.filter((v) => v < avg));
-
-        const move = Object.keys(oppSquaresCount).filter(
-          (k) => oppSquaresCount[k] == min
-        )[0];
-        // if (
-        //   squaresCount[move] >
-        //   // configuration.FLOOD_FILL_FACTOR * gameState.you.length
-        //   myAvg
-        // ) {
-        console.log("ATTACKING move: " + move);
-        possibleMoves[move] = true;
-        return possibleMoves;
-        // }
-      }
+    if (move != null) {
+      possibleMoves[move] = true;
+      return possibleMoves;
     }
   }
 
@@ -352,7 +378,8 @@ function getPossibleMovesFloodFill(gameState) {
     const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
       return squaresCount[a] > squaresCount[b] ? a : b;
     });
-    possibleMoves[maxMove] = squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
+    possibleMoves[maxMove] = true
+    // squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
   }
   return possibleMoves;
 }
@@ -597,6 +624,44 @@ function detectDeadlyMove(gameState) {
   return undefined;
 }
 
+// . . . < X
+// . . . . .
+// . . . ^ .
+// . . . X .
+// . . . X .
+// It should also check if squares on the second row are blocked and then
+// free. In that case the snake can escape!
+function isTrapped(gameState) {
+  const myHead = gameState.you.head;
+
+  const longerSnakeHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id && s.length > gameState.you.length)
+    .map((s) => s.head);
+
+  if (
+    // top case
+    (myHead.y == gameState.board.height - 1 &&
+      longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y - 2) &&
+      isEmpty(gameState, { x: myHead.x, y: myHead.y - 1 })) ||
+    // bottom case
+    (myHead.y == 0 &&
+      longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y + 2) &&
+      isEmpty(gameState, { x: myHead.x, y: myHead.y + 1 })) ||
+    // left case
+    (myHead.x == 0 &&
+      longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x + 2) &&
+      isEmpty(gameState, { y: myHead.y, x: myHead.x + 1 })) ||
+    // right case
+    (myHead.x == gameState.board.width - 1 &&
+      longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x - 2) &&
+      isEmpty(gameState, { y: myHead.y, x: myHead.x - 1 }))
+  ) {
+    console.log("TRAPPED!");
+    return true;
+  }
+  return false;
+}
+
 function preprocess(gameState) {
   gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
 
@@ -760,4 +825,6 @@ module.exports = {
   applyMove,
   isFood,
   getMyPossibleMoves,
+  twoPlayerSuggestedAttackingMove,
+  isTrapped,
 };

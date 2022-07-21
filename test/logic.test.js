@@ -7,6 +7,8 @@ const {
   applyMove,
   isFood,
   getMyPossibleMoves,
+  twoPlayerSuggestedAttackingMove,
+  isTrapped
 } = require("../src/logic");
 
 const TIMES = 10;
@@ -53,6 +55,8 @@ function addFood(gameState, coord) {
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
+  boardHeight = 5
+  boardWidth = 5
 });
 
 describe("Battlesnake Moves", () => {
@@ -535,8 +539,6 @@ describe("Battlesnake Moves", () => {
       expect(allowedMoves).toContain(moveResponse.move);
     }
   });
-
-
 });
 
 describe("getMyPossibleMoves", () => {
@@ -659,7 +661,7 @@ describe("getPossibleMovesFloodFill", () => {
     expect(moves).toStrictEqual(exp);
   });
 
-  test("solving bug in FF 0 value is wrong for all moves (check with depth 1 and 2)", () => {
+  test("solving bug in FF 0 value is wrong for all moves (check with depth 2)", () => {
     // other back 2 squares
     configuration.MINMAX_DEPTH = 1;
     const me = createBattlesnake("me", [
@@ -682,18 +684,91 @@ describe("getPossibleMovesFloodFill", () => {
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    for (let i = 1; i <= 2; i++) {
-      configuration.MINMAX_DEPTH = i;
-      console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH)
-      const moves = getPossibleMovesFloodFill(gameState);
-      const exp = {
-        up: false,
-        down: true,
-        left: false, // does not fit
-        right: false,
-      };
-      expect(moves).toStrictEqual(exp);
-    }
+    configuration.MINMAX_DEPTH = 2;
+    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
+    const moves = getPossibleMovesFloodFill(gameState);
+    console.log(`moves ${JSON.stringify(moves)}`);
+    const exp = {
+      up: false,
+      down: true,
+      left: false, // does not fit
+      right: false,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
+
+  test("solving bug in FF 0 value is wrong for all moves (check with depth 1)", () => {
+    // other back 2 squares
+    configuration.MINMAX_DEPTH = 1;
+    const me = createBattlesnake("me", [
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 2, y: 3 },
+      { x: 2, y: 4 },
+      { x: 1, y: 4 },
+      { x: 0, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 2 },
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 0 },
+      { x: 1, y: 0 },
+    ]);
+
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    configuration.MINMAX_DEPTH = 1;
+    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
+    const moves = getPossibleMovesFloodFill(gameState);
+    console.log(`moves ${JSON.stringify(moves)}`);
+    const exp = {
+      up: false,
+      down: true,
+      left: false, // does not fit
+      right: false,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
+
+  test("left only one option, right more options", () => {
+    // other back 2 squares
+    boardHeight = 7
+    boardWidth = 10
+    configuration.MINMAX_DEPTH = 2;
+    configuration.debug = true;
+    const me = createBattlesnake("me", [
+      { x: 5, y: 6 },
+      { x: 5, y: 5 },
+      { x: 5, y: 4 },
+      { x: 5, y: 3 },
+      { x: 5, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 3 },
+      { x: 3, y: 3 },
+      { x: 2, y: 3 },
+      { x: 1, y: 3 },
+      { x: 1, y: 2 },
+      { x: 1, y: 1 },
+    ]);
+
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
+    const moves = getPossibleMovesFloodFill(gameState);
+    console.log(`moves ${JSON.stringify(moves)}`);
+    const exp = {
+      up: false,
+      down: false,
+      left: false, // will lose here
+      right: true,
+    };
+    expect(moves).toStrictEqual(exp);
   });
 });
 
@@ -766,4 +841,135 @@ describe("applyMove", () => {
       newHead
     );
   });
+});
+
+describe("twoPlayerSuggestedAttackingMove", () => {
+  test("opponent loses anyway we should prefer the correct move from our FF", () => {
+    // happened in a game
+    const squaresCount = { left: 61, right: 3 };
+    const oppSquaresCount = { left: 7, right: 3 };
+    expect(twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount)).toBe(
+      "left"
+    );
+  });
+
+  test("one of the best two moves reduces also the opponent", () => {
+    // happened in a game
+    const squaresCount = { up: 31, down: 46, left: 46 };
+    const oppSquaresCount = { up: 13, down: 46, left: 15 };
+    expect(twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount)).toBe(
+      "left"
+    );
+  });
+
+  test("take an attacking move reducing the opponent. It will also reduce your territory", () => {
+    // happened in a game
+    const squaresCount = { up: 31, down: 46, left: 46 };
+    const oppSquaresCount = { up: 13, down: 46, left: 40 };
+    expect(twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount)).toBe(
+      "up"
+    );
+  });
+
+});
+
+describe("isTrapped ", () => {
+  test("isTrapped top", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 2 },
+      { x: 2, y: 1 },
+      { x: 2, y: 0 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState)
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(
+      true
+    );
+  });
+
+  test("isTrapped bottom", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 2 },
+      { x: 2, y: 3 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState)
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(
+      true
+    );
+  });
+
+  test("isTrapped left", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { y: 2, x: 0 },
+      { y: 3, x: 0 },
+    ]);
+    const other = createBattlesnake("other", [
+      { y: 2, x: 2 },
+      { y: 2, x: 3 },
+      { y: 2, x: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState)
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(
+      true
+    );
+  });
+
+  test("isTrapped right", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { y: 2, x: 4 },
+      { y: 3, x: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { y: 2, x: 2 },
+      { y: 2, x: 1 },
+      { y: 2, x: 0 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState)
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(
+      true
+    );
+  });
+
+  test("isTrapped top false", () => {
+    const me = createBattlesnake("me", [
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 2 },
+      { x: 2, y: 1 },
+      { x: 2, y: 0 },
+    ]);
+    const blocking = createBattlesnake("blocking", [
+      { x: 2, y: 3 },
+      { x: 1, y: 3 },
+    ]);
+    const gameState = createGameState(me, [me, other, blocking]);
+    preprocess(gameState)
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(
+      false
+    );
+  });
+
 });
