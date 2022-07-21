@@ -1,28 +1,13 @@
-const { distance, getTrueKeys, isEqual } = require("./util");
-const { Matrix } = require("./bitmatrix");
+const { configuration } = require("./config");
+const { distance, getTrueKeys, isEqual, squareAfterMove } = require("./util");
 const { getFloodFillSquares } = require("./boardfill");
 const { bsAStar } = require("./battlesnake_astar");
+const { isEmpty, preprocess } = require("./board");
 const {
   processMyFill,
   processOppFill,
   FF_MAX_VALUE,
 } = require("./process_ffdata");
-
-var configuration = {
-  CHECK_FOOD_CLOSER_TO_OTHERS: true,
-  CHECK_DEADLY_ATTACK: true,
-  CHECK_DEADLY_DEFENCE: true,
-  BFS_DEPTH: 8, // max with Heroku
-  MINMAX_DEPTH: 2,
-  /**
-   * number of extra squares in the area for the snake 
-  // to safely enter. 1.5 * length
-   */
-  // FLOOD_FILL_FACTOR: 1.5,
-  FLOOD_FILL_FACTOR: 1.5,
-  DISTANCE_TO_FOOD_WHILE_ATTACKING: 1, // may pick up food next to it while attacking
-  debug: false,
-};
 
 const MAX_DISTANCE = 999;
 
@@ -33,7 +18,7 @@ function collideSquare(myX, myY, xblock, yblock, possibleMoves) {
   if (myX == xblock && myY - 1 == yblock) possibleMoves.down = false;
 }
 
-function avoidLongerHeads(gameState) {
+function avoidLongerOrEqualHeads(gameState) {
   let possibleMovesAvoidingHeads = {
     up: true,
     down: true,
@@ -42,13 +27,13 @@ function avoidLongerHeads(gameState) {
   };
   const myHead = gameState.you.head;
 
-  const longerSnakeHeads = gameState.board.snakes
+  const longerOrEqualSnakeHeads = gameState.board.snakes
     .filter((s) => s.id != gameState.you.id && s.length >= gameState.you.length)
     .map((s) => s.head);
 
-  for (let index = 0; index < longerSnakeHeads.length; index++) {
-    x = longerSnakeHeads[index].x;
-    y = longerSnakeHeads[index].y;
+  for (let index = 0; index < longerOrEqualSnakeHeads.length; index++) {
+    x = longerOrEqualSnakeHeads[index].x;
+    y = longerOrEqualSnakeHeads[index].y;
     collideSquare(myHead.x, myHead.y, x + 1, y, possibleMovesAvoidingHeads);
     collideSquare(myHead.x, myHead.y, x - 1, y, possibleMovesAvoidingHeads);
     collideSquare(myHead.x, myHead.y, x, y + 1, possibleMovesAvoidingHeads);
@@ -57,7 +42,7 @@ function avoidLongerHeads(gameState) {
   return possibleMovesAvoidingHeads;
 }
 
-function moveTowardsTarget(myHead, target) {
+function moveTowardsTargetDirection(myHead, target) {
   let towardsTargetMoves = {
     up: false,
     down: false,
@@ -72,17 +57,6 @@ function moveTowardsTarget(myHead, target) {
   return towardsTargetMoves;
 }
 
-function isEmpty(gameState, coord) {
-  const w = gameState.board.width;
-  const h = gameState.board.height;
-  return (
-    coord.x >= 0 &&
-    coord.x < w &&
-    coord.y >= 0 &&
-    coord.y < h &&
-    new Matrix(w, h).set(coord.x, coord.y).and(gameState.blocks).data == 0n
-  );
-}
 
 function getSnakePossibleMoves(gameState, snake) {
   return {
@@ -98,29 +72,6 @@ function getSnakePossibleMoves(gameState, snake) {
 
 function getMyPossibleMoves(gameState) {
   return getSnakePossibleMoves(gameState, gameState.you);
-}
-
-function squareAfterMove(sq, aMove) {
-  let x = sq.x;
-  let y = sq.y;
-
-  switch (aMove) {
-    case "up":
-      y++;
-      break;
-    case "down":
-      y--;
-      break;
-    case "right":
-      x++;
-      break;
-    case "left":
-      x--;
-      break;
-    default:
-    // code block
-  }
-  return { x: x, y: y };
 }
 
 function applyMoveToSnake(newGameState, snake, newHead) {
@@ -674,6 +625,8 @@ function detectDeadlyMove(gameState) {
 // . . . X .
 // It should also check if squares on the second row are blocked and then
 // free. In that case the snake can escape!
+// Also if there is food, the snake can grow and escape!
+// Lazy check for food!
 function isTrapped(gameState) {
   const myHead = gameState.you.head;
 
@@ -684,18 +637,22 @@ function isTrapped(gameState) {
   if (
     // top case
     (myHead.y == gameState.board.height - 1 &&
+      !gameState.board.food.some(f => f.y == myHead.y) && 
       longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y - 2) &&
       isEmpty(gameState, { x: myHead.x, y: myHead.y - 1 })) ||
     // bottom case
     (myHead.y == 0 &&
+      !gameState.board.food.some(f => f.y == myHead.y) && 
       longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y + 2) &&
       isEmpty(gameState, { x: myHead.x, y: myHead.y + 1 })) ||
     // left case
     (myHead.x == 0 &&
+      !gameState.board.food.some(f => f.x == myHead.x) && 
       longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x + 2) &&
       isEmpty(gameState, { y: myHead.y, x: myHead.x + 1 })) ||
     // right case
     (myHead.x == gameState.board.width - 1 &&
+      !gameState.board.food.some(f => f.x == myHead.x) && 
       longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x - 2) &&
       isEmpty(gameState, { y: myHead.y, x: myHead.x - 1 }))
   ) {
@@ -750,33 +707,13 @@ function isTrappedClose(gameState) {
           snake.head.y == myHead.y + (myDirection == "up" ? 1 : -1)
       ))
   ) {
-    console.log("TRAPPED CLOSE")
+    console.log("TRAPPED CLOSE");
     return true;
   }
   return false;
 }
 
-function preprocess(gameState) {
-  gameState.blocks = new Matrix(gameState.board.width, gameState.board.height);
 
-  // gameState.you.body.forEach((b) => gameState.blocks.set(b.x, b.y));
-  // for each block except the last (tail)
-  for (let i = 0; i < gameState.you.body.length - 1; i++) {
-    gameState.blocks.set(gameState.you.body[i].x, gameState.you.body[i].y);
-  }
-
-  gameState.board.snakes
-    .filter((s) => !s.lost)
-    .forEach((s) =>
-      // s.body.forEach((b) => gameState.blocks.set(b.x, b.y))
-      // for each block except the last (tail)
-      {
-        for (let i = 0; i < s.body.length - 1; i++) {
-          gameState.blocks.set(s.body[i].x, s.body[i].y);
-        }
-      }
-    );
-}
 
 // cache previous move
 var previousDeadlyMove = undefined;
@@ -786,7 +723,7 @@ function resetPreviousDeadlyMove() {
 }
 
 function isFood(gameState, coord) {
-  return gameState.board.food.filter((f) => isEqual(f, coord)).length > 0;
+  return gameState.board.food.some((f) => isEqual(f, coord));
 }
 
 function isHungry(gameState) {
@@ -817,7 +754,7 @@ function move(gameState) {
 
   const longest = Math.max(...otherSnakes.map((s) => s.length));
 
-  const possibleMovesAvoidingLongerHeads = avoidLongerHeads(gameState);
+  const possibleMovesAvoidingLongerHeads = avoidLongerOrEqualHeads(gameState);
 
   const totallySafeMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>
@@ -840,7 +777,7 @@ function move(gameState) {
     // target = otherSnakes[0].head;
     target = otherSnakes.sort((s) => distance(myHead, s.head))[0].head;
     targetDistance = distance(myHead, target);
-    let towardsSnake = moveTowardsTarget(myHead, target);
+    let towardsSnake = moveTowardsTargetDirection(myHead, target);
     safeTargetMoves = Object.keys(towardsSnake).filter(
       (key) =>
         possibleMovesLookAhead[key] &&

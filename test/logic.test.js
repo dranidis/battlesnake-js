@@ -920,7 +920,6 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 
 describe("isTrapped ", () => {
   test("isTrapped top", () => {
-    // happened in a game
     const me = createBattlesnake("me", [
       { x: 2, y: 4 },
       { x: 3, y: 4 },
@@ -931,13 +930,14 @@ describe("isTrapped ", () => {
       { x: 2, y: 0 },
     ]);
     const gameState = createGameState(me, [me, other]);
+    addFood(gameState, {x: 0, y:3})
+
     preprocess(gameState);
     console.log(gameState.blocks.toString());
     expect(isTrapped(gameState)).toBe(true);
   });
 
   test("isTrapped bottom", () => {
-    // happened in a game
     const me = createBattlesnake("me", [
       { x: 2, y: 0 },
       { x: 3, y: 0 },
@@ -954,7 +954,6 @@ describe("isTrapped ", () => {
   });
 
   test("isTrapped left", () => {
-    // happened in a game
     const me = createBattlesnake("me", [
       { y: 2, x: 0 },
       { y: 3, x: 0 },
@@ -971,7 +970,6 @@ describe("isTrapped ", () => {
   });
 
   test("isTrapped right", () => {
-    // happened in a game
     const me = createBattlesnake("me", [
       { y: 2, x: 4 },
       { y: 3, x: 4 },
@@ -986,6 +984,29 @@ describe("isTrapped ", () => {
     console.log(gameState.blocks.toString());
     expect(isTrapped(gameState)).toBe(true);
   });
+
+  test("isTrapped right false (there is food)", () => {
+    // happened in a game
+    const me = createBattlesnake("me", [
+      { x: 4, y: 1 },
+      { x: 4, y: 0 },
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+      { x: 0, y: 3 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    addFood(gameState, {x: 4, y:3})
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(isTrapped(gameState)).toBe(false);
+  });
+
 
   test("isTrapped top false", () => {
     const me = createBattlesnake("me", [
