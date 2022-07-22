@@ -3,7 +3,7 @@ const { distance, getTrueKeys } = require("./util");
 const { bsAStar } = require("./battlesnake_astar");
 const { preprocess } = require("./board");
 const { detectDeadlyMove, getDeadlyMove } = require("./traps");
-const { getMyPossibleMoves } = require("./move");
+const { getMyPossibleMoves, squareAfterMove } = require("./move");
 const { getPossibleMovesFloodFill } = require("./minmax_floodfill");
 const { getPathTowardsClosestTail } = require("./path");
 
@@ -78,15 +78,15 @@ function closerFoodAndDistance(gameState, myHead, boardfood) {
     return [{}, MAX_DISTANCE, []];
   }
 
-  const paths = boardfood.map((f) => pathToFoodAStar(gameState, myHead, f));
-  // console.log("PATHS: " + JSON.stringify(paths));
+  const paths = boardfood.map((f) => pathToTargetAStar(gameState, myHead, f));
+  console.log("PATHS to food: " + JSON.stringify(paths));
   const distances = paths.map((p) => p.length);
   const minIndex = distances.indexOf(Math.min(...distances));
   if (minIndex == -1) return [{}, MAX_DISTANCE, []];
   return [boardfood[minIndex], distances[minIndex], paths[minIndex]];
 }
 
-function pathToFoodAStar(gameState, h, food) {
+function pathToTargetAStar(gameState, h, food) {
   // TODO: Cache these calculations
   const path = bsAStar(gameState.blocks, h, food);
   // console.log("PATH to food " + JSON.stringify(path));
@@ -99,7 +99,7 @@ function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
     .map((s) => s.head);
   return Math.min(
     ...longerOrSameHeads.map((h) =>
-      distanceOfPath(pathToFoodAStar(gameState, h, food))
+      distanceOfPath(pathToTargetAStar(gameState, h, food))
     )
   );
 }
@@ -138,7 +138,7 @@ function movesTowardsClosestFood(gameState) {
 
     const foodNotCloserToLongerSnakes = boardfood.filter(
       (f) =>
-        distanceOfPath(pathToFoodAStar(gameState, myHead, f)) <
+        distanceOfPath(pathToTargetAStar(gameState, myHead, f)) <
         minFoodDistanceFromLongerOrSameSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
@@ -223,14 +223,51 @@ function move(gameState) {
   if (isAttacking) {
     console.log("isAttacking");
     target = otherSnakes.sort((s) => distance(myHead, s.head))[0].head;
-    targetDistance = distance(myHead, target);
-    let towardsSnake = moveTowardsTargetDirection(myHead, target);
-    safeTargetMoves = Object.keys(towardsSnake).filter(
-      (key) =>
-        possibleMovesLookAhead[key] &&
-        possibleMovesAvoidingLongerHeads[key] &&
-        towardsSnake[key]
+    gameState.blocks.unset(target.x, target.y);
+
+    // new code
+    const pathsToTargetFromSafeMoves = safeMoves
+      .map((m) => squareAfterMove(myHead, m))
+      .map((sq) => pathToTargetAStar(gameState, sq, target));
+    const shortestDistance = Math.min(
+      ...pathsToTargetFromSafeMoves
+        .filter((p) => p.length > 0)
+        .map((p) => p.length)
     );
+    console.log(
+      "target",
+      target,
+      "safe moves",
+      safeMoves,
+      "PATHS ",
+      pathsToTargetFromSafeMoves,
+      " sh dist ",
+      shortestDistance
+    );
+
+    const shortestIndex = pathsToTargetFromSafeMoves.findIndex(
+      (p) => p.length == shortestDistance
+    );
+    console.log(
+      "Sh index ",
+      shortestIndex,
+      "PATH to target",
+      pathsToTargetFromSafeMoves[shortestIndex],
+      "FROM SAFE MOVE: ",
+      safeMoves[shortestIndex]
+    );
+    safeTargetMoves = shortestIndex != -1 ? [safeMoves[shortestIndex]] : [];
+
+    gameState.blocks.set(target.x, target.y);
+
+    // targetDistance = distance(myHead, target);
+    // let towardsSnake = moveTowardsTargetDirection(myHead, target);
+    // safeTargetMoves = Object.keys(towardsSnake).filter(
+    //   (key) =>
+    //     possibleMovesLookAhead[key] &&
+    //     possibleMovesAvoidingLongerHeads[key] &&
+    //     towardsSnake[key]
+    // );
   }
 
   const [towardsFoodMoves, distanceToCloserFood] =

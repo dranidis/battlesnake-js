@@ -42,6 +42,8 @@ const { getPathTowardsClosestTail } = require("./path")
             : getFloodFillSquares(gameState, start),
       };
 
+      // this part is calculated again for each of my moves
+      // not necessary
       let ffMoves = [];
       for (let i = 0; i < otherMoves.length; i++) {
         const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
