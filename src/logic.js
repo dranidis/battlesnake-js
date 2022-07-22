@@ -2,14 +2,10 @@ const { configuration } = require("./config");
 const { distance, getTrueKeys } = require("./util");
 const { bsAStar } = require("./battlesnake_astar");
 const { preprocess } = require("./board");
-const {
-  detectDeadlyMove,
-  getDeadlyMove,
-} = require("./traps");
-const {getMyPossibleMoves} =  require("./move")
-const { getPossibleMovesFloodFill} = require("./minmax_floodfill")
-const { getPathTowardsClosestTail } = require("./path")
-
+const { detectDeadlyMove, getDeadlyMove } = require("./traps");
+const { getMyPossibleMoves } = require("./move");
+const { getPossibleMovesFloodFill } = require("./minmax_floodfill");
+const { getPathTowardsClosestTail } = require("./path");
 
 const MAX_DISTANCE = 999;
 
@@ -58,8 +54,6 @@ function moveTowardsTargetDirection(myHead, target) {
 
   return towardsTargetMoves;
 }
-
-
 
 function pickMove(gameState, safeMoves) {
   let newSafeMoves = safeMoves;
@@ -187,7 +181,6 @@ function resetPreviousDeadlyMove() {
   previousDeadlyMove = undefined;
 }
 
-
 function isHungry(gameState) {
   return gameState.you.health < 30;
 }
@@ -275,6 +268,12 @@ function move(gameState) {
     previousDeadlyMove = undefined;
   }
 
+  let chaseTailMove = null;
+  const pathTowardsClosestTail = getPathTowardsClosestTail(gameState);
+  if (pathTowardsClosestTail != null) {
+    chaseTailMove = pathTowardsClosestTail[0];
+  }
+
   if (detectedDeadlyMoveFrom && safeMoves.includes(detectedDeadlyMoveFrom)) {
     console.log(">> AVOID DEADLY MOVE blocking");
     moveToMake = detectedDeadlyMoveFrom;
@@ -295,21 +294,12 @@ function move(gameState) {
   } else if (safeFoodMoves.length > 0) {
     console.log(">> Going for food");
     moveToMake = pickMove(gameState, safeFoodMoves);
+  } else if (chaseTailMove != null && safeMoves.includes(chaseTailMove)) {
+    console.log(">> Chasing tails...");
+    moveToMake = chaseTailMove;
   } else {
-    const pathTowardsClosestTail = getPathTowardsClosestTail(gameState);
-    if (pathTowardsClosestTail != null) {
-      console.log(
-        `Examine tail chase ${JSON.stringify(pathTowardsClosestTail)}`
-      );
-      const chaseTailMove = pathTowardsClosestTail[0];
-      if (safeMoves.includes(chaseTailMove)) {
-        console.log(">> Chasing tails...");
-        moveToMake = chaseTailMove;
-      } else {
-        console.log(">> Wandering...");
-        moveToMake = pickMove(gameState, safeMoves);
-      }
-    }
+    console.log(">> Wandering...");
+    moveToMake = pickMove(gameState, safeMoves);
   }
 
   if (moveToMake == undefined) {
