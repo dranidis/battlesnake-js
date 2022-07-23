@@ -1,7 +1,5 @@
-
 const { isEmpty, preprocess } = require("./board");
 const { isEqual } = require("./util");
-
 
 function getSnakePossibleMoves(gameState, snake) {
   return {
@@ -42,7 +40,6 @@ function squareAfterMove(sq, aMove) {
   return { x: x, y: y };
 }
 
-
 function applyMoveToSnake(newGameState, snake, newHead) {
   if (!isFood(newGameState, newHead)) {
     snake.body.pop();
@@ -73,37 +70,23 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   const snakes = newGameState.board.snakes;
   const otherSnakes = snakes.filter((s) => s.id != newGameState.you.id);
 
-  for (let i = 0; i < otherHeadList.length; i++) {
-    applyMoveToSnake(newGameState, otherSnakes[i], otherHeadList[i]);
-  }
-
-  // head-to-head collision
-  for (let i = 0; i < snakes.length - 1; i++) {
-    for (let j = i + 1; j < snakes.length; j++) {
-      if (isEqual(snakes[i].head, snakes[j].head)) {
-        if (snakes[i].body.length <= snakes[j].body.length) {
-          snakes[i].lost = true;
-        }
-        if (snakes[i].body.length >= snakes[j].body.length) {
-          snakes[j].lost = true;
-        }
-      }
-    }
-  }
-
-  for (let i = 0; i < snakes.length; i++) {
-    if (snakes[i].id == newGameState.you.id) {
-      newGameState.you = snakes[i];
-      break;
-    }
-  }
-
-  let newFood = [];
-  newGameState.board.food.forEach((f) => {
-    if (!f.consumed) newFood.push(f);
+  otherHeadList.forEach((head, i) => {
+    applyMoveToSnake(newGameState, otherSnakes[i], head);
   });
 
-  newGameState.board.food = newFood;
+  // head-to-head collision
+  snakes.forEach((s1) => {
+    snakes
+      .filter((s2) => s2.id != s1.id && isEqual(s2.head, s1.head))
+      .forEach((s2) => {
+        if (s1.body.length <= s2.body.length) s1.lost = true;
+        if (s1.body.length >= s2.body.length) s2.lost = true;
+      });
+  });
+
+  newGameState.you = snakes.find((s) => s.id == newGameState.you.id);
+
+  newGameState.board.food = newGameState.board.food.filter((f) => !f.consumed);
 
   preprocess(newGameState);
   // console.log(
@@ -116,11 +99,14 @@ function applyMove(gameState, newHead, otherHeadList = []) {
   return newGameState;
 }
 
-
 function isFood(gameState, coord) {
   return gameState.board.food.some((f) => isEqual(f, coord));
 }
 
 module.exports = {
-  getMyPossibleMoves, getSnakePossibleMoves, squareAfterMove, applyMove, isFood
-}
+  getMyPossibleMoves,
+  getSnakePossibleMoves,
+  squareAfterMove,
+  applyMove,
+  isFood,
+};

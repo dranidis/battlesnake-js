@@ -35,9 +35,9 @@ function processMyMove(myMoveData, isMyFill) {
     return isMyFill ? FF_MAX_VALUE : 0;
   }
 
-  const processed = oppMoveDataList.map((mv) => processOppMove(mv, isMyFill));
+  const oppMovesValues = oppMoveDataList.map((mv) => processOppMove(mv, isMyFill));
 
-  return isMyFill ? Math.min(...processed) : Math.max(...processed);
+  return isMyFill ? Math.min(...oppMovesValues) : Math.max(...oppMovesValues);
 }
 
 function processOppMove(oppMoveData, isMyFill) {
@@ -45,9 +45,9 @@ function processOppMove(oppMoveData, isMyFill) {
   if (myMoveDataList.length == 0) {
     return isMyFill ? 0 : FF_MAX_VALUE;
   }
-  const processed = myMoveDataList.map((mv) => processMyMove(mv, isMyFill));
+  const myMovesValues = myMoveDataList.map((mv) => processMyMove(mv, isMyFill));
 
-  return isMyFill ? Math.max(...processed) : Math.min(...processed);
+  return isMyFill ? Math.max(...myMovesValues) : Math.min(...myMovesValues);
 }
 
 
