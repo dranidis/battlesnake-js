@@ -1,11 +1,20 @@
-const { createBattlesnake, createGameState, addFood } = require("./test_util");
+const { createBattlesnake, createGameState, addFood, setBoardDimensions, boardHeight, boardWidth } = require("./test_util");
 const { configuration } = require("../src/config");
 const { preprocess } = require("../src/board")
+const { resetPreviousDeadlyMove } = require("../src/logic");
+
 
 const {
   twoPlayerSuggestedAttackingMove,
   getPossibleMovesFloodFill,
 } = require("../src/minmax_floodfill");
+
+// Applies to all tests in this file
+beforeEach(() => {
+  resetPreviousDeadlyMove();
+  setBoardDimensions(5,5)
+  configuration.MINMAX_DEPTH = 2
+});
 
 describe("twoPlayerSuggestedAttackingMove", () => {
   test("opponent loses anyway we should prefer the correct move from our FF", () => {
@@ -37,41 +46,40 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 });
 
 describe("getPossibleMovesFloodFill", () => {
-  // test("avoid getting trapped with 2 steps ahead flood-fill", () => {
-  //   if (configuration.MINMAX_DEPTH < 2) return;
+  test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+    if (configuration.MINMAX_DEPTH < 2) return;
+    setBoardDimensions(8,8)
 
-  //   boardWidth = 8;
-  //   boardHeight = 8;
-  //   const me = createBattlesnake("me", [
-  //     { x: 6, y: 5 },
-  //     { x: 6, y: 6 },
-  //     { x: 7, y: 6 },
-  //     { x: 7, y: 7 },
-  //     { x: 6, y: 7 },
-  //     { x: 5, y: 7 },
-  //     { x: 4, y: 7 },
-  //   ]);
-  //   const other = createBattlesnake("other", [
-  //     { x: 5, y: 2 },
-  //     { x: 5, y: 3 },
-  //     { x: 5, y: 4 },
-  //     { x: 4, y: 4 },
-  //     { x: 3, y: 4 },
-  //     { x: 2, y: 4 },
-  //   ]);
-  //   const gameState = createGameState(me, [me, other]);
-  //   preprocess(gameState);
-  //   console.log(gameState.blocks.toString());
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
 
-  //   const moves = getPossibleMovesFloodFill(gameState);
-  //   const exp = {
-  //     up: false,
-  //     down: false,
-  //     left: true,
-  //     right: false,
-  //   };
-  //   expect(moves).toStrictEqual(exp);
-  // });
+    const moves = getPossibleMovesFloodFill(gameState);
+    const exp = {
+      up: false,
+      down: false,
+      left: true,
+      right: false,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
 
   test("solving bug in FF 0 value is wrong for all moves (check with depth 2)", () => {
     // other back 2 squares
@@ -145,43 +153,43 @@ describe("getPossibleMovesFloodFill", () => {
     expect(moves).toStrictEqual(exp);
   });
 
-  // test("left only one option, right more options", () => {
-  //   // other back 2 squares
-  //   boardHeight = 7;
-  //   boardWidth = 10;
-  //   configuration.MINMAX_DEPTH = 2;
-  //   configuration.debug = true;
-  //   const me = createBattlesnake("me", [
-  //     { x: 5, y: 6 },
-  //     { x: 5, y: 5 },
-  //     { x: 5, y: 4 },
-  //     { x: 5, y: 3 },
-  //     { x: 5, y: 2 },
-  //   ]);
-  //   const other = createBattlesnake("other", [
-  //     { x: 4, y: 3 },
-  //     { x: 3, y: 3 },
-  //     { x: 2, y: 3 },
-  //     { x: 1, y: 3 },
-  //     { x: 1, y: 2 },
-  //     { x: 1, y: 1 },
-  //   ]);
+  test("left only one option, right more options", () => {
+    // other back 2 squares
+    setBoardDimensions(10,7)
 
-  //   const gameState = createGameState(me, [me, other]);
-  //   preprocess(gameState);
-  //   console.log(gameState.blocks.toString());
+    configuration.MINMAX_DEPTH = 2;
+    configuration.debug = true;
+    const me = createBattlesnake("me", [
+      { x: 5, y: 6 },
+      { x: 5, y: 5 },
+      { x: 5, y: 4 },
+      { x: 5, y: 3 },
+      { x: 5, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 3 },
+      { x: 3, y: 3 },
+      { x: 2, y: 3 },
+      { x: 1, y: 3 },
+      { x: 1, y: 2 },
+      { x: 1, y: 1 },
+    ]);
 
-  //   console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
-  //   const moves = getPossibleMovesFloodFill(gameState);
-  //   console.log(`moves ${JSON.stringify(moves)}`);
-  //   const exp = {
-  //     up: false,
-  //     down: false,
-  //     left: false, // will lose here
-  //     right: true,
-  //   };
-  //   expect(moves).toStrictEqual(exp);
-  // });
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
+    const moves = getPossibleMovesFloodFill(gameState);
+    console.log(`moves ${JSON.stringify(moves)}`);
+    const exp = {
+      up: false,
+      down: false,
+      left: false, // will lose here
+      right: true,
+    };
+    expect(moves).toStrictEqual(exp);
+  });
 
   test("chase tail", () => {
     configuration.MINMAX_DEPTH = 2;

@@ -1,4 +1,4 @@
-const { createBattlesnake, createGameState, addFood } = require("./test_util");
+const { createBattlesnake, createGameState, addFood, setBoardDimensions, boardHeight, boardWidth } = require("./test_util");
 const { configuration } = require("../src/config");
 const { preprocess } = require("../src/board")
 const { move, resetPreviousDeadlyMove } = require("../src/logic");
@@ -11,8 +11,7 @@ const TIMES = 5;
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-  boardHeight = 5;
-  boardWidth = 5;
+  setBoardDimensions(5,5)
   configuration.MINMAX_DEPTH = 2
 });
 
@@ -156,33 +155,33 @@ describe("Battlesnake Moves", () => {
     }
   });
 
-  // test("can escape because other snake's tail is reduced", () => {
-  //   const me = createBattlesnake("me", [
-  //     { x: 1, y: 0 },
-  //     { x: 0, y: 0 },
-  //     { x: 0, y: 1 },
-  //     { x: 0, y: 2 },
-  //     { x: 0, y: 3 },
-  //     { x: 0, y: 4 },
-  //   ]);
-  //   const other = createBattlesnake("other", [
-  //     { x: 3, y: 0 },
-  //     { x: 3, y: 1 },
-  //     { x: 3, y: 2 },
-  //     { x: 2, y: 2 },
-  //     { x: 1, y: 2 },
-  //     { x: 1, y: 3 },
-  //   ]);
-  //   const gameState = createGameState(me, [me, other]);
-  //   preprocess(gameState);
-  //   console.log(gameState.blocks.toString());
+  test("can escape because other snake's tail is reduced", () => {
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: 2 },
+      { x: 0, y: 3 },
+      { x: 0, y: 4 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+      { x: 3, y: 2 },
+      { x: 2, y: 2 },
+      { x: 1, y: 2 },
+      { x: 1, y: 3 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
 
-  //   for (let i = 0; i < 1; i++) {
-  //     const moveResponse = move(gameState);
-  //     const allowedMoves = ["up"];
-  //     expect(allowedMoves).toContain(moveResponse.move);
-  //   }
-  // });
+    for (let i = 0; i < 1; i++) {
+      const moveResponse = move(gameState);
+      const allowedMoves = ["up"];
+      expect(allowedMoves).toContain(moveResponse.move);
+    }
+  });
 
   test("goes towards closest food", () => {
     // Arrange
