@@ -1,19 +1,27 @@
-const { createBattlesnake, createGameState, addFood, setBoardDimensions, boardHeight, boardWidth } = require("./test_util");
+const {
+  createBattlesnake,
+  createGameState,
+  addFood,
+  setBoardDimensions,
+  boardHeight,
+  boardWidth,
+} = require("./test_util");
 const { configuration } = require("../src/config");
-const { preprocess } = require("../src/board")
+const { preprocess } = require("../src/board");
 const { resetPreviousDeadlyMove } = require("../src/logic");
-
 
 const {
   twoPlayerSuggestedAttackingMove,
   getPossibleMovesFloodFill,
+  getSquaresCountPerMove,
+  floodFillEvaluation,
 } = require("../src/minmax_floodfill");
 
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-  setBoardDimensions(5,5)
-  configuration.MINMAX_DEPTH = 2
+  setBoardDimensions(5, 5);
+  configuration.MINMAX_DEPTH = 2;
 });
 
 describe("twoPlayerSuggestedAttackingMove", () => {
@@ -48,7 +56,7 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 describe("getPossibleMovesFloodFill", () => {
   test("avoid getting trapped with 2 steps ahead flood-fill", () => {
     if (configuration.MINMAX_DEPTH < 2) return;
-    setBoardDimensions(8,8)
+    setBoardDimensions(8, 8);
 
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
@@ -155,7 +163,7 @@ describe("getPossibleMovesFloodFill", () => {
 
   test("left only one option, right more options", () => {
     // other back 2 squares
-    setBoardDimensions(10,7)
+    setBoardDimensions(10, 7);
 
     configuration.MINMAX_DEPTH = 2;
     configuration.debug = true;
@@ -224,5 +232,354 @@ describe("getPossibleMovesFloodFill", () => {
       right: true, //chase the tail
     };
     expect(moves).toStrictEqual(exp);
+  });
+});
+
+describe("floodFillEvaluation", () => {
+  test("floodFillEvaluation", () => {
+    setBoardDimensions(8, 8);
+
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const val = floodFillEvaluation(gameState, me);
+    const exp = 53;
+    expect(val).toStrictEqual(exp);
+  });
+});
+
+describe("getSquaresCountPerMove", () => {
+  test("getSquaresCountPerMove", () => {
+    setBoardDimensions(8, 8);
+
+    const me = createBattlesnake("me", [
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+
+    const val = getSquaresCountPerMove(gameState, 2);
+    const exp = {
+      down: {
+        data: {
+          down: {
+            down: {
+              data: {
+                down: {
+                  down: { other: 44, you: 9 },
+                  right: { other: 44, you: 9 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  right: { other: 53, you: 53 },
+                },
+                right: {
+                  down: { other: 53, you: 53 },
+                  right: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+            right: {
+              data: {
+                down: {
+                  down: { other: 44, you: 8 },
+                  up: { other: 44, you: 1 },
+                },
+                left: {
+                  down: { other: 52, you: 52 },
+                  up: { other: 52, you: 1 },
+                },
+                right: {
+                  down: { other: 52, you: 52 },
+                  up: { other: 52, you: 1 },
+                },
+              },
+              id: "other",
+            },
+          },
+          left: {
+            down: {
+              data: {
+                down: {
+                  down: { other: 53, you: 53 },
+                  right: { other: 53, you: 53 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  right: { other: 53, you: 53 },
+                },
+                up: {
+                  down: { other: 53, you: 53 },
+                  right: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+            right: {
+              data: {
+                down: {
+                  down: { other: 52, you: 52 },
+                  up: { other: 52, you: 1 },
+                },
+                left: {
+                  down: { other: 52, you: 52 },
+                  up: { other: 52, you: 1 },
+                },
+                up: { down: { other: 52, you: 52 }, up: { other: 52, you: 1 } },
+              },
+              id: "other",
+            },
+          },
+          right: {
+            down: {
+              data: {
+                down: { right: { other: 53, you: 53 } },
+                right: { right: { other: 50, you: 3 } },
+                up: {
+                  down: { other: 0, you: 58 },
+                  left: { other: 0, you: 58 },
+                  right: { other: 0, you: 58 },
+                },
+              },
+              id: "other",
+            },
+            right: {
+              data: {
+                down: {
+                  down: { other: 52, you: 52 },
+                  up: { other: 52, you: 1 },
+                },
+                right: {
+                  down: { other: 50, you: 2 },
+                  up: { other: 50, you: 1 },
+                },
+                up: { down: { other: 52, you: 52 }, up: { other: 52, you: 1 } },
+              },
+              id: "other",
+            },
+          },
+        },
+        id: "other",
+      },
+      left: {
+        data: {
+          down: {
+            left: {
+              data: {
+                down: {
+                  down: { other: 42, you: 42 },
+                  left: { other: 42, you: 42 },
+                  up: { other: 42, you: 42 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                right: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+            up: {
+              data: {
+                down: {
+                  left: { other: 42, you: 42 },
+                  up: { other: 42, you: 42 },
+                },
+                left: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                right: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+          },
+          left: {
+            left: {
+              data: {
+                down: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                up: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+            up: {
+              data: {
+                down: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                left: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                up: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+          },
+          right: {
+            left: {
+              data: {
+                down: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                right: {
+                  down: { other: 48, you: 48 },
+                  left: { other: 48, you: 48 },
+                  up: { other: 48, you: 48 },
+                },
+                up: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+            up: {
+              data: {
+                down: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+                right: {
+                  left: { other: 48, you: 48 },
+                  up: { other: 48, you: 48 },
+                },
+                up: {
+                  left: { other: 53, you: 53 },
+                  up: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+          },
+        },
+        id: "other",
+      },
+      right: {
+        data: {
+          down: {
+            down: {
+              data: {
+                down: {
+                  down: { other: 44, you: 9 },
+                  left: { other: 44, you: 9 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+                right: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+          },
+          left: {
+            down: {
+              data: {
+                down: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+                left: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+                up: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+              },
+              id: "other",
+            },
+          },
+          right: {
+            down: {
+              data: {
+                down: {
+                  down: { other: 53, you: 53 },
+                  left: { other: 53, you: 53 },
+                },
+                right: {
+                  down: { other: 50, you: 3 },
+                  left: { other: 50, you: 3 },
+                },
+                up: {
+                  down: { other: 52, you: 52 },
+                  left: { other: 52, you: 1 },
+                },
+              },
+              id: "other",
+            },
+          },
+        },
+        id: "other",
+      },
+    };
+    expect(val).toStrictEqual(exp);
   });
 });

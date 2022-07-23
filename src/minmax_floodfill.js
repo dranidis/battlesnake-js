@@ -7,13 +7,18 @@ const {
 const { getFloodFillSquares } = require("./boardfill");
 const {
   isTrapped,
+  isTrappedSnake,
   isTrappedClose,
   isTrappeCloseForSnake,
 } = require("./traps");
-const {getMyPossibleMoves, getSnakePossibleMoves, squareAfterMove, applyMove} =  require("./move")
+const {
+  getMyPossibleMoves,
+  getSnakePossibleMoves,
+  squareAfterMove,
+  applyMove,
+} = require("./move");
 const { getTrueKeys } = require("./util");
-const { getPathTowardsClosestTail } = require("./path")
-
+const { getPathTowardsClosestTail } = require("./path");
 
 /**
  *
@@ -22,20 +27,17 @@ const { getPathTowardsClosestTail } = require("./path")
  * @param {*} depth
  * @returns
  */
- function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
+function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
   const otherSnakes = gameState.board.snakes.filter(
     (s) => s.id != gameState.you.id
   );
 
   if (otherSnakes.length == 1) {
     const otherSnake = otherSnakes[0];
-    const otherHead = otherSnake.head;
-    // console.log(`Other head ${JSON.stringify(otherHead)}`)
-    const otherMovesMap = getSnakePossibleMoves(gameState, otherSnake);
-    const otherMoves = getTrueKeys(otherMovesMap);
 
     if (depth == 0) {
       let floodFilldata = {
+        
         you:
           isTrapped(gameState) || isTrappedClose(gameState)
             ? 0
@@ -44,43 +46,38 @@ const { getPathTowardsClosestTail } = require("./path")
 
       // this part is calculated again for each of my moves
       // not necessary
-      let ffMoves = [];
+      floodFilldata[otherSnake.id] = floodFillEvaluation(gameState, otherSnake);
+
+      return floodFilldata;
+    } else {
+      const otherHead = otherSnake.head;
+      // console.log(`Other head ${JSON.stringify(otherHead)}`)
+      const otherMovesMap = getSnakePossibleMoves(gameState, otherSnake);
+      const otherMoves = getTrueKeys(otherMovesMap);
+
+      // let maxSquaresCountList = [];
+      let maxSquaresCountList = {};
+
+      // get all combinations of moves
+      // for each combination of moves
+
+      // TODO: sometimes the returned value is null
       for (let i = 0; i < otherMoves.length; i++) {
         const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
-        ffMoves.push(getFloodFillSquares(gameState, newOtherHead));
-      }
 
-      const otherIsTrapped = isTrappeCloseForSnake(gameState, otherSnake);
-      if (otherIsTrapped) {
-        console.log("other snake trapped");
+        const newGameState = applyMove(gameState, start, [newOtherHead]);
+        if (newGameState.you.lost == undefined) {
+          const squaresCount = getSquaresCountPerMove(newGameState, depth - 1);
+          // const maxSquaresCount = Math.max(...Object.values(squaresCount));
+          // maxSquaresCountList.push(maxSquaresCount);
+          maxSquaresCountList[otherMoves[i]] = squaresCount;
+        } else {
+          maxSquaresCountList[otherMoves[i]] = {};
+        }
       }
-      floodFilldata[otherSnake.id] =
-        ffMoves.length > 0 && !otherIsTrapped ? Math.max(...ffMoves) : 0;
-      return floodFilldata;
+      // return Math.min(...maxSquaresCountList);
+      return { id: otherSnake.id, data: maxSquaresCountList };
     }
-
-    // let maxSquaresCountList = [];
-    let maxSquaresCountList = {};
-
-    // get all combinations of moves
-    // for each combination of moves
-
-    // TODO: sometimes the returned value is null
-    for (let i = 0; i < otherMoves.length; i++) {
-      const newOtherHead = squareAfterMove(otherHead, otherMoves[i]);
-
-      const newGameState = applyMove(gameState, start, [newOtherHead]);
-      if (newGameState.you.lost == undefined) {
-        const squaresCount = getSquaresCountPerMove(newGameState, depth - 1);
-        // const maxSquaresCount = Math.max(...Object.values(squaresCount));
-        // maxSquaresCountList.push(maxSquaresCount);
-        maxSquaresCountList[otherMoves[i]] = squaresCount;
-      } else {
-        maxSquaresCountList[otherMoves[i]] = {};
-      }
-    }
-    // return Math.min(...maxSquaresCountList);
-    return { id: otherSnake.id, data: maxSquaresCountList };
   }
 
   if (depth == 0) {
@@ -188,7 +185,6 @@ function getPossibleMovesFloodFill(gameState) {
   return possibleMoves;
 }
 
-
 function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
   const oppSquaresCountValues = Object.values(oppSquaresCount);
   if (oppSquaresCountValues.length > 0) {
@@ -235,7 +231,34 @@ function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
   return null;
 }
 
+function floodFillEvaluation(gameState, snake) {
+  const head = snake.head;
+  const movesMap = getSnakePossibleMoves(gameState, snake);
+  const moves = getTrueKeys(movesMap);
+  let ffMoves = [];
+
+  for (let i = 0; i < moves.length; i++) {
+    const newHead = squareAfterMove(head, moves[i]);
+    ffMoves.push(getFloodFillSquares(gameState, newHead));
+  }
+
+  const isTrappedClose = isTrappeCloseForSnake(gameState, snake);
+  if (isTrappedClose) {
+    console.log(`Trapped (close): ${snake.id}`);
+  }
+
+  const isTrapped = isTrappedSnake(gameState, snake);
+  if (isTrappedClose) {
+    console.log(`Trapped: ${snake.id}`);
+  }
+  return ffMoves.length > 0 && !(isTrappedClose || isTrapped)
+    ? Math.max(...ffMoves)
+    : 0;
+}
+
 module.exports = {
   getPossibleMovesFloodFill,
-  twoPlayerSuggestedAttackingMove
-}
+  twoPlayerSuggestedAttackingMove,
+  getSquaresCountPerMove,
+  floodFillEvaluation,
+};

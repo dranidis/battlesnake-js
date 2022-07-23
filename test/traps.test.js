@@ -1,5 +1,5 @@
 const { createBattlesnake, createGameState, addFood } = require("./test_util");
-const { isTrapped, isTrappedClose } = require("../src/traps");
+const { isTrapped, isTrappedClose, isTrappeCloseForSnake } = require("../src/traps");
 const { preprocess } = require("../src/board")
 
 
@@ -147,4 +147,22 @@ describe("isTrappedClose ", () => {
     console.log(gameState.blocks.toString());
     expect(isTrappedClose(gameState)).toBe(true);
   });
+
+  test("isTrappeCloseForSnake bottom", () => {
+    // happened in a game
+    const other = createBattlesnake("me", [
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+    ]);
+    const me = createBattlesnake("other", [
+      { x: 1, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    expect(isTrappeCloseForSnake(gameState, other)).toBe(true);
+  });
+
 });

@@ -131,35 +131,38 @@ function detectDeadlyMove(gameState) {
 // Also if there is food, the snake can grow and escape!
 // Lazy check for food!
 function isTrapped(gameState) {
-  const myHead = gameState.you.head;
+  return isTrappedSnake(gameState, gameState.you);
+}
+
+function isTrappedSnake(gameState, snake) {
+  const head = snake.head;
 
   const longerSnakeHeads = gameState.board.snakes
-    .filter((s) => s.id != gameState.you.id && s.length > gameState.you.length)
+    .filter((s) => s.id != snake.id && s.length > snake.length)
     .map((s) => s.head);
 
   if (
     // top case
-    (myHead.y == gameState.board.height - 1 &&
-      !gameState.board.food.some((f) => f.y == myHead.y) &&
-      longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y - 2) &&
-      isEmpty(gameState, { x: myHead.x, y: myHead.y - 1 })) ||
+    (head.y == gameState.board.height - 1 &&
+      !gameState.board.food.some((f) => f.y == head.y) &&
+      longerSnakeHeads.some((h) => h.x == head.x && h.y == head.y - 2) &&
+      isEmpty(gameState, { x: head.x, y: head.y - 1 })) ||
     // bottom case
-    (myHead.y == 0 &&
-      !gameState.board.food.some((f) => f.y == myHead.y) &&
-      longerSnakeHeads.some((h) => h.x == myHead.x && h.y == myHead.y + 2) &&
-      isEmpty(gameState, { x: myHead.x, y: myHead.y + 1 })) ||
+    (head.y == 0 &&
+      !gameState.board.food.some((f) => f.y == head.y) &&
+      longerSnakeHeads.some((h) => h.x == head.x && h.y == head.y + 2) &&
+      isEmpty(gameState, { x: head.x, y: head.y + 1 })) ||
     // left case
-    (myHead.x == 0 &&
-      !gameState.board.food.some((f) => f.x == myHead.x) &&
-      longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x + 2) &&
-      isEmpty(gameState, { y: myHead.y, x: myHead.x + 1 })) ||
+    (head.x == 0 &&
+      !gameState.board.food.some((f) => f.x == head.x) &&
+      longerSnakeHeads.some((h) => h.y == head.y && h.x == head.x + 2) &&
+      isEmpty(gameState, { y: head.y, x: head.x + 1 })) ||
     // right case
-    (myHead.x == gameState.board.width - 1 &&
-      !gameState.board.food.some((f) => f.x == myHead.x) &&
-      longerSnakeHeads.some((h) => h.y == myHead.y && h.x == myHead.x - 2) &&
-      isEmpty(gameState, { y: myHead.y, x: myHead.x - 1 }))
+    (head.x == gameState.board.width - 1 &&
+      !gameState.board.food.some((f) => f.x == head.x) &&
+      longerSnakeHeads.some((h) => h.y == head.y && h.x == head.x - 2) &&
+      isEmpty(gameState, { y: head.y, x: head.x - 1 }))
   ) {
-    console.log("TRAPPED!");
     return true;
   }
   return false;
@@ -220,7 +223,9 @@ function isTrappedClose(gameState) {
 
 module.exports = {
   isTrapped,
+  isTrappedSnake,
   isTrappedClose,
   isTrappeCloseForSnake,
-  detectDeadlyMove, getDeadlyMove
+  detectDeadlyMove,
+  getDeadlyMove,
 };
