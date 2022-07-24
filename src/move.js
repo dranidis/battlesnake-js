@@ -53,13 +53,17 @@ function applyMoveToSnake(newGameState, snake, newHead) {
   snake.head = newHead;
 }
 
-function applyMove(gameState, newHead, otherHeadList = []) {
-  let newGameState = JSON.parse(
+function cloneGameState(gameState) {
+  return JSON.parse(
     JSON.stringify(
       gameState,
       (key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
     )
   );
+}
+
+function applyMove(gameState, newHead, otherHeadList = []) {
+  let newGameState = cloneGameState(gameState);
 
   const mySnake = newGameState.board.snakes.filter(
     (s) => s.id == newGameState.you.id
@@ -109,4 +113,5 @@ module.exports = {
   squareAfterMove,
   applyMove,
   isFood,
+  cloneGameState,
 };

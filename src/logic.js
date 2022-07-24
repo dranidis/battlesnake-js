@@ -6,6 +6,7 @@ const { detectDeadlyMove, getDeadlyMove } = require("./traps");
 const { getMyPossibleMoves, squareAfterMove } = require("./move");
 const { getPossibleMovesFloodFill } = require("./minmax_floodfill");
 const { getPathTowardsClosestTail } = require("./path");
+const { setStartTime, getStartTime } = require("./time");
 
 const MAX_DISTANCE = 999;
 
@@ -79,7 +80,7 @@ function closerFoodAndDistance(gameState, myHead, boardfood) {
   }
 
   const paths = boardfood.map((f) => pathToTargetAStar(gameState, myHead, f));
-  console.log("PATHS to food: " + JSON.stringify(paths));
+  // console.log("PATHS to food: " + JSON.stringify(paths));
   const distances = paths.map((p) => p.length);
   const minIndex = distances.indexOf(Math.min(...distances));
   if (minIndex == -1) return [{}, MAX_DISTANCE, []];
@@ -186,6 +187,7 @@ function isHungry(gameState) {
 }
 
 function move(gameState) {
+  setStartTime(Date.now());
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
 
@@ -348,6 +350,7 @@ function move(gameState) {
     move: moveToMake,
   };
 
+  console.log(Date.now() - getStartTime(), "ms");
   console.log(`${gameState.game.id} MOVE ${gameState.turn}: ${response.move}`);
   return response;
 }

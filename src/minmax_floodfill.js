@@ -17,9 +17,11 @@ const {
   squareAfterMove,
   applyMove,
 } = require("./move");
-const { getTrueKeys } = require("./util");
+const { getTrueKeys, bigIntSerializer } = require("./util");
 const { getPathTowardsClosestTail } = require("./path");
-
+const { MinMax } = require("./minmax");
+const { isTerminal, children, myChildren } = require("./battlesnake_minmax");
+const { getStartTime, getRemainingTime } = require("./time");
 /**
  *
  * @param {*} gameState
@@ -37,7 +39,6 @@ function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
 
     if (depth == 0) {
       let floodFilldata = {
-        
         you:
           isTrapped(gameState) || isTrappedClose(gameState)
             ? 0
@@ -119,6 +120,7 @@ function getSquaresCountPerMove(gameState, depth) {
 
 function getPossibleMovesFloodFill(gameState) {
   // console.log(`INIT STATE ${gameState.blocks.toString()}`);
+  const otherSnakes = gameState.board.snakes;
 
   const getFloodFillData = getSquaresCountPerMove(
     gameState,
@@ -129,22 +131,36 @@ function getPossibleMovesFloodFill(gameState) {
       `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
     );
 
-  const squaresCount = processMyFill(getFloodFillData);
+  let squaresCount;
+  if (otherSnakes.length != 2) {
+    squaresCount = processMyFill(getFloodFillData);
+  } else {
+    const remaining = getRemainingTime();
+    console.log("REMAINING", remaining);
+    const give = Math.max(remaining - 50, 50);
+    console.log("GIVE to mm", give);
+
+    const mmstart = Date.now();
+    squaresCount = bsMinMax(gameState, 20, give);
+    console.log("MM TIME", Date.now() - mmstart);
+    console.log("Remaining time after mm", getRemainingTime());
+  }
+
   console.log("FloodFill me : " + JSON.stringify(squaresCount));
 
   let possibleMoves = { up: false, down: false, left: false, right: false };
 
-  if (gameState.board.snakes.length == 2) {
-    const oppSquaresCount = processOppFill(getFloodFillData);
-    console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
+  // if (gameState.board.snakes.length == 2) {
+  //   const oppSquaresCount = processOppFill(getFloodFillData);
+  //   console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
 
-    const move = twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount);
+  //   const move = twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount);
 
-    if (move != null) {
-      possibleMoves[move] = true;
-      return possibleMoves;
-    }
-  }
+  //   if (move != null) {
+  //     possibleMoves[move] = true;
+  //     return possibleMoves;
+  //   }
+  // }
 
   ["up", "down", "right", "left"].forEach((direction) => {
     possibleMoves[direction] =
@@ -166,7 +182,7 @@ function getPossibleMovesFloodFill(gameState) {
         `Examine tail chase ${JSON.stringify(pathTowardsClosestTail)}`
       );
       const move = pathTowardsClosestTail[0];
-      if (pathTowardsClosestTail.length <= squaresCount[move]) {
+      if (pathTowardsClosestTail.length <= squaresCount[move] + 1) {
         console.log(`TAIL CHASE! `);
         possibleMoves[move] = true;
         return possibleMoves;
@@ -233,14 +249,11 @@ function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
 
 function floodFillEvaluation(gameState, snake) {
   const head = snake.head;
-  const movesMap = getSnakePossibleMoves(gameState, snake);
-  const moves = getTrueKeys(movesMap);
-  let ffMoves = [];
+  const moves = getTrueKeys(getSnakePossibleMoves(gameState, snake));
 
-  for (let i = 0; i < moves.length; i++) {
-    const newHead = squareAfterMove(head, moves[i]);
-    ffMoves.push(getFloodFillSquares(gameState, newHead));
-  }
+  const ffMoves = moves.map((m) =>
+    getFloodFillSquares(gameState, squareAfterMove(head, m))
+  );
 
   const isTrappedClose = isTrappeCloseForSnake(gameState, snake);
   if (isTrappedClose) {
@@ -256,9 +269,58 @@ function floodFillEvaluation(gameState, snake) {
     : 0;
 }
 
+function bsMinMax(gameState, depth, ms) {
+  const minmax = new MinMax(isTerminal, children, heuristic);
+
+  // let moveEval = {}
+  // const my_children = myChildren(gameState);
+  // for (let i = 0; i < my_children.length; i++) {
+  //   const child = my_children[i];
+  //   console.log(JSON.stringify(child, bigIntSerializer, 2));
+  //   const value = minmax.alphabetaTimed(
+  //     child,
+  //     depth,
+  //     -Infinity,
+  //     Infinity,
+  //     false,
+  //     ms
+  //   );
+  //   console.log(value);
+  //   moveEval[child.mm.myMove] = value
+  // }
+
+  // return moveEval
+
+  return myChildren(gameState).reduce((moveEval, state) => {
+    moveEval[state.mm.myMove] = minmax.alphabetaTimed(
+      state,
+      depth,
+      -Infinity,
+      Infinity,
+      false,
+      ms
+    );
+    return moveEval;
+  }, {});
+}
+
+function heuristic(gameState) {
+  if (isTerminal(gameState)) {
+    if (gameState.you.lost) return 0;
+  }
+
+  otherSnake = gameState.board.snakes.find((s) => s.id != gameState.you.id);
+  const oppmoves = getTrueKeys(getSnakePossibleMoves(gameState, otherSnake));
+  if (oppmoves.length == 0) return FF_MAX_VALUE;
+
+  return floodFillEvaluation(gameState, gameState.you);
+}
+
 module.exports = {
   getPossibleMovesFloodFill,
   twoPlayerSuggestedAttackingMove,
   getSquaresCountPerMove,
   floodFillEvaluation,
+  bsMinMax,
+  heuristic,
 };

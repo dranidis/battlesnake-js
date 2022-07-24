@@ -1243,256 +1243,409 @@ const wrong_FF_values_2 = {
   },
 };
 
-const left_one_option =    {
-  "left": {
-      "id": "other",
-      "data": {
-          "up": {
-              "down": {
-                  "id": "other",
-                  "data": {
-                      "up": {},
-                      "left": {
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
+const left_one_option = {
+  left: {
+    id: "other",
+    data: {
+      up: {
+        down: {
+          id: "other",
+          data: {
+            up: {},
+            left: {
+              left: {
+                you: 61,
+                other: 61,
               },
-              "left": {
-                  "id": "other",
-                  "data": {
-                      "up": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
-              }
+            },
           },
-          "down": {
-              "down": {
-                  "id": "other",
-                  "data": {
-                      "down": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "right": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
+        },
+        left: {
+          id: "other",
+          data: {
+            up: {
+              down: {
+                you: 61,
+                other: 61,
               },
-              "left": {
-                  "id": "other",
-                  "data": {
-                      "down": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "right": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "left": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
-              }
-          }
-      }
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+      },
+      down: {
+        down: {
+          id: "other",
+          data: {
+            down: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+            right: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+        left: {
+          id: "other",
+          data: {
+            down: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+            right: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              left: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+      },
+    },
   },
-  "right": {
-      "id": "other",
-      "data": {
-          "up": {
-              "down": {
-                  "id": "other",
-                  "data": {
-                      "up": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
+  right: {
+    id: "other",
+    data: {
+      up: {
+        down: {
+          id: "other",
+          data: {
+            up: {
+              down: {
+                you: 61,
+                other: 61,
               },
-              "right": {
-                  "id": "other",
-                  "data": {
-                      "up": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
-              }
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
           },
-          "down": {
-              "down": {
-                  "id": "other",
-                  "data": {
-                      "down": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "right": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
+        },
+        right: {
+          id: "other",
+          data: {
+            up: {
+              down: {
+                you: 61,
+                other: 61,
               },
-              "right": {
-                  "id": "other",
-                  "data": {
-                      "down": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "left": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      },
-                      "right": {
-                          "down": {
-                              "you": 61,
-                              "other": 61
-                          },
-                          "right": {
-                              "you": 61,
-                              "other": 61
-                          }
-                      }
-                  }
-              }
-          }
-      }
-  }
-}
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+      },
+      down: {
+        down: {
+          id: "other",
+          data: {
+            down: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            right: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+        right: {
+          id: "other",
+          data: {
+            down: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            left: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+            right: {
+              down: {
+                you: 61,
+                other: 61,
+              },
+              right: {
+                you: 61,
+                other: 61,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
 
-
-
+data = [
+  {
+    game: { id: "", ruleset: { name: "", version: "" }, timeout: 0 },
+    turn: 0,
+    board: {
+      height: 8,
+      width: 8,
+      food: [],
+      snakes: [
+        {
+          id: "me",
+          name: "me",
+          health: 0,
+          body: [
+            { x: 2, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+            { x: 1, y: 2 },
+            { x: 1, y: 3 },
+            { x: 2, y: 3 },
+            { x: 3, y: 3 },
+            { x: 4, y: 3 },
+            { x: 5, y: 3 },
+          ],
+          latency: "",
+          head: { x: 2, y: 0 },
+          length: 9,
+          shout: "",
+          squad: "",
+        },
+        {
+          id: "other",
+          name: "other",
+          health: 0,
+          body: [
+            { x: 2, y: 0 },
+            { x: 3, y: 0 },
+            { x: 3, y: 1 },
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 3, y: 2 },
+            { x: 4, y: 2 },
+            { x: 4, y: 1 },
+          ],
+          latency: "",
+          head: { x: 2, y: 0 },
+          length: 8,
+          shout: "",
+          squad: "",
+          lost: true,
+        },
+      ],
+      hazards: [],
+    },
+    you: {
+      id: "me",
+      name: "me",
+      health: 0,
+      body: [
+        { x: 2, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+        { x: 1, y: 2 },
+        { x: 1, y: 3 },
+        { x: 2, y: 3 },
+        { x: 3, y: 3 },
+        { x: 4, y: 3 },
+        { x: 5, y: 3 },
+      ],
+      latency: "",
+      head: { x: 2, y: 0 },
+      length: 9,
+      shout: "",
+      squad: "",
+    },
+    blocks: { width: 8, height: 8, data: "503448070" },
+    mm: { myMove: "right", newHead: { x: 2, y: 0 }, turnId: "me" },
+  },
+  {
+    game: { id: "", ruleset: { name: "", version: "" }, timeout: 0 },
+    turn: 0,
+    board: {
+      height: 8,
+      width: 8,
+      food: [],
+      snakes: [
+        {
+          id: "me",
+          name: "me",
+          health: 0,
+          body: [
+            { x: 2, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+            { x: 1, y: 2 },
+            { x: 1, y: 3 },
+            { x: 2, y: 3 },
+            { x: 3, y: 3 },
+            { x: 4, y: 3 },
+            { x: 5, y: 3 },
+          ],
+          latency: "",
+          head: { x: 2, y: 0 },
+          length: 9,
+          shout: "",
+          squad: "",
+        },
+        {
+          id: "other",
+          name: "other",
+          health: 0,
+          body: [
+            { x: 4, y: 0 },
+            { x: 3, y: 0 },
+            { x: 3, y: 1 },
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 3, y: 2 },
+            { x: 4, y: 2 },
+            { x: 4, y: 1 },
+          ],
+          latency: "",
+          head: { x: 4, y: 0 },
+          length: 8,
+          shout: "",
+          squad: "",
+        },
+      ],
+      hazards: [],
+    },
+    you: {
+      id: "me",
+      name: "me",
+      health: 0,
+      body: [
+        { x: 2, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+        { x: 1, y: 2 },
+        { x: 1, y: 3 },
+        { x: 2, y: 3 },
+        { x: 3, y: 3 },
+        { x: 4, y: 3 },
+        { x: 5, y: 3 },
+      ],
+      latency: "",
+      head: { x: 2, y: 0 },
+      length: 9,
+      shout: "",
+      squad: "",
+    },
+    blocks: { width: 8, height: 8, data: "505286174" },
+    mm: { myMove: "right", newHead: { x: 2, y: 0 }, turnId: "me" },
+  },
+];
 
 module.exports = {
   floodFillData,

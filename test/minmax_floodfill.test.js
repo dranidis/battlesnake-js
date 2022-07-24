@@ -22,6 +22,7 @@ beforeEach(() => {
   resetPreviousDeadlyMove();
   setBoardDimensions(5, 5);
   configuration.MINMAX_DEPTH = 2;
+  configuration.debug = false;
 });
 
 describe("twoPlayerSuggestedAttackingMove", () => {
@@ -66,6 +67,12 @@ describe("getPossibleMovesFloodFill", () => {
       { x: 6, y: 7 },
       { x: 5, y: 7 },
       { x: 4, y: 7 },
+      { x: 3, y: 7 },
+      { x: 2, y: 7 },
+      { x: 1, y: 7 },
+      { x: 0, y: 7 },
+      { x: 0, y: 6 },
+      { x: 0, y: 5 },
     ]);
     const other = createBattlesnake("other", [
       { x: 5, y: 2 },
@@ -74,6 +81,8 @@ describe("getPossibleMovesFloodFill", () => {
       { x: 4, y: 4 },
       { x: 3, y: 4 },
       { x: 2, y: 4 },
+      { x: 1, y: 4 },
+      { x: 1, y: 3 },
     ]);
     const gameState = createGameState(me, [me, other]);
     preprocess(gameState);
@@ -166,7 +175,7 @@ describe("getPossibleMovesFloodFill", () => {
     setBoardDimensions(10, 7);
 
     configuration.MINMAX_DEPTH = 2;
-    configuration.debug = true;
+    // configuration.debug = true;
     const me = createBattlesnake("me", [
       { x: 5, y: 6 },
       { x: 5, y: 5 },
