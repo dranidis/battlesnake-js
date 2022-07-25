@@ -17,7 +17,7 @@ const {
   squareAfterMove,
   applyMove,
 } = require("./move");
-const { getTrueKeys, bigIntSerializer } = require("./util");
+const { getTrueKeys, bigIntSerializer, getMaxKey } = require("./util");
 const { getPathTowardsClosestTail } = require("./path");
 const { MinMax } = require("./minmax");
 const { isTerminal, children, myChildren } = require("./battlesnake_minmax");
@@ -118,6 +118,19 @@ function getSquaresCountPerMove(gameState, depth) {
   return squaresCount;
 }
 
+function getSquaresCountPerLegalMove(gameState) {
+
+  const safeMoves = getTrueKeys(getMyPossibleMoves(gameState));
+
+  let squaresCount = {};
+  for (let index = 0; index < safeMoves.length; index++) {
+    const start = squareAfterMove(gameState.you.head, safeMoves[index]);
+    squaresCount[safeMoves[index]] = getFloodFillSquares(gameState, start);
+  }
+
+  return squaresCount;
+}
+
 function getPossibleMovesFloodFill(gameState) {
   let squaresCount;
 
@@ -139,17 +152,17 @@ function getPossibleMovesFloodFill(gameState) {
 
     const mmstart = Date.now();
     if (allSnakes.length > 3) {
-      const give = Math.max(remaining - 400, 50);
-      console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 3, 50);
-    } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 300, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 10, give);
+      squaresCount = bsMinMax(gameState, 3, 50, 4);
+    } else if (allSnakes.length == 3) {
+      const give = Math.max(remaining - 150, 50);
+      console.log("GIVE to mm", give);
+      squaresCount = bsMinMax(gameState, 10, give, 2);
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 10, give);
+      squaresCount = bsMinMax(gameState, 10, give, 1);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -158,18 +171,6 @@ function getPossibleMovesFloodFill(gameState) {
   console.log("FloodFill me : " + JSON.stringify(squaresCount));
 
   let possibleMoves = { up: false, down: false, left: false, right: false };
-
-  // if (gameState.board.snakes.length == 2) {
-  //   const oppSquaresCount = processOppFill(getFloodFillData);
-  //   console.log("FloodFill opp: " + JSON.stringify(oppSquaresCount));
-
-  //   const move = twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount);
-
-  //   if (move != null) {
-  //     possibleMoves[move] = true;
-  //     return possibleMoves;
-  //   }
-  // }
 
   ["up", "down", "right", "left"].forEach((direction) => {
     possibleMoves[direction] =
@@ -198,14 +199,11 @@ function getPossibleMovesFloodFill(gameState) {
       }
     }
     console.log(`MAX MOVE! `);
+   const maxMove = getMaxKey(squaresCount);
 
-    const maxMove = Object.keys(squaresCount).reduce(function (a, b) {
-      return squaresCount[a] > squaresCount[b] ? a : b;
-    });
     console.log(`MAX MOVE! ${maxMove}`);
     possibleMoves[maxMove] = true;
     return possibleMoves;
-    // squaresCount[maxMove] > gameState.you.length; // get the max move when all moves look bad
   }
   return possibleMoves;
 }
@@ -278,9 +276,10 @@ function floodFillEvaluation(gameState, snake) {
     : 0;
 }
 
-function bsMinMax(gameState, depth, ms) {
+function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
   const start = Date.now();
   const minmax = new MinMax(isTerminal, children, heuristic);
+  minmax.timePerRecursiveCall = timePerRecursiveCall;
   const result = myChildren(gameState).reduce((moveEval, state) => {
     moveEval[state.mm.myMove] = minmax.alphabetaTimed(
       state,
@@ -316,4 +315,5 @@ module.exports = {
   floodFillEvaluation,
   bsMinMax,
   heuristic,
+  getSquaresCountPerLegalMove,
 };

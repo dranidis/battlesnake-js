@@ -1,12 +1,16 @@
 const { configuration } = require("./config");
-const { distance, getTrueKeys } = require("./util");
+const { distance, getTrueKeys, getMaxKey } = require("./util");
 const { bsAStar } = require("./battlesnake_astar");
 const { preprocess } = require("./board");
 const { detectDeadlyMove, getDeadlyMove } = require("./traps");
 const { getMyPossibleMoves, squareAfterMove } = require("./move");
-const { getPossibleMovesFloodFill } = require("./minmax_floodfill");
+const {
+  getPossibleMovesFloodFill,
+  getSquaresCountPerLegalMove,
+} = require("./minmax_floodfill");
 const { getPathTowardsClosestTail } = require("./path");
 const { setStartTime, getStartTime } = require("./time");
+const { getFloodFillSquares } = require("./boardfill");
 
 const MAX_DISTANCE = 999;
 
@@ -191,8 +195,7 @@ function move(gameState) {
   console.log("\nTURN " + gameState.turn);
   preprocess(gameState);
 
-  const possibleMoves = getMyPossibleMoves(gameState);
-  const nextMoves = getTrueKeys(possibleMoves);
+  const legalMoves = getTrueKeys(getMyPossibleMoves(gameState));
 
   const possibleMovesLookAhead = getPossibleMovesFloodFill(gameState);
   console.log(
@@ -219,15 +222,15 @@ function move(gameState) {
 
   let isAttacking = otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
-  let targetDistance = MAX_DISTANCE;
   let safeTargetMoves = undefined;
 
   if (isAttacking) {
     console.log("isAttacking");
     target = otherSnakes.sort((s) => distance(myHead, s.head))[0].head;
+
+    // IMPORTANT: unset the head to make A* work
     gameState.blocks.unset(target.x, target.y);
 
-    // new code
     const pathsToTargetFromSafeMoves = safeMoves
       .map((m) => squareAfterMove(myHead, m))
       .map((sq) => pathToTargetAStar(gameState, sq, target));
@@ -236,45 +239,18 @@ function move(gameState) {
         .filter((p) => p.length > 0)
         .map((p) => p.length)
     );
-    console.log(
-      "target",
-      target,
-      "safe moves",
-      safeMoves,
-      "PATHS ",
-      pathsToTargetFromSafeMoves,
-      " sh dist ",
-      shortestDistance
-    );
 
     const shortestIndex = pathsToTargetFromSafeMoves.findIndex(
       (p) => p.length == shortestDistance
     );
-    console.log(
-      "Sh index ",
-      shortestIndex,
-      "PATH to target",
-      pathsToTargetFromSafeMoves[shortestIndex],
-      "FROM SAFE MOVE: ",
-      safeMoves[shortestIndex]
-    );
     safeTargetMoves = shortestIndex != -1 ? [safeMoves[shortestIndex]] : [];
 
+    // IMPORTANT: set the head back!!
     gameState.blocks.set(target.x, target.y);
-
-    // targetDistance = distance(myHead, target);
-    // let towardsSnake = moveTowardsTargetDirection(myHead, target);
-    // safeTargetMoves = Object.keys(towardsSnake).filter(
-    //   (key) =>
-    //     possibleMovesLookAhead[key] &&
-    //     possibleMovesAvoidingLongerHeads[key] &&
-    //     towardsSnake[key]
-    // );
   }
 
   const [towardsFoodMoves, distanceToCloserFood] =
     movesTowardsClosestFood(gameState);
-  // const [towardsFoodMoves, distanceToCloserFood] = foodPathsAStar(gameState);
 
   let safeFoodMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>
@@ -283,7 +259,7 @@ function move(gameState) {
       possibleMovesAvoidingLongerHeads[key]
   );
 
-  console.log("NEXT MOVES:     " + nextMoves);
+  console.log("NEXT MOVES:     " + legalMoves);
   console.log("SAF FOOD MOVES: " + safeFoodMoves);
   console.log("TOT SAFE MOVES: " + totallySafeMoves);
   console.log("FIN SAFE MOVES: " + safeMoves);
@@ -337,13 +313,17 @@ function move(gameState) {
     console.log(">> Chasing tails...");
     moveToMake = chaseTailMove;
   } else {
-    console.log(">> Wandering...");
-    moveToMake = pickMove(gameState, safeMoves);
+    console.log(">> Wandering... (totally safe move)");
+    moveToMake = pickMove(gameState, totallySafeMoves);
+
   }
 
   if (moveToMake == undefined) {
-    console.log(">>>>>> Desperate move!");
-    moveToMake = pickMove(gameState, nextMoves);
+    console.log(">>>>>> Desperate move (legal with max FF)!");
+    const squ = getSquaresCountPerLegalMove(gameState);
+    console.log(squ);
+    moveToMake = getMaxKey(squ);
+    // moveToMake = pickMove(gameState, legalMoves);
   }
 
   response = {

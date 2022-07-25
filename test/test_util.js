@@ -1,13 +1,6 @@
 const TIMES = 10;
-var boardHeight = 5;
-var boardWidth = 5;
 
-function setBoardDimensions(w, h) {
-  boardWidth = w;
-  boardHeight = h;
-}
-
-function createGameState(myBattlesnake, allSnakes) {
+function createGameState(myBattlesnake, allSnakes, boardWidth = 5, boardHeight = 5) {
   return {
     game: {
       id: "",
@@ -48,7 +41,4 @@ module.exports = {
   createGameState,
   createBattlesnake,
   addFood,
-  setBoardDimensions,
-  boardHeight,
-  boardWidth
 };

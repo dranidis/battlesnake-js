@@ -1,6 +1,5 @@
 const { bigIntSerializer } = require("./util");
 
-const TIME_PER_RECURSIVE_CALL = 2; // TIME substracted for each remaining rec call
 class MinMax {
   constructor(isTerminal, children, heuristic) {
     this.isTerminal = isTerminal;
@@ -9,6 +8,7 @@ class MinMax {
     this.stop = false;
     this.remainingRecursiveCalls = 0;
     this.totalCalls = 0;
+    this.timePerRecursiveCall = 2; // TIME substracted for each remaining rec call
   }
 
   alphabetaTimed(node, depth, alpha, beta, maximizingPlayer, ms) {
@@ -33,7 +33,7 @@ class MinMax {
 
     if (
       Date.now() >
-        endTime - TIME_PER_RECURSIVE_CALL * this.remainingRecursiveCalls ||
+        endTime - this.timePerRecursiveCall * this.remainingRecursiveCalls ||
       depth === 0 ||
       this.isTerminal(node)
     ) {

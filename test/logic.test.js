@@ -1,23 +1,20 @@
-const { createBattlesnake, createGameState, addFood, setBoardDimensions, boardHeight, boardWidth } = require("./test_util");
+const { createBattlesnake, createGameState, addFood } = require("./test_util");
 const { configuration } = require("../src/config");
-const { preprocess } = require("../src/board")
+const { preprocess } = require("../src/board");
 const { move, resetPreviousDeadlyMove } = require("../src/logic");
 const { isFood } = require("../src/move");
 const { getPathTowardsClosestTail } = require("../src/path");
-
 
 const TIMES = 5;
 
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-  setBoardDimensions(5,5)
-  configuration.MINMAX_DEPTH = 2
+  configuration.MINMAX_DEPTH = 2;
 });
 
 describe("Battlesnake Moves", () => {
   test("should never move into its own neck", () => {
-    // Arrange
     const me = createBattlesnake("me", [
       { x: 2, y: 0 },
       { x: 1, y: 0 },
@@ -34,7 +31,6 @@ describe("Battlesnake Moves", () => {
   });
 
   test("should never move outside the board bottom left", () => {
-    // Arrange
     const me = createBattlesnake("me", [{ x: 0, y: 0 }]);
     const gameState = createGameState(me, [me]);
 
@@ -47,7 +43,7 @@ describe("Battlesnake Moves", () => {
   });
 
   test("should never move outside the board top left", () => {
-    // Arrange
+    const boardHeight = 5;
     const me = createBattlesnake("me", [{ x: 0, y: boardHeight - 1 }]);
     const gameState = createGameState(me, [me]);
 
@@ -60,7 +56,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("should never move outside the board top right", () => {
-    // Arrange
+    const boardHeight = 5;
+    const boardWidth = 5;
     const me = createBattlesnake("me", [
       { x: boardWidth - 1, y: boardHeight - 1 },
     ]);
@@ -75,7 +72,7 @@ describe("Battlesnake Moves", () => {
   });
 
   test("should never move outside the board bottom right", () => {
-    // Arrange
+    const boardWidth = 5;
     const me = createBattlesnake("me", [{ x: boardWidth - 1, y: 0 }]);
     const gameState = createGameState(me, [me]);
 
@@ -88,7 +85,6 @@ describe("Battlesnake Moves", () => {
   });
 
   test("should never move to another snake, except to its tail", () => {
-    // Arrange
     const me = createBattlesnake("me", [
       { x: 3, y: 3 },
       { x: 3, y: 4 },
@@ -296,7 +292,7 @@ describe("Battlesnake Moves", () => {
   test("deadly attack up", () => {
     if (!configuration.CHECK_DEADLY_ATTACK) return;
 
-    // Arrange
+    const boardHeight = 5;
     console.log("deadly attack");
 
     const me = createBattlesnake("me", [
@@ -348,14 +344,14 @@ describe("Battlesnake Moves", () => {
   test("deadly attack right", () => {
     if (!configuration.CHECK_DEADLY_ATTACK) return;
 
-    // Arrange
+    const boardWidth = 5;
     console.log("deadly attack");
 
     const me = createBattlesnake("me", [
       { y: 3, x: boardWidth - 2 },
       { y: 2, x: boardWidth - 2 },
       { y: 1, x: boardWidth - 2 },
-      { y: 1, x: boardHeight - 3 },
+      { y: 1, x: boardWidth - 3 },
     ]);
     // other back 2 squares
     const other = createBattlesnake("other", [
@@ -407,7 +403,7 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 2", () => {
-    // other back 2 squares
+    const boardHeight = 5;
     const me = createBattlesnake("me", [{ x: 1, y: boardHeight - 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
@@ -418,6 +414,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 3", () => {
+    const boardWidth = 5;
+
     const me = createBattlesnake("me", [{ x: boardWidth - 1, y: 1 }]);
     const gameState = createGameState(me, [me]);
     for (let i = 0; i < TIMES; i++) {
@@ -428,7 +426,8 @@ describe("Battlesnake Moves", () => {
   });
 
   test("prefer going towards the center 4", () => {
-    // other back 2 squares
+    const boardHeight = 5;
+    const boardWidth = 5;
     const me = createBattlesnake("me", [
       { x: boardWidth - 1, y: boardHeight - 1 },
     ]);

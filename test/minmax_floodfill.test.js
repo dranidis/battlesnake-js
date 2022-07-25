@@ -1,10 +1,6 @@
 const {
   createBattlesnake,
   createGameState,
-  addFood,
-  setBoardDimensions,
-  boardHeight,
-  boardWidth,
 } = require("./test_util");
 const { configuration } = require("../src/config");
 const { preprocess } = require("../src/board");
@@ -21,7 +17,6 @@ const { setStartTime } = require("../src/time");
 // Applies to all tests in this file
 beforeEach(() => {
   resetPreviousDeadlyMove();
-  setBoardDimensions(5, 5);
   configuration.MINMAX_DEPTH = 2;
   configuration.debug = false;
   setStartTime(Date.now());
@@ -57,124 +52,96 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 });
 
 describe("getPossibleMovesFloodFill", () => {
-  // test("avoid getting trapped with 2 steps ahead flood-fill", () => {
-  //   if (configuration.MINMAX_DEPTH < 2) return;
-  //   setBoardDimensions(8, 8);
+  test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+    if (configuration.MINMAX_DEPTH < 2) return;
 
-  //   const me = createBattlesnake("me", [
-  //     { x: 6, y: 5 },
-  //     { x: 6, y: 6 },
-  //     { x: 7, y: 6 },
-  //     { x: 7, y: 7 },
-  //     { x: 6, y: 7 },
-  //     { x: 5, y: 7 },
-  //     { x: 4, y: 7 },
-  //     { x: 3, y: 7 },
-  //     { x: 2, y: 7 },
-  //     { x: 1, y: 7 },
-  //     { x: 0, y: 7 },
-  //     { x: 0, y: 6 },
-  //     { x: 0, y: 5 },
-  //   ]);
-  //   const other = createBattlesnake("other", [
-  //     { x: 5, y: 2 },
-  //     { x: 5, y: 3 },
-  //     { x: 5, y: 4 },
-  //     { x: 4, y: 4 },
-  //     { x: 3, y: 4 },
-  //     { x: 2, y: 4 },
-  //     { x: 1, y: 4 },
-  //     { x: 1, y: 3 },
-  //   ]);
-  //   const gameState = createGameState(me, [me, other]);
-  //   preprocess(gameState);
-  //   console.log(gameState.blocks.toString());
-
-  //   const moves = getPossibleMovesFloodFill(gameState);
-  //   const exp = {
-  //     up: false,
-  //     down: false,
-  //     left: true,
-  //     right: false,
-  //   };
-  //   expect(moves).toStrictEqual(exp);
-  // });
-
-  test("solving bug in FF 0 value is wrong for all moves (check with depth 2)", () => {
-    // other back 2 squares
-    configuration.MINMAX_DEPTH = 1;
     const me = createBattlesnake("me", [
-      { x: 1, y: 2 },
-      { x: 1, y: 3 },
-      { x: 2, y: 3 },
-      { x: 2, y: 4 },
-      { x: 1, y: 4 },
-      { x: 0, y: 4 },
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+      { x: 3, y: 7 },
+      { x: 2, y: 7 },
+      { x: 1, y: 7 },
+      { x: 0, y: 7 },
+      { x: 0, y: 6 },
+      { x: 0, y: 5 },
     ]);
     const other = createBattlesnake("other", [
-      { x: 3, y: 2 },
-      { x: 3, y: 1 },
-      { x: 2, y: 1 },
-      { x: 2, y: 0 },
-      { x: 1, y: 0 },
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
+      { x: 2, y: 4 },
+      { x: 1, y: 4 },
+      { x: 1, y: 3 },
+      { x: 0, y: 3 },
     ]);
-
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    configuration.MINMAX_DEPTH = 2;
-    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
     const moves = getPossibleMovesFloodFill(gameState);
-    console.log(`moves ${JSON.stringify(moves)}`);
     const exp = {
       up: false,
-      down: true,
-      left: false, // does not fit
+      down: false,
+      left: true,
       right: false,
     };
     expect(moves).toStrictEqual(exp);
   });
 
-  test("solving bug in FF 0 value is wrong for all moves (check with depth 1)", () => {
-    // other back 2 squares
-    configuration.MINMAX_DEPTH = 1;
+  test("(next move) avoid getting trapped with 2 steps ahead flood-fill", () => {
+    if (configuration.MINMAX_DEPTH < 2) return;
+
     const me = createBattlesnake("me", [
-      { x: 1, y: 2 },
-      { x: 1, y: 3 },
-      { x: 2, y: 3 },
+      { x: 7, y: 5 },
+      { x: 6, y: 5 },
+      { x: 6, y: 6 },
+      { x: 7, y: 6 },
+      { x: 7, y: 7 },
+      { x: 6, y: 7 },
+      { x: 5, y: 7 },
+      { x: 4, y: 7 },
+      { x: 3, y: 7 },
+      { x: 2, y: 7 },
+      { x: 1, y: 7 },
+      { x: 0, y: 7 },
+      { x: 0, y: 6 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 6, y: 2 },
+      { x: 5, y: 2 },
+      { x: 5, y: 3 },
+      { x: 5, y: 4 },
+      { x: 4, y: 4 },
+      { x: 3, y: 4 },
       { x: 2, y: 4 },
       { x: 1, y: 4 },
       { x: 0, y: 4 },
     ]);
-    const other = createBattlesnake("other", [
-      { x: 3, y: 2 },
-      { x: 3, y: 1 },
-      { x: 2, y: 1 },
-      { x: 2, y: 0 },
-      { x: 1, y: 0 },
-    ]);
-
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    configuration.MINMAX_DEPTH = 1;
-    console.log("MIN_MAN_DEPTH " + configuration.MINMAX_DEPTH);
     const moves = getPossibleMovesFloodFill(gameState);
-    console.log(`moves ${JSON.stringify(moves)}`);
     const exp = {
       up: false,
       down: true,
-      left: false, // does not fit
+      left: false,
       right: false,
     };
     expect(moves).toStrictEqual(exp);
   });
 
+  
+  
   test("left only one option, right more options", () => {
     // other back 2 squares
-    setBoardDimensions(10, 7);
 
     configuration.MINMAX_DEPTH = 2;
     // configuration.debug = true;
@@ -194,7 +161,7 @@ describe("getPossibleMovesFloodFill", () => {
       { x: 1, y: 1 },
     ]);
 
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 10, 7);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
@@ -248,7 +215,6 @@ describe("getPossibleMovesFloodFill", () => {
 
 describe("floodFillEvaluation", () => {
   test("floodFillEvaluation", () => {
-    setBoardDimensions(8, 8);
 
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
@@ -267,7 +233,7 @@ describe("floodFillEvaluation", () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
@@ -279,7 +245,6 @@ describe("floodFillEvaluation", () => {
 
 describe("getSquaresCountPerMove", () => {
   test("getSquaresCountPerMove", () => {
-    setBoardDimensions(8, 8);
 
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
@@ -298,7 +263,7 @@ describe("getSquaresCountPerMove", () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 

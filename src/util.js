@@ -16,6 +16,13 @@ function getTrueKeys(obj) {
   return Object.keys(obj).filter((key) => obj[key]);
 }
 
+function getMaxKey(squaresCount) {
+  if (Object.keys(squaresCount).length == 0) return null;
+  return Object.keys(squaresCount).reduce(function (a, b) {
+    return squaresCount[a] > squaresCount[b] ? a : b;
+  });
+}
+
 function isEqual(p1, p2) {
   return p1.x == p2.x && p1.y == p2.y;
 }
@@ -57,13 +64,17 @@ function combine(listOfMovesList) {
   const rest = listOfMovesList.splice(1);
   const restCombinations = combine(rest);
 
-  const result = first.reduce((prev, current) => 
-    prev.concat(restCombinations.reduce((prev, comb) => {
-      const m = [current].concat(comb);
-      prev.push(m);
-      return prev;
-    }, []))
-  , []);
+  const result = first.reduce(
+    (prev, current) =>
+      prev.concat(
+        restCombinations.reduce((prev, comb) => {
+          const m = [current].concat(comb);
+          prev.push(m);
+          return prev;
+        }, [])
+      ),
+    []
+  );
 
   return result;
 }
@@ -79,4 +90,5 @@ module.exports = {
   isEqual,
   bigIntSerializer,
   combine,
+  getMaxKey
 };

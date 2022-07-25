@@ -2,17 +2,10 @@ const {
   createBattlesnake,
   createGameState,
   addFood,
-  setBoardDimensions,
 } = require("./test_util");
 const { preprocess } = require("../src/board");
 const { applyMove, isFood } = require("../src/move");
 const { getMyPossibleMoves } = require("../src/move");
-
-// Applies to all tests in this file
-beforeEach(() => {
-  boardHeight = 5;
-  boardWidth = 5;
-});
 
 describe("getMyPossibleMoves", () => {
   test("can go to it's tail", () => {
@@ -98,7 +91,6 @@ describe("getMyPossibleMoves", () => {
 });
 describe("applyMove", () => {
   test("applyMove changes right head of other snake", () => {
-    setBoardDimensions(8, 8);
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
       { x: 6, y: 6 },
@@ -116,7 +108,7 @@ describe("applyMove", () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
@@ -130,7 +122,6 @@ describe("applyMove", () => {
   });
 
   test("applyMove changes head of you and your snake in snakes", () => {
-    setBoardDimensions(8, 8);
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
       { x: 6, y: 6 },
@@ -148,7 +139,7 @@ describe("applyMove", () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 

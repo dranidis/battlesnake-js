@@ -1,35 +1,9 @@
-const {
-  createBattlesnake,
-  createGameState,
-  setBoardDimensions,
-} = require("./test_util");
-const { configuration } = require("../src/config");
+const { createBattlesnake, createGameState } = require("./test_util");
 const { preprocess } = require("../src/board");
-const { resetPreviousDeadlyMove } = require("../src/logic");
-
-const {
-  bsMinMax,
-  getPossibleMovesFloodFill,
-  heuristic,
-} = require("../src/minmax_floodfill");
-const {
-  myChildren,
-  children,
-  isTerminal,
-} = require("../src/battlesnake_minmax");
-const { getSnakePossibleMoves } = require("../src/move");
-
-// Applies to all tests in this file
-beforeEach(() => {
-  resetPreviousDeadlyMove();
-  setBoardDimensions(5, 5);
-  configuration.MINMAX_DEPTH = 2;
-});
+const { bsMinMax } = require("../src/minmax_floodfill");
 
 describe("min max", () => {
   test("min max", () => {
-    setBoardDimensions(8, 8);
-
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },
       { x: 6, y: 6 },
@@ -47,7 +21,7 @@ describe("min max", () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
@@ -83,8 +57,6 @@ describe("bsMinMax", () => {
 
 describe("bsMinMax 2", () => {
   test("bsMinMax 2", () => {
-    setBoardDimensions(8, 8);
-
     const me = createBattlesnake("me", [
       { x: 1, y: 0 },
       { x: 1, y: 1 },
@@ -106,23 +78,9 @@ describe("bsMinMax 2", () => {
       { x: 4, y: 1 },
       { x: 4, y: 0 },
     ]);
-    const gameState = createGameState(me, [me, other]);
+    const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    console.log(getSnakePossibleMoves(gameState, other));
-    // console.log(heuristic(gameState));
-
-    // console.log(JSON.stringify(myChildren(gameState), null, 2))
-    // console.log(
-    //   JSON.stringify(
-    //     children(myChildren(gameState)[1]),
-    //     (key, value) => (typeof value === "bigint" ? value.toString() : value),
-    //     2
-    //   )
-    // );
-    // const gs = children(myChildren(gameState)[1])[1];
-    // console.log(isTerminal(gs), heuristic(gs));
-
     const val = bsMinMax(gameState, 100, 500);
     console.log("VAL", val);
     expect(val.right).toBe(0);
