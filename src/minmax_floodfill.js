@@ -156,11 +156,11 @@ function getPossibleMovesFloodFill(gameState) {
       console.log("GIVE to mm", give);
       squaresCount = bsMinMax(gameState, 3, 50, 4);
     } else if (allSnakes.length == 3) {
-      const give = Math.max(remaining - 150, 50);
+      const give = Math.max(remaining - 200, 50);
       console.log("GIVE to mm", give);
       squaresCount = bsMinMax(gameState, 10, give, 2);
     } else {
-      const give = Math.max(remaining - 50, 50);
+      const give = Math.max(remaining - 100, 50);
       console.log("GIVE to mm", give);
       squaresCount = bsMinMax(gameState, 10, give, 1);
     }
