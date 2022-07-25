@@ -140,7 +140,8 @@ function getPossibleMovesFloodFill(gameState) {
     const mmstart = Date.now();
     if (allSnakes.length > 3) {
       const give = Math.max(remaining - 400, 50);
-      console.log("GIVE to mm", give);      squaresCount = bsMinMax(gameState, 3, 50);
+      console.log("GIVE to mm", give);
+      squaresCount = bsMinMax(gameState, 3, 50);
     } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 300, 50);
       console.log("GIVE to mm", give);
@@ -148,7 +149,7 @@ function getPossibleMovesFloodFill(gameState) {
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 10, give);      
+      squaresCount = bsMinMax(gameState, 10, give);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -278,28 +279,9 @@ function floodFillEvaluation(gameState, snake) {
 }
 
 function bsMinMax(gameState, depth, ms) {
+  const start = Date.now();
   const minmax = new MinMax(isTerminal, children, heuristic);
-
-  // let moveEval = {}
-  // const my_children = myChildren(gameState);
-  // for (let i = 0; i < my_children.length; i++) {
-  //   const child = my_children[i];
-  //   console.log(JSON.stringify(child, bigIntSerializer, 2));
-  //   const value = minmax.alphabetaTimed(
-  //     child,
-  //     depth,
-  //     -Infinity,
-  //     Infinity,
-  //     false,
-  //     ms
-  //   );
-  //   console.log(value);
-  //   moveEval[child.mm.myMove] = value
-  // }
-
-  // return moveEval
-
-  return myChildren(gameState).reduce((moveEval, state) => {
+  const result = myChildren(gameState).reduce((moveEval, state) => {
     moveEval[state.mm.myMove] = minmax.alphabetaTimed(
       state,
       depth,
@@ -310,6 +292,9 @@ function bsMinMax(gameState, depth, ms) {
     );
     return moveEval;
   }, {});
+  console.log("Time per call", (Date.now() -start) / minmax.totalCalls);
+
+  return result;
 }
 
 function heuristic(gameState) {
