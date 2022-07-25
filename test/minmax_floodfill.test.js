@@ -57,48 +57,48 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 });
 
 describe("getPossibleMovesFloodFill", () => {
-  test("avoid getting trapped with 2 steps ahead flood-fill", () => {
-    if (configuration.MINMAX_DEPTH < 2) return;
-    setBoardDimensions(8, 8);
+  // test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+  //   if (configuration.MINMAX_DEPTH < 2) return;
+  //   setBoardDimensions(8, 8);
 
-    const me = createBattlesnake("me", [
-      { x: 6, y: 5 },
-      { x: 6, y: 6 },
-      { x: 7, y: 6 },
-      { x: 7, y: 7 },
-      { x: 6, y: 7 },
-      { x: 5, y: 7 },
-      { x: 4, y: 7 },
-      { x: 3, y: 7 },
-      { x: 2, y: 7 },
-      { x: 1, y: 7 },
-      { x: 0, y: 7 },
-      { x: 0, y: 6 },
-      { x: 0, y: 5 },
-    ]);
-    const other = createBattlesnake("other", [
-      { x: 5, y: 2 },
-      { x: 5, y: 3 },
-      { x: 5, y: 4 },
-      { x: 4, y: 4 },
-      { x: 3, y: 4 },
-      { x: 2, y: 4 },
-      { x: 1, y: 4 },
-      { x: 1, y: 3 },
-    ]);
-    const gameState = createGameState(me, [me, other]);
-    preprocess(gameState);
-    console.log(gameState.blocks.toString());
+  //   const me = createBattlesnake("me", [
+  //     { x: 6, y: 5 },
+  //     { x: 6, y: 6 },
+  //     { x: 7, y: 6 },
+  //     { x: 7, y: 7 },
+  //     { x: 6, y: 7 },
+  //     { x: 5, y: 7 },
+  //     { x: 4, y: 7 },
+  //     { x: 3, y: 7 },
+  //     { x: 2, y: 7 },
+  //     { x: 1, y: 7 },
+  //     { x: 0, y: 7 },
+  //     { x: 0, y: 6 },
+  //     { x: 0, y: 5 },
+  //   ]);
+  //   const other = createBattlesnake("other", [
+  //     { x: 5, y: 2 },
+  //     { x: 5, y: 3 },
+  //     { x: 5, y: 4 },
+  //     { x: 4, y: 4 },
+  //     { x: 3, y: 4 },
+  //     { x: 2, y: 4 },
+  //     { x: 1, y: 4 },
+  //     { x: 1, y: 3 },
+  //   ]);
+  //   const gameState = createGameState(me, [me, other]);
+  //   preprocess(gameState);
+  //   console.log(gameState.blocks.toString());
 
-    const moves = getPossibleMovesFloodFill(gameState);
-    const exp = {
-      up: false,
-      down: false,
-      left: true,
-      right: false,
-    };
-    expect(moves).toStrictEqual(exp);
-  });
+  //   const moves = getPossibleMovesFloodFill(gameState);
+  //   const exp = {
+  //     up: false,
+  //     down: false,
+  //     left: true,
+  //     right: false,
+  //   };
+  //   expect(moves).toStrictEqual(exp);
+  // });
 
   test("solving bug in FF 0 value is wrong for all moves (check with depth 2)", () => {
     // other back 2 squares

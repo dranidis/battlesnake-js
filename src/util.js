@@ -39,6 +39,38 @@ function doCallManyTimes(maxIndices, func, args, index) {
   }
 }
 
+/**
+ *  combine receives a list with a list of moves 
+ * for each snake: [[u, r], [d, u], [d, l,r]] 
+    and produces a list of all combinations:
+    [[u,d,d], [u,d,l], [u,d,r],
+     [u,u,d], [u,u,l], [u,u,r],
+     [r,d,d], [r,d,l], [r,d,r],
+     [r,u,d], [r,u,l], [r,u,r]]
+ * @param {*} listOfMovesList 
+ * @returns 
+ */
+function combine(listOfMovesList) {
+  if (listOfMovesList.length == 0) return [];
+  if (listOfMovesList.length == 1) return listOfMovesList[0].map((m) => [m]);
+  const first = listOfMovesList[0];
+  const rest = listOfMovesList.splice(1);
+  const restCombinations = combine(rest);
+  console.log(restCombinations);
+
+  const result = first.reduce((prev, current) => 
+    prev.concat(restCombinations.reduce((prev, comb) => {
+      const m = [current].concat(comb);
+      prev.push(m);
+      console.log("prev", prev)
+      return prev;
+    }, []))
+  , []);
+
+  console.log("R", result);
+  return result;
+}
+
 const bigIntSerializer = (key, value) =>
   typeof value === "bigint" ? value.toString() : value;
 
@@ -48,5 +80,6 @@ module.exports = {
   indexToCoord,
   getTrueKeys,
   isEqual,
-  bigIntSerializer
+  bigIntSerializer,
+  combine,
 };
