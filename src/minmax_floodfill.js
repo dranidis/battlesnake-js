@@ -119,29 +119,37 @@ function getSquaresCountPerMove(gameState, depth) {
 }
 
 function getPossibleMovesFloodFill(gameState) {
-  // console.log(`INIT STATE ${gameState.blocks.toString()}`);
-  const otherSnakes = gameState.board.snakes;
-
-  const getFloodFillData = getSquaresCountPerMove(
-    gameState,
-    configuration.MINMAX_DEPTH
-  );
-  if (configuration.debug)
-    console.log(
-      `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
-    );
-
   let squaresCount;
-  if (otherSnakes.length != 2) {
+
+  const allSnakes = gameState.board.snakes;
+
+  if (allSnakes.length == 1) {
+    const getFloodFillData = getSquaresCountPerMove(
+      gameState,
+      configuration.MINMAX_DEPTH
+    );
+    if (configuration.debug)
+      console.log(
+        `Return squaresCount ${JSON.stringify(getFloodFillData, null, 4)}`
+      );
     squaresCount = processMyFill(getFloodFillData);
   } else {
     const remaining = getRemainingTime();
     console.log("REMAINING", remaining);
-    const give = Math.max(remaining - 50, 50);
-    console.log("GIVE to mm", give);
 
     const mmstart = Date.now();
-    squaresCount = bsMinMax(gameState, 20, give);
+    if (allSnakes.length > 3) {
+      const give = Math.max(remaining - 400, 50);
+      console.log("GIVE to mm", give);      squaresCount = bsMinMax(gameState, 3, 50);
+    } else if (allSnakes.length == 3) {
+      const give = Math.max(remaining - 300, 50);
+      console.log("GIVE to mm", give);
+      squaresCount = bsMinMax(gameState, 10, give);
+    } else {
+      const give = Math.max(remaining - 50, 50);
+      console.log("GIVE to mm", give);
+      squaresCount = bsMinMax(gameState, 10, give);      
+    }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
   }

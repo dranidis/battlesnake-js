@@ -56,18 +56,15 @@ function combine(listOfMovesList) {
   const first = listOfMovesList[0];
   const rest = listOfMovesList.splice(1);
   const restCombinations = combine(rest);
-  console.log(restCombinations);
 
   const result = first.reduce((prev, current) => 
     prev.concat(restCombinations.reduce((prev, comb) => {
       const m = [current].concat(comb);
       prev.push(m);
-      console.log("prev", prev)
       return prev;
     }, []))
   , []);
 
-  console.log("R", result);
   return result;
 }
 

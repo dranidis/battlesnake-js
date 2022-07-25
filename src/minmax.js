@@ -1,6 +1,6 @@
 const { bigIntSerializer } = require("./util");
 
-const TIME_PER_RECURSIVE_CALL = 1; // TIME substracted for each remaining rec call
+const TIME_PER_RECURSIVE_CALL = 3; // TIME substracted for each remaining rec call
 class MinMax {
   constructor(isTerminal, children, heuristic) {
     this.isTerminal = isTerminal;
