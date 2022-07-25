@@ -75,7 +75,7 @@ describe("bsMinMax", () => {
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    const val = bsMinMax(gameState, 5, 200);
+    const val = bsMinMax(gameState, 50, 200);
     console.log(val);
     expect(val.down).toBe(0);
   });
@@ -123,7 +123,7 @@ describe("bsMinMax 2", () => {
     // const gs = children(myChildren(gameState)[1])[1];
     // console.log(isTerminal(gs), heuristic(gs));
 
-    const val = bsMinMax(gameState, 100, 5);
+    const val = bsMinMax(gameState, 100, 500);
     console.log("VAL", val);
     expect(val.right).toBe(0);
   });

@@ -1,18 +1,19 @@
 const { bigIntSerializer } = require("./util");
 
+const TIME_PER_RECURSIVE_CALL = 1; // TIME substracted for each remaining rec call
 class MinMax {
   constructor(isTerminal, children, heuristic) {
     this.isTerminal = isTerminal;
     this.children = children;
     this.heuristic = heuristic;
     this.stop = false;
-    this.calls = 0;
+    this.remainingRecursiveCalls = 0;
   }
 
   alphabetaTimed(node, depth, alpha, beta, maximizingPlayer, ms) {
     const start = Date.now();
     const endAt = start + ms;
-    this.calls = 0;
+    this.remainingRecursiveCalls = 0;
     // console.log(`NOW: ${Date.now()} end at: ${endAt}`)
     // console.log("START", start)
     return this.alphabeta(node, depth, alpha, beta, maximizingPlayer, endAt);
@@ -26,11 +27,17 @@ class MinMax {
     // if (Date.now() > endTime) console.log("TIME OUT!");
     // if (this.isTerminal(node)) console.log("Terminal node reached");
 
-    this.calls++
+    this.remainingRecursiveCalls++;
 
-    if (Date.now() > endTime - (2 * this.calls) || depth === 0 || this.isTerminal(node)) {
+    if (
+      Date.now() >
+        endTime - TIME_PER_RECURSIVE_CALL * this.remainingRecursiveCalls ||
+      depth === 0 ||
+      this.isTerminal(node)
+    ) {
       // console.log("depth", depth, "terminal?", this.isTerminal(node));
-      this.calls--
+      this.remainingRecursiveCalls--;
+      // console.log("remainingRecursiveCalls", this.remainingRecursiveCalls, "DEPTH", depth);
       return this.heuristic(node);
     }
     if (maximizingPlayer) {

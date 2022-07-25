@@ -16,6 +16,7 @@ const {
   getSquaresCountPerMove,
   floodFillEvaluation,
 } = require("../src/minmax_floodfill");
+const { setStartTime } = require("../src/time");
 
 // Applies to all tests in this file
 beforeEach(() => {
@@ -23,6 +24,7 @@ beforeEach(() => {
   setBoardDimensions(5, 5);
   configuration.MINMAX_DEPTH = 2;
   configuration.debug = false;
+  setStartTime(Date.now());
 });
 
 describe("twoPlayerSuggestedAttackingMove", () => {
