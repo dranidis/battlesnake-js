@@ -298,7 +298,8 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
 
 function heuristic(gameState) {
   if (isTerminal(gameState)) {
-    if (gameState.you.lost) return 0;
+    const myMoves = getTrueKeys(getMyPossibleMoves(gameState));
+    if (myMoves.length == 0 || gameState.you.lost) return 0;
   }
 
   otherSnakeMoves = gameState.board.snakes
@@ -312,7 +313,9 @@ function heuristic(gameState) {
   // const oppmoves = getTrueKeys(getSnakePossibleMoves(gameState, otherSnake));
   // if (oppmoves.length == 0) return FF_MAX_VALUE;
 
-  return floodFillEvaluation(gameState, gameState.you);
+  const floodFill = floodFillEvaluation(gameState, gameState.you);
+  const health = gameState.you.health / 5;
+  return floodFill + health;
 }
 
 module.exports = {

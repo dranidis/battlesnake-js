@@ -43,11 +43,13 @@ function squareAfterMove(sq, aMove) {
 function applyMoveToSnake(newGameState, snake, newHead) {
   if (!isFood(newGameState, newHead)) {
     snake.body.pop();
+    snake.health--;
   } else {
     // console.log(`FOOD CONSUMED at ${JSON.stringify(newHead)}`)
     newGameState.board.food.filter((f) =>
       isEqual(f, newHead)
     )[0].consumed = true;
+    snake.health = 100;
   }
   snake.body.unshift(newHead);
   snake.head = newHead;
