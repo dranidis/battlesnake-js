@@ -6,7 +6,7 @@ const {
   wrong_FF_values,
   wrong_FF_values_2,
 } = require("./test_json");
-const { processMyFill, processOppFill } = require("../src/process_ffdata");
+const { processMyFill, processOppFill, FF_MAX_VALUE } = require("../src/process_ffdata");
 
 describe("read ff data", () => {
   test("read file test_json", () => {
@@ -57,8 +57,8 @@ describe("read ff data", () => {
     const ffData = processOppFill(bothDie);
     console.log(ffData);
     expect(ffData.up).toBe(21);
-    expect(ffData.down).toBe(999);
-    expect(ffData.right).toBe(999);
+    expect(ffData.down).toBe(FF_MAX_VALUE);
+    expect(ffData.right).toBe(FF_MAX_VALUE);
     // expect(allowedMoves).toContain(moveResponse.move);
   });
 

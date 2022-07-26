@@ -1,4 +1,4 @@
-const FF_MAX_VALUE = 999;
+const FF_MAX_VALUE = Infinity;
 
 function processMyFill(floodFillData) {
   return processFill(floodFillData, true);

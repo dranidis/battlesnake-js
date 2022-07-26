@@ -53,7 +53,15 @@ describe("twoPlayerSuggestedAttackingMove", () => {
 
 describe("getPossibleMovesFloodFill", () => {
   test("avoid getting trapped with 2 steps ahead flood-fill", () => {
+
+    // TODO:
+    //
+    // test succeeds only with depth 7
+    // in minmax_floodfill.js
+    // IN greated depths results are not correct!!
+    //
     if (configuration.MINMAX_DEPTH < 2) return;
+    setStartTime(Date.now());
 
     const me = createBattlesnake("me", [
       { x: 6, y: 5 },

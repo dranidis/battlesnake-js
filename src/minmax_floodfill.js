@@ -119,7 +119,6 @@ function getSquaresCountPerMove(gameState, depth) {
 }
 
 function getSquaresCountPerLegalMove(gameState) {
-
   const safeMoves = getTrueKeys(getMyPossibleMoves(gameState));
 
   let squaresCount = {};
@@ -158,11 +157,11 @@ function getPossibleMovesFloodFill(gameState) {
     } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 200, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 10, give, 2);
+      squaresCount = bsMinMax(gameState, 9, give, 2);
     } else {
-      const give = Math.max(remaining - 100, 50);
+      const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 10, give, 1);
+      squaresCount = bsMinMax(gameState, 7, give, 2);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -199,7 +198,7 @@ function getPossibleMovesFloodFill(gameState) {
       }
     }
     console.log(`MAX MOVE! `);
-   const maxMove = getMaxKey(squaresCount);
+    const maxMove = getMaxKey(squaresCount);
 
     console.log(`MAX MOVE! ${maxMove}`);
     possibleMoves[maxMove] = true;
@@ -280,18 +279,19 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
   const start = Date.now();
   const minmax = new MinMax(isTerminal, children, heuristic);
   minmax.timePerRecursiveCall = timePerRecursiveCall;
-  const result = myChildren(gameState).reduce((moveEval, state) => {
+  const myChildrenStates = myChildren(gameState);
+  const result = myChildrenStates.reduce((moveEval, state) => {
     moveEval[state.mm.myMove] = minmax.alphabetaTimed(
       state,
       depth,
       -Infinity,
       Infinity,
       false,
-      ms
+      ms / myChildrenStates.length
     );
     return moveEval;
   }, {});
-  console.log("Time per call", (Date.now() -start) / minmax.totalCalls);
+  console.log("Time per call", (Date.now() - start) / minmax.nodesVisited);
 
   return result;
 }
@@ -301,9 +301,16 @@ function heuristic(gameState) {
     if (gameState.you.lost) return 0;
   }
 
-  otherSnake = gameState.board.snakes.find((s) => s.id != gameState.you.id);
-  const oppmoves = getTrueKeys(getSnakePossibleMoves(gameState, otherSnake));
-  if (oppmoves.length == 0) return FF_MAX_VALUE;
+  otherSnakeMoves = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id)
+    .map((otherSnake) =>
+      getTrueKeys(getSnakePossibleMoves(gameState, otherSnake))
+    );
+
+    if (otherSnakeMoves.some(m => m.length == 0))
+    return FF_MAX_VALUE;
+  // const oppmoves = getTrueKeys(getSnakePossibleMoves(gameState, otherSnake));
+  // if (oppmoves.length == 0) return FF_MAX_VALUE;
 
   return floodFillEvaluation(gameState, gameState.you);
 }

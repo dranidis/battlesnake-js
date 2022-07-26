@@ -25,7 +25,9 @@ describe("min max", () => {
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    const val = bsMinMax(gameState, 5, 200);
+    // give endless time
+    const val = bsMinMax(gameState, 5, Infinity);
+    console.log(val);
     const exp = { down: 2, left: 53, right: 50 };
     expect(val).toStrictEqual(exp);
   });
@@ -85,4 +87,137 @@ describe("bsMinMax 2", () => {
     console.log("VAL", val);
     expect(val.right).toBe(0);
   });
+});
+
+describe("bsMinMax 11x11", () => {
+  test("bsMinMax 11x11", () => {
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 2, y: 2 },
+    ]);
+    const gameState = createGameState(me, [me, other], 11, 11);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    const val = bsMinMax(gameState, 100, 5000);
+    console.log("VAL", val);
+    expect(val.right).toBe(val.left);
+  });
+
+  test("bsMinMax 11x11 2", () => {
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 6 },
+      { x: 3, y: 7 },
+      { x: 2, y: 7 },
+      { x: 2, y: 8 },
+    ]);
+    const gameState = createGameState(me, [me, other], 11, 11);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    const val = bsMinMax(gameState, 8, Infinity);
+    console.log("VAL", val);
+    expect(val.right).toBe(val.left);
+  });
+
+  test("bsMinMax 11x11 2 limited time", () => {
+    const me = createBattlesnake("me", [
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 3, y: 6 },
+      { x: 3, y: 7 },
+      { x: 2, y: 7 },
+      { x: 2, y: 8 },
+    ]);
+    const gameState = createGameState(me, [me, other], 11, 11);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    const val = bsMinMax(gameState, Infinity, 400, 2);
+    console.log("VAL", val);
+    expect(val.right).toBe(val.left);
+  });
+
+
+  test("bsMinMax 11x11 2 limited time (trapped)", () => {
+    const me = createBattlesnake("me", [
+      { x: 0, y: 9 },
+      { x: 1, y: 9 },
+      { x: 2, y: 9 },
+      { x: 3, y: 9 },
+      { x: 4, y: 9 },
+      { x: 5, y: 9 },
+      { x: 6, y: 9 },
+      { x: 7, y: 9 },
+      { x: 8, y: 9 },
+      { x: 9, y: 9 },
+      { x: 10, y: 9 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 2, y: 6 },
+      { x: 2, y: 7 },
+      { x: 2, y: 8 },
+      { x: 3, y: 8 },
+      { x: 4, y: 8 },
+      { x: 5, y: 8 },
+      { x: 6, y: 8 },
+      { x: 7, y: 8 },
+      { x: 8, y: 8 },
+      { x: 9, y: 8 },
+      { x: 9, y: 7 },
+    ]);
+    const gameState = createGameState(me, [me, other], 11, 11);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    const val = bsMinMax(gameState, 15, 10000, 2.5);
+    console.log("VAL", val);
+    expect(val.down).toBe(0);
+  });
+
+  test("bsMinMax 11x11 2 limited time (trapped in 1)", () => {
+    const me = createBattlesnake("me", [
+      { x: 0, y: 9 },
+      { x: 1, y: 9 },
+      { x: 2, y: 9 },
+      { x: 3, y: 9 },
+      { x: 4, y: 9 },
+      { x: 5, y: 9 },
+      { x: 6, y: 9 },
+      { x: 7, y: 9 },
+      { x: 8, y: 9 },
+      { x: 9, y: 9 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x:1, y: 6 },
+      { x: 2, y: 6 },
+      { x: 2, y: 7 },
+      { x: 2, y: 8 },
+      { x: 3, y: 8 },
+      { x: 4, y: 8 },
+      { x: 5, y: 8 },
+      { x: 6, y: 8 },
+      { x: 7, y: 8 },
+      { x: 8, y: 8 },
+    ]);
+    const gameState = createGameState(me, [me, other], 11, 11);
+    preprocess(gameState);
+    console.log(gameState.blocks.toString());
+    const val = bsMinMax(gameState, Infinity, 400, 2.5);
+    console.log("VAL", val);
+    expect(val.down).toBe(0);
+  });
+
+
 });

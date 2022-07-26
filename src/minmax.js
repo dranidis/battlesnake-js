@@ -7,7 +7,7 @@ class MinMax {
     this.heuristic = heuristic;
     this.stop = false;
     this.remainingRecursiveCalls = 0;
-    this.totalCalls = 0;
+    this.nodesVisited = 0;
     this.timePerRecursiveCall = 2; // TIME substracted for each remaining rec call
   }
 
@@ -17,8 +17,9 @@ class MinMax {
     this.remainingRecursiveCalls = 0;
     // console.log(`NOW: ${Date.now()} end at: ${endAt}`)
     // console.log("START", start)
-    return this.alphabeta(node, depth, alpha, beta, maximizingPlayer, endAt);
-  }
+    const result = this.alphabeta(node, depth, alpha, beta, maximizingPlayer, endAt);
+    console.log(`MinMax: nodes: ${this.nodesVisited} time: ${Date.now() - start}`)
+    return result;  }
 
   alphabeta(node, depth, alpha, beta, maximizingPlayer, endTime, recCalls) {
     // console.log("END TIME at", endTime)
@@ -28,7 +29,7 @@ class MinMax {
     // if (Date.now() > endTime) console.log("TIME OUT!");
     // if (this.isTerminal(node)) console.log("Terminal node reached");
 
-    this.totalCalls++;
+    this.nodesVisited++;
     this.remainingRecursiveCalls++;
 
     if (
