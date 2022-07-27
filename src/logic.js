@@ -315,7 +315,6 @@ function move(gameState) {
   } else {
     console.log(">> Wandering... (totally safe move)");
     moveToMake = pickMove(gameState, totallySafeMoves);
-
   }
 
   if (moveToMake == undefined) {

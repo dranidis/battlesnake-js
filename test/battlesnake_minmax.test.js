@@ -55,7 +55,7 @@ describe("bsMinMax", () => {
 
     const val = bsMinMax(gameState, 7, Infinity);
     console.log(val);
-    expect(val.down).toBe(0);
+    expect(val.down).toBeLessThan(1);
   });
 });
 
@@ -87,7 +87,7 @@ describe("bsMinMax 2", () => {
     console.log(gameState.blocks.toString());
     const val = bsMinMax(gameState, 7, Infinity);
     console.log("VAL", val);
-    expect(val.right).toBe(0);
+    expect(val.right).toBeLessThan(1);
   });
 });
 
@@ -109,7 +109,7 @@ describe("bsMinMax 11x11", () => {
     console.log(gameState.blocks.toString());
     const val = bsMinMax(gameState, 7, Infinity);
     console.log("VAL", val);
-    expect(val.right).toBe(0);
+    expect(val.right).toBeLessThan(1);
   });
 
   test("bsMinMax 11x11 2", () => {
@@ -186,7 +186,7 @@ describe("bsMinMax 11x11", () => {
     console.log(gameState.blocks.toString());
     const val = bsMinMax(gameState, 7, Infinity, 2.5);
     console.log("VAL", val);
-    expect(val.down).toBe(0);
+    expect(val.down).toBeLessThan(1);
   });
 
   test("bsMinMax 11x11 2 limited time (trapped in 1)", () => {
@@ -219,7 +219,7 @@ describe("bsMinMax 11x11", () => {
     console.log(gameState.blocks.toString());
     const val = bsMinMax(gameState, 5,Infinity, 2.5);
     console.log("VAL", val);
-    expect(val.down).toBe(0);
+    expect(val.down).toBeLessThan(1);
   });
 
   test("bsMinMax loses in two moves (head to head)", () => {
@@ -249,7 +249,7 @@ describe("bsMinMax 11x11", () => {
     console.log(gameState.blocks.toString());
     const val = bsMinMax(gameState, 6, Infinity, 2.5);
     console.log("VAL", val);
-    expect(val.down).toBe(0);
+    expect(val.down).toBeLessThan(1);
   });
 
 

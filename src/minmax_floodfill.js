@@ -167,7 +167,10 @@ function getPossibleMovesFloodFill(gameState) {
     console.log("Remaining time after mm", getRemainingTime());
   }
 
-  console.log("FloodFill me : " + JSON.stringify(squaresCount));
+  console.log(
+    "FloodFill me : " + JSON.stringify(squaresCount),
+    configuration.FLOOD_FILL_FACTOR * gameState.you.length
+  );
 
   let possibleMoves = { up: false, down: false, left: false, right: false };
 
@@ -178,6 +181,22 @@ function getPossibleMovesFloodFill(gameState) {
         configuration.FLOOD_FILL_FACTOR * gameState.you.length;
   });
 
+  const squaresCountValues = Object.values(squaresCount);
+  if (squaresCountValues.length > 0) {
+    const myAvg =
+      squaresCountValues.reduce((a, b) => a + b) / squaresCountValues.length;
+
+    if (myAvg < Infinity) {
+      console.log(myAvg, squaresCount);
+
+      ["up", "down", "right", "left"].forEach((direction) => {
+        possibleMoves[direction] =
+          squaresCount[direction] > myAvg - 5 && // threshold 5 below the average
+          possibleMoves[direction];
+      });
+    }
+  }
+
   // no moves satisfy the enter criteria
   // follow the closest tail
   // pick the maximum
@@ -185,21 +204,24 @@ function getPossibleMovesFloodFill(gameState) {
     getTrueKeys(possibleMoves).length == 0 &&
     Object.keys(squaresCount).length > 0
   ) {
+    const maxMove = getMaxKey(squaresCount);
+
     const pathTowardsClosestTail = getPathTowardsClosestTail(gameState);
     if (pathTowardsClosestTail != null) {
       console.log(
         `Examine tail chase ${JSON.stringify(pathTowardsClosestTail)}`
       );
       const move = pathTowardsClosestTail[0];
-      if (pathTowardsClosestTail.length <= squaresCount[move] + 1) {
+      if (
+        squaresCount[move] > 1 && // to avoid the situation where
+        // a snake eats a new food and tail grows
+        pathTowardsClosestTail.length <= squaresCount[move] + 1
+      ) {
         console.log(`TAIL CHASE! `);
         possibleMoves[move] = true;
         return possibleMoves;
       }
     }
-    console.log(`MAX MOVE! `);
-    const maxMove = getMaxKey(squaresCount);
-
     console.log(`MAX MOVE! ${maxMove}`);
     possibleMoves[maxMove] = true;
     return possibleMoves;
@@ -308,7 +330,7 @@ function heuristic(gameState) {
     // console.log(myMoves);
     if (myMoves.length == 0 || gameState.you.lost) {
       // console.log(gameState);
-      return 0 + gameState.mm.path.length;
+      return 0 + gameState.mm.path.length / 10;
     }
   }
 
