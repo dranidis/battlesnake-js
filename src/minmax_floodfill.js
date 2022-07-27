@@ -308,7 +308,7 @@ function heuristic(gameState) {
     // console.log(myMoves);
     if (myMoves.length == 0 || gameState.you.lost) {
       // console.log(gameState);
-      return 0;
+      return 0 + gameState.mm.path.length;
     }
   }
 

@@ -309,7 +309,7 @@ function move(gameState) {
   } else if (safeFoodMoves.length > 0) {
     console.log(">> Going for food");
     moveToMake = pickMove(gameState, safeFoodMoves);
-  } else if (chaseTailMove != null && safeMoves.includes(chaseTailMove)) {
+  } else if (chaseTailMove != null && totallySafeMoves.includes(chaseTailMove)) {
     console.log(">> Chasing tails...");
     moveToMake = chaseTailMove;
   } else {
