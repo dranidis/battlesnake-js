@@ -23,7 +23,7 @@ function createBattlesnake(id, bodyCoords) {
   return {
     id: id,
     name: id,
-    health: 0,
+    health: 100,
     body: bodyCoords,
     latency: "",
     head: bodyCoords[0],

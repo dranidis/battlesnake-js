@@ -17,9 +17,19 @@ class MinMax {
     this.remainingRecursiveCalls = 0;
     // console.log(`NOW: ${Date.now()} end at: ${endAt}`)
     // console.log("START", start)
-    const result = this.alphabeta(node, depth, alpha, beta, maximizingPlayer, endAt);
-    console.log(`MinMax: nodes: ${this.nodesVisited} time: ${Date.now() - start}`)
-    return result;  }
+    const result = this.alphabeta(
+      node,
+      depth,
+      alpha,
+      beta,
+      maximizingPlayer,
+      endAt
+    );
+    console.log(
+      `MinMax: nodes: ${this.nodesVisited} time: ${Date.now() - start}`
+    );
+    return result;
+  }
 
   alphabeta(node, depth, alpha, beta, maximizingPlayer, endTime, recCalls) {
     // console.log("END TIME at", endTime)
@@ -33,16 +43,25 @@ class MinMax {
     this.remainingRecursiveCalls++;
 
     if (
-      Date.now() >
-        endTime - this.timePerRecursiveCall * this.remainingRecursiveCalls ||
+      // Date.now() >
+      //   endTime - this.timePerRecursiveCall * this.remainingRecursiveCalls ||
       depth === 0 ||
       this.isTerminal(node)
     ) {
       // console.log("depth", depth, "terminal?", this.isTerminal(node));
       this.remainingRecursiveCalls--;
       // console.log("remainingRecursiveCalls", this.remainingRecursiveCalls, "DEPTH", depth);
-      return this.heuristic(node);
+      const value = this.heuristic(node);
+      // console.log(
+      //   "H:",
+      //   value,
+      //   node.mm.path,
+      //   depth,
+      //   this.isTerminal(node) ? "Terminal" : ""
+      // );
+      return value;
     }
+    // console.log(node.you.lost, JSON.stringify(node.mm, bigIntSerializer, 4));
     if (maximizingPlayer) {
       let value = -Infinity;
       const nodeChildren = this.children(node);

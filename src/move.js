@@ -51,6 +51,9 @@ function applyMoveToSnake(newGameState, snake, newHead) {
     )[0].consumed = true;
     snake.health = 100;
   }
+  if (snake.health == 0) {
+    snake.lost = true
+  }
   snake.body.unshift(newHead);
   snake.head = newHead;
 }
@@ -73,7 +76,7 @@ function applyMove(gameState, newHead, otherHeadList = []) {
 
   applyMoveToSnake(newGameState, mySnake, newHead);
 
-  const snakes = newGameState.board.snakes;
+  const snakes = newGameState.board.snakes.filter((s) => !s.lost);
   const otherSnakes = snakes.filter((s) => s.id != newGameState.you.id);
 
   otherHeadList.forEach((head, i) => {

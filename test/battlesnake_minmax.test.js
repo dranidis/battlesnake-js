@@ -53,7 +53,7 @@ describe("bsMinMax", () => {
     preprocess(gameState);
     console.log(gameState.blocks.toString());
 
-    const val = bsMinMax(gameState, 50, 200);
+    const val = bsMinMax(gameState, 7, Infinity);
     console.log(val);
     expect(val.down).toBe(0);
   });
@@ -85,14 +85,14 @@ describe("bsMinMax 2", () => {
     const gameState = createGameState(me, [me, other], 8, 8);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, 100, 500);
+    const val = bsMinMax(gameState, 7, Infinity);
     console.log("VAL", val);
     expect(val.right).toBe(0);
   });
 });
 
 describe("bsMinMax 11x11", () => {
-  test("bsMinMax 11x11", () => {
+  test("bsMinMax 11x11 small", () => {
     const me = createBattlesnake("me", [
       { x: 1, y: 0 },
       { x: 1, y: 1 },
@@ -107,9 +107,9 @@ describe("bsMinMax 11x11", () => {
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, 100, 5000);
+    const val = bsMinMax(gameState, 7, Infinity);
     console.log("VAL", val);
-    expect(val.right).toBe(val.left);
+    expect(val.right).toBe(0);
   });
 
   test("bsMinMax 11x11 2", () => {
@@ -147,7 +147,7 @@ describe("bsMinMax 11x11", () => {
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, Infinity, 400, 2);
+    const val = bsMinMax(gameState, 5, Infinity, 2);
     console.log("VAL", val);
     expect(val.right).toBeGreaterThan(100);
     expect(val.left).toBeGreaterThan(100);
@@ -184,7 +184,7 @@ describe("bsMinMax 11x11", () => {
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, 15, 10000, 2.5);
+    const val = bsMinMax(gameState, 7, Infinity, 2.5);
     console.log("VAL", val);
     expect(val.down).toBe(0);
   });
@@ -217,7 +217,7 @@ describe("bsMinMax 11x11", () => {
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, Infinity, 400, 2.5);
+    const val = bsMinMax(gameState, 5,Infinity, 2.5);
     console.log("VAL", val);
     expect(val.down).toBe(0);
   });
@@ -247,7 +247,7 @@ describe("bsMinMax 11x11", () => {
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);
     console.log(gameState.blocks.toString());
-    const val = bsMinMax(gameState, 7, 400, 2.5);
+    const val = bsMinMax(gameState, 6, Infinity, 2.5);
     console.log("VAL", val);
     expect(val.down).toBe(0);
   });

@@ -31,7 +31,7 @@ const { getStartTime, getRemainingTime } = require("./time");
  */
 function getMinMaxFloodFill(gameState, start, depth, otherHeads = []) {
   const otherSnakes = gameState.board.snakes.filter(
-    (s) => s.id != gameState.you.id
+    (s) => s.id != gameState.you.id && !s.lost
   );
 
   if (otherSnakes.length == 1) {
@@ -104,7 +104,7 @@ function getSquaresCountPerMove(gameState, depth) {
     const start = squareAfterMove(gameState.you.head, safeMoves[index]);
 
     const otherHeads = gameState.board.snakes
-      .filter((s) => s.id != gameState.you.id)
+      .filter((s) => s.id != gameState.you.id && !s.lost)
       .map((s) => s.head);
 
     const squares = getMinMaxFloodFill(gameState, start, depth, otherHeads);
@@ -153,11 +153,11 @@ function getPossibleMovesFloodFill(gameState) {
     if (allSnakes.length > 3) {
       const give = Math.max(remaining - 300, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 3, 50, 4);
+      squaresCount = bsMinMax(gameState, 1, 50, 4);
     } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 200, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 9, give, 2);
+      squaresCount = bsMinMax(gameState, 3, give, 2);
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
@@ -254,6 +254,8 @@ function twoPlayerSuggestedAttackingMove(squaresCount, oppSquaresCount) {
 }
 
 function floodFillEvaluation(gameState, snake) {
+  if (snake.lost) throw `Should not be called for lost snakes ${snake.id}`;
+
   const head = snake.head;
   const moves = getTrueKeys(getSnakePossibleMoves(gameState, snake));
 
@@ -280,6 +282,10 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
   const minmax = new MinMax(isTerminal, children, heuristic);
   minmax.timePerRecursiveCall = timePerRecursiveCall;
   const myChildrenStates = myChildren(gameState);
+
+  // TODO : is this necessary?
+  if (myChildrenStates.length == 0) return {};
+
   const result = myChildrenStates.reduce((moveEval, state) => {
     moveEval[state.mm.myMove] = minmax.alphabetaTimed(
       state,
@@ -299,17 +305,20 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
 function heuristic(gameState) {
   if (isTerminal(gameState)) {
     const myMoves = getTrueKeys(getMyPossibleMoves(gameState));
-    if (myMoves.length == 0 || gameState.you.lost) return 0;
+    // console.log(myMoves);
+    if (myMoves.length == 0 || gameState.you.lost) {
+      // console.log(gameState);
+      return 0;
+    }
   }
 
   otherSnakeMoves = gameState.board.snakes
-    .filter((s) => s.id != gameState.you.id)
+    .filter((s) => s.id != gameState.you.id && !s.lost)
     .map((otherSnake) =>
       getTrueKeys(getSnakePossibleMoves(gameState, otherSnake))
     );
 
-    if (otherSnakeMoves.some(m => m.length == 0))
-    return FF_MAX_VALUE;
+  if (otherSnakeMoves.some((m) => m.length == 0)) return FF_MAX_VALUE;
   // const oppmoves = getTrueKeys(getSnakePossibleMoves(gameState, otherSnake));
   // if (oppmoves.length == 0) return FF_MAX_VALUE;
 

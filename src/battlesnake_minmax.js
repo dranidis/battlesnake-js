@@ -10,7 +10,6 @@ const { MinMax } = require("./minmax");
 
 function isTerminal(gameState) {
   const myMoves = getTrueKeys(getMyPossibleMoves(gameState));
-
   return (
     myMoves.length == 0 ||
     gameState.you.lost ||
@@ -21,27 +20,39 @@ function isTerminal(gameState) {
 }
 
 function myChildren(gameState) {
+  if (gameState.you.lost) {
+    throw `ERROR should not reach ${gameState}`;
+  }
   const myHead = gameState.you.head;
   const moves = getTrueKeys(getMyPossibleMoves(gameState));
 
   return moves.map((m) => {
     const sq = squareAfterMove(myHead, m);
     let newGameState = cloneGameState(gameState);
-    newGameState.mm = {};
+    if (newGameState.mm == undefined) {
+      newGameState.mm = {};
+    }
     newGameState.mm.myMove = m;
     newGameState.mm.newHead = sq;
     newGameState.mm.turnId = "opponents";
+    if (newGameState.mm.path == undefined) {
+      newGameState.mm.path = [];
+    }
+    newGameState.mm.path.push(m);
     return newGameState;
   });
 }
 
 // Adds a structure mm to gameState for minmax
 function children(gameState) {
-  if (gameState.mm.turnId == gameState.you.id) {
+  if (gameState.you.lost) {
+    throw `ERROR should not reach ${gameState}`;
+  }
+  if (gameState.mm.turnId != "opponents") {
     return myChildren(gameState);
   } else {
     const otherSnakes = gameState.board.snakes.filter(
-      (s) => s.id != gameState.you.id
+      (s) => s.id != gameState.you.id && !s.lost
     );
 
     // oppMoves :
@@ -59,15 +70,15 @@ function children(gameState) {
     // console.log("children: oppMoves", oppMoves)
 
     return oppMovesCombinations.map((oppMovesComb) => {
-
-      const otherHeads = oppMovesComb.map((move, i) => squareAfterMove(otherSnakes[i].head, move));
+      const otherHeads = oppMovesComb.map((move, i) =>
+        squareAfterMove(otherSnakes[i].head, move)
+      );
       let newGameState = applyMove(gameState, gameState.mm.newHead, otherHeads);
       newGameState.mm.oppMoves = oppMovesComb;
       newGameState.mm.oppHeads = otherHeads;
       newGameState.mm.turnId = gameState.you.id;
+      newGameState.mm.path.push(oppMovesComb);
       return newGameState;
-    
-    
     });
   }
 }
