@@ -26,8 +26,8 @@ class MinMax {
       endAt
     );
     console.log(
-      `MinMax: nodes: ${this.nodesVisited} time: ${Date.now() - start}`
-    );
+      `MinMax: nodes: ${this.nodesVisited} time: ${Date.now() - start} ${Date.now()> endAt? "TIME OUT": "Completed"}`
+    ); 
     return result;
   }
 

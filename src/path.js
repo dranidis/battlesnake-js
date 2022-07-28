@@ -1,4 +1,8 @@
 const { bsAStar } = require("./battlesnake_astar");
+const { squareAfterMove } = require("./move");
+
+
+const MAX_DISTANCE = 999;
 
 function getPathTowardsClosestTail(gameState) {
   const myHead = gameState.you.head;
@@ -19,7 +23,43 @@ function getPathTowardsClosestTail(gameState) {
   return shortestPathIndex == -1 ? null : pathsToSnakeTails[shortestPathIndex];
 }
 
+function closerFoodAndDistance(gameState, myHead, boardfood, safeMoves) {
+  if (boardfood.length == 0) {
+    return [{}, MAX_DISTANCE, []];
+  }
+
+  let shortestPath;
+  let shortestPathLength = Infinity;
+  let fromMove;
+
+  safeMoves.forEach((m) => {
+    const sq = squareAfterMove(myHead, m);
+    const paths = boardfood.map((f) => pathToTargetAStar(gameState, sq, f));
+    paths.forEach((p) => {
+      if (p.length < shortestPathLength) {
+        shortestPath = p;
+        shortestPathLength = p.length;
+        fromMove = m;
+      }
+    });
+  });
+
+  if (shortestPath == undefined) return [{}, MAX_DISTANCE, []];
+
+  shortestPath.unshift(fromMove);
+  return [{}, shortestPath.length, shortestPath];
+}
+
+function pathToTargetAStar(gameState, h, food) {
+  // TODO: Cache these calculations
+  const path = bsAStar(gameState.blocks, h, food);
+  // console.log("PATH to food " + JSON.stringify(path));
+  return path;
+}
+
 
 module.exports = {
-  getPathTowardsClosestTail
+  getPathTowardsClosestTail,
+  closerFoodAndDistance, 
+  pathToTargetAStar
 }

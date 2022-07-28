@@ -8,9 +8,8 @@ const {
   getPossibleMovesFloodFill,
   getSquaresCountPerLegalMove,
 } = require("./minmax_floodfill");
-const { getPathTowardsClosestTail } = require("./path");
+const { getPathTowardsClosestTail, closerFoodAndDistance, pathToTargetAStar } = require("./path");
 const { setStartTime, getStartTime } = require("./time");
-const { getFloodFillSquares } = require("./boardfill");
 
 const MAX_DISTANCE = 999;
 
@@ -78,46 +77,12 @@ function pickMove(gameState, safeMoves) {
   return safeMoves[Math.floor(Math.random() * safeMoves.length)];
 }
 
-function closerFoodAndDistance(gameState, myHead, boardfood, safeMoves) {
-  if (boardfood.length == 0) {
-    return [{}, MAX_DISTANCE, []];
-  }
-
-  let shortestPath;
-  let shortestPathLength = Infinity;
-  let fromMove;
-
-  safeMoves.forEach((m) => {
-    const sq = squareAfterMove(myHead, m);
-    const paths = boardfood.map((f) => pathToTargetAStar(gameState, sq, f));
-    paths.forEach((p) => {
-      if (p.length < shortestPathLength) {
-        shortestPath = p;
-        shortestPathLength = p.length;
-        fromMove = m;
-      }
-    });
-  });
-
-  if (shortestPath == undefined) return [{}, MAX_DISTANCE, []];
-
-  shortestPath.unshift(fromMove);
-  return [{}, shortestPath.length, shortestPath];
-}
-
-function pathToTargetAStar(gameState, h, food) {
-  // TODO: Cache these calculations
-  const path = bsAStar(gameState.blocks, h, food);
-  // console.log("PATH to food " + JSON.stringify(path));
-  return path;
-}
-
-function minFoodDistanceFromLongerOrSameSnakes(gameState, food) {
-  const longerOrSameHeads = gameState.board.snakes
-    .filter((s) => s.id != gameState.you.id && s.length >= gameState.you.length)
+function minFoodDistanceFromLongerSnakes(gameState, food) {
+  const longerHeads = gameState.board.snakes
+    .filter((s) => s.id != gameState.you.id && s.length > gameState.you.length)
     .map((s) => s.head);
   return Math.min(
-    ...longerOrSameHeads.map((h) =>
+    ...longerHeads.map((h) =>
       distanceOfPath(pathToTargetAStar(gameState, h, food))
     )
   );
@@ -158,7 +123,7 @@ function movesTowardsClosestFood(gameState, safeMoves) {
     const foodNotCloserToLongerSnakes = boardfood.filter(
       (f) =>
         distanceOfPath(pathToTargetAStar(gameState, myHead, f)) <
-        minFoodDistanceFromLongerOrSameSnakes(gameState, f)
+        minFoodDistanceFromLongerSnakes(gameState, f)
       // (f) => minFoodDistanceFromLongerOrSameSnakes(gameState, f) > 1
     );
 
@@ -175,7 +140,8 @@ function movesTowardsClosestFood(gameState, safeMoves) {
     [minDistanceFood, distanceToCloserFood, pathToFood] = closerFoodAndDistance(
       gameState,
       myHead,
-      foodNotCloserToLongerSnakes
+      foodNotCloserToLongerSnakes,
+      safeMoves
     );
   } else {
     [minDistanceFood, distanceToCloserFood, pathToFood] = closerFoodAndDistance(

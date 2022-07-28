@@ -161,7 +161,7 @@ function getPossibleMovesFloodFill(gameState) {
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 11, give, 2);
+      squaresCount = bsMinMax(gameState, 11, give, 3);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -314,7 +314,7 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
 
   let minResult = {};
 
-  let iterDepth = 5;
+  let iterDepth = 3;
   while (Date.now() < endAt && iterDepth <= depth) {
     const minmax = new MinMax(isTerminal, children, heuristic);
     minmax.timePerRecursiveCall = timePerRecursiveCall;
@@ -343,7 +343,7 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
     });
 
     console.log("minresult", minResult);
-    iterDepth++;
+    iterDepth += 2;
   }
 
   return minResult;

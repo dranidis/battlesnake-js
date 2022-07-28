@@ -226,6 +226,7 @@ describe("Battlesnake Moves", () => {
     const other = createBattlesnake("other", [
       { x: 4, y: 1 },
       { x: 4, y: 2 },
+      { x: 4, y: 3 }
     ]);
     const gameState = createGameState(me, [me, other]);
     addFood(gameState, { x: 3, y: 1 });
