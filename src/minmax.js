@@ -71,41 +71,25 @@ class MinMax {
           value,
           this.alphabeta(child, depth - 1, alpha, beta, false, endTime)
         );
-        // console.log(
-        //   "MY TURN CHILD",
-        //   JSON.stringify(child, bigIntSerializer, 2)
-        // );
-        // console.log("MY TURN VALUE MM", value);
-        if (value >= beta) {
+        alpha = Math.max(alpha, value);
+        if (beta <= alpha) {
           break;
         }
-        alpha = Math.max(alpha, value);
       }
       return value;
     } else {
       let value = Infinity;
       const nodeChildren = this.children(node);
-      // console.log("CHILDREN LEN", nodeChildren.length)
       for (let i = 0; i < nodeChildren.length; i++) {
         const child = nodeChildren[i];
         value = Math.min(
           value,
           this.alphabeta(child, depth - 1, alpha, beta, true, endTime)
         );
-
-        // console.log(
-        //   "OPP TURN CHILD",
-        //   JSON.stringify(
-        //     child,
-        //     bigIntSerializer,
-        //     2
-        //   )
-        // );
-        // console.log("OPP TURN VALUE MM", value);
-        if (value <= alpha) {
+        beta = Math.min(beta, value);
+        if (beta <= alpha) {
           break;
         }
-        beta = Math.min(beta, value);
       }
       return value;
     }

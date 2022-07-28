@@ -208,17 +208,20 @@ function move(gameState) {
 
   const longest = Math.max(...otherSnakes.map((s) => s.length));
 
-  const possibleMovesAvoidingLongerHeads = avoidLongerOrEqualHeads(gameState);
+  // const possibleMovesAvoidingLongerHeads = avoidLongerOrEqualHeads(gameState);
 
-  const totallySafeMoves = Object.keys(possibleMovesLookAhead).filter(
-    (key) =>
-      possibleMovesLookAhead[key] && possibleMovesAvoidingLongerHeads[key]
-  );
+  // const totallySafeMoves = Object.keys(possibleMovesLookAhead).filter(
+  //   (key) =>
+  //     possibleMovesLookAhead[key] && possibleMovesAvoidingLongerHeads[key]
+  // );
 
-  const safeMoves =
-    totallySafeMoves.length > 0
-      ? totallySafeMoves
-      : getTrueKeys(possibleMovesLookAhead);
+  // const safeMoves =
+  //   totallySafeMoves.length > 0
+  //     ? totallySafeMoves
+  //     : getTrueKeys(possibleMovesLookAhead);
+
+  const safeMoves = getTrueKeys(possibleMovesLookAhead)
+  const totallySafeMoves = safeMoves
 
   let isAttacking = otherSnakes.length > 0 && gameState.you.length > longest;
   let target = undefined;
@@ -255,13 +258,14 @@ function move(gameState) {
   let safeFoodMoves = Object.keys(possibleMovesLookAhead).filter(
     (key) =>
       possibleMovesLookAhead[key] &&
-      towardsFoodMoves[key] &&
-      possibleMovesAvoidingLongerHeads[key]
+      towardsFoodMoves[key] 
+      // &&
+      // possibleMovesAvoidingLongerHeads[key]
   );
 
   console.log("NEXT MOVES:     " + legalMoves);
   console.log("SAF FOOD MOVES: " + safeFoodMoves);
-  console.log("TOT SAFE MOVES: " + totallySafeMoves);
+  // console.log("TOT SAFE MOVES: " + totallySafeMoves);
   console.log("FIN SAFE MOVES: " + safeMoves);
   console.log("SAF TARG MOVES: " + safeTargetMoves);
 
