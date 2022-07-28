@@ -30,7 +30,7 @@ describe("min max", () => {
     console.log(val);
     // const exp = { down: 2, left: 53, right: 50 };
     expect(val.left).toBeGreaterThan(40);
-    expect(val.right).toBeLessThan(40);
+    expect(val.right).toBeGreaterThan(40);
     expect(val.down).toBeLessThan(40);
   });
 });

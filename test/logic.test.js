@@ -192,6 +192,27 @@ describe("Battlesnake Moves", () => {
     expect(allowedMoves).toContain(moveResponse.move);
   });
 
+  test("goes towards closest food even if not to eat", () => {
+    // Arrange
+    console.log("goes towards closest food even if not to eat");
+    const me = createBattlesnake("me", [
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ]);
+    const other = createBattlesnake("other", [
+      { x: 4, y: 1 },
+      { x: 4, y: 2 },
+      { x: 4, y: 3 },
+    ]);
+    const gameState = createGameState(me, [me, other]);
+    addFood(gameState, { x: 3, y: 0 });
+
+    const moveResponse = move(gameState);
+    const allowedMoves = ["down"];
+    expect(allowedMoves).toContain(moveResponse.move);
+  });
+
   test("goes towards closest food unless there is another snake closer to the food", () => {
     // Arrange
     console.log(
