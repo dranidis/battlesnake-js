@@ -38,13 +38,12 @@ class MinMax {
 
     // if (Date.now() > endTime) console.log("TIME OUT!");
     // if (this.isTerminal(node)) console.log("Terminal node reached");
-
     this.nodesVisited++;
     this.remainingRecursiveCalls++;
 
     if (
-      // Date.now() >
-      //   endTime - this.timePerRecursiveCall * this.remainingRecursiveCalls ||
+      Date.now() >
+        endTime - this.timePerRecursiveCall * this.remainingRecursiveCalls ||
       depth === 0 ||
       this.isTerminal(node)
     ) {
@@ -63,35 +62,31 @@ class MinMax {
     }
     // console.log(node.you.lost, JSON.stringify(node.mm, bigIntSerializer, 4));
     if (maximizingPlayer) {
-      let value = -Infinity;
-      const nodeChildren = this.children(node);
+      const nodeChildren = this.children(node); //.sort(n=> -1 * this.heuristic(node));
       for (let i = 0; i < nodeChildren.length; i++) {
         const child = nodeChildren[i];
-        value = Math.max(
-          value,
+        alpha = Math.max(
+          alpha,
           this.alphabeta(child, depth - 1, alpha, beta, false, endTime)
         );
-        alpha = Math.max(alpha, value);
         if (beta <= alpha) {
-          break;
+          return alpha;
         }
       }
-      return value;
+      return alpha;
     } else {
-      let value = Infinity;
-      const nodeChildren = this.children(node);
+      const nodeChildren = this.children(node); //.sort(n=> this.heuristic(node));
       for (let i = 0; i < nodeChildren.length; i++) {
         const child = nodeChildren[i];
-        value = Math.min(
-          value,
+        beta = Math.min(
+          beta,
           this.alphabeta(child, depth - 1, alpha, beta, true, endTime)
         );
-        beta = Math.min(beta, value);
         if (beta <= alpha) {
-          break;
+          return beta;
         }
       }
-      return value;
+      return beta;
     }
   }
 }

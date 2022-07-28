@@ -157,11 +157,11 @@ function getPossibleMovesFloodFill(gameState) {
     } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 200, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 3, give, 2);
+      squaresCount = bsMinMax(gameState, 7, give, 2);
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 7, give, 2);
+      squaresCount = bsMinMax(gameState, 11, give, 2);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -189,9 +189,13 @@ function getPossibleMovesFloodFill(gameState) {
     if (myAvg < Infinity) {
       console.log(myAvg, squaresCount);
 
+      // 100.86666666666667 { up: 105.6, down: 101.6, right: 95.4 }
+      // should give all moves
+      // 70.53333333333333 { up: 79.6, down: 52.6, right: 79.4 }
+      // should not give down
       ["up", "down", "right", "left"].forEach((direction) => {
         possibleMoves[direction] =
-          squaresCount[direction] > myAvg - 5 && // threshold 5 below the average
+          squaresCount[direction] > myAvg - 0.1 * myAvg && // threshold 5 below the average
           possibleMoves[direction];
       });
     }
@@ -301,27 +305,48 @@ function floodFillEvaluation(gameState, snake) {
 
 function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
   const start = Date.now();
-  const minmax = new MinMax(isTerminal, children, heuristic);
-  minmax.timePerRecursiveCall = timePerRecursiveCall;
+  const endAt = start + ms;
+
   const myChildrenStates = myChildren(gameState);
 
   // TODO : is this necessary?
-  if (myChildrenStates.length == 0) return {};
+  // if (myChildrenStates.length == 0) return {};
 
-  const result = myChildrenStates.reduce((moveEval, state) => {
-    moveEval[state.mm.myMove] = minmax.alphabetaTimed(
-      state,
-      depth,
-      -Infinity,
-      Infinity,
-      false,
-      ms / myChildrenStates.length
-    );
-    return moveEval;
-  }, {});
-  console.log("Time per call", (Date.now() - start) / minmax.nodesVisited);
+  let minResult = {};
 
-  return result;
+  let iterDepth = 5;
+  while (Date.now() < endAt && iterDepth <= depth) {
+    const minmax = new MinMax(isTerminal, children, heuristic);
+    minmax.timePerRecursiveCall = timePerRecursiveCall;
+    const timeAvailable = endAt - Date.now();
+    const result = myChildrenStates.reduce((moveEval, state) => {
+      moveEval[state.mm.myMove] = minmax.alphabetaTimed(
+        state,
+        iterDepth,
+        -Infinity,
+        Infinity,
+        false,
+        timeAvailable / myChildrenStates.length
+      );
+      return moveEval;
+    }, {});
+    console.log("Time per call", (Date.now() - start) / minmax.nodesVisited);
+    console.log(iterDepth, result);
+
+    ["up", "down", "left", "right"].forEach((direction) => {
+      if (result[direction] != undefined) {
+        minResult[direction] = Math.min(
+          result[direction],
+          minResult[direction] != undefined ? minResult[direction] : Infinity
+        );
+      }
+    });
+
+    console.log("minresult", minResult);
+    iterDepth++;
+  }
+
+  return minResult;
 }
 
 function heuristic(gameState) {
