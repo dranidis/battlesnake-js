@@ -90,23 +90,18 @@ function closerFoodAndDistance(gameState, myHead, boardfood, safeMoves) {
   safeMoves.forEach((m) => {
     const sq = squareAfterMove(myHead, m);
     const paths = boardfood.map((f) => pathToTargetAStar(gameState, sq, f));
-    paths.forEach(p => {
+    paths.forEach((p) => {
       if (p.length < shortestPathLength) {
         shortestPath = p;
         shortestPathLength = p.length;
         fromMove = m;
       }
-    })
+    });
   });
-  shortestPath.unshift(fromMove);
-  
-  // WIP
 
-  // const paths = boardfood.map((f) => pathToTargetAStar(gameState, myHead, f));
-  // // console.log("PATHS to food: " + JSON.stringify(paths));
-  // const distances = paths.map((p) => p.length);
-  // const minIndex = distances.indexOf(Math.min(...distances));
   if (shortestPath == undefined) return [{}, MAX_DISTANCE, []];
+
+  shortestPath.unshift(fromMove);
   return [{}, shortestPath.length, shortestPath];
 }
 
