@@ -9,7 +9,7 @@ var configuration = {
   // to safely enter. 1.5 * length
    */
   // FLOOD_FILL_FACTOR: 1.5,
-  FLOOD_FILL_FACTOR: 1.5,//1.5,
+  FLOOD_FILL_FACTOR: 0,//1.5,
   DISTANCE_TO_FOOD_WHILE_ATTACKING: 1, // may pick up food next to it while attacking
   debug: false,
 };

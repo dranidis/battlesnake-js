@@ -336,24 +336,18 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
     console.log("Time per call", (Date.now() - start) / minmax.nodesVisited);
     console.log(iterDepth, result);
 
-    let undefinedCount = 0;
+    const timeOut = Object.values(result).some((v) => v == undefined);
 
-    ["up", "down", "left", "right"].forEach((direction) => {
-      // if (result[direction] != undefined) {
-      //   bestResult[direction] = Math.min(
-      //     result[direction],
-      //     bestResult[direction] != undefined ? bestResult[direction] : Infinity
-      //   );
-      // }
-      if (result[direction] != undefined) {
-        bestResult[direction] = result[direction];
-      } else {
-        undefinedCount++;
-      }
-    });
+    if (!timeOut) {
+      ["up", "down", "left", "right"].forEach((direction) => {
+        if (result[direction] != undefined)
+          bestResult[direction] = result[direction];
+      });
+    } else {
+      break;
+    }
 
     console.log("bestresult", bestResult);
-    if (undefinedCount == 4) break; // all directions undefined => timeout
     iterDepth += 2;
   }
 

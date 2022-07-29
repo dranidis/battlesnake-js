@@ -1,5 +1,5 @@
 const { bsAStar } = require("./battlesnake_astar");
-const { squareAfterMove } = require("./move");
+const { squareAfterMove, isFood } = require("./move");
 
 
 const MAX_DISTANCE = 999;
@@ -29,19 +29,26 @@ function closerFoodAndDistance(gameState, myHead, boardfood, safeMoves) {
   }
 
   let shortestPath;
-  let shortestPathLength = Infinity;
   let fromMove;
+
+  let shortestPathLength = Infinity;
 
   safeMoves.forEach((m) => {
     const sq = squareAfterMove(myHead, m);
-    const paths = boardfood.map((f) => pathToTargetAStar(gameState, sq, f));
-    paths.forEach((p) => {
-      if (p.length < shortestPathLength) {
-        shortestPath = p;
-        shortestPathLength = p.length;
-        fromMove = m;
-      }
-    });
+    if (isFood(gameState, sq)) {
+      shortestPath = []
+      fromMove = m;
+    } else {
+      const paths = boardfood.map((f) => pathToTargetAStar(gameState, sq, f));
+      paths.filter(p => p.length > 0).forEach((p) => {
+        if (p.length < shortestPathLength) {
+          shortestPath = p;
+          shortestPathLength = p.length;
+          fromMove = m;
+        }
+      });
+    }
+
   });
 
   if (shortestPath == undefined) return [{}, MAX_DISTANCE, []];
