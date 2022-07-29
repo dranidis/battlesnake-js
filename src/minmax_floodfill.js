@@ -361,24 +361,32 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
 }
 
 function heuristic(gameState) {
+  const otherSnakes = gameState.board.snakes.filter(
+    (s) => s.id != gameState.you.id
+  );
+
+  let otherFloodFill = 0;
+  if (otherSnakes.length == 1) {
+    if (otherSnakes[0].lost) {
+      return FF_MAX_VALUE;
+    } else {
+      otherFloodFill = floodFillEvaluation(gameState, otherSnakes[0]);
+    }
+  }
+
   if (isTerminal(gameState)) {
     const myMoves = getTrueKeys(getMyPossibleMoves(gameState));
     // console.log(myMoves);
     if (myMoves.length == 0 || gameState.you.lost) {
       // check if other snake lost too!
       // a tie is better in unavoidable situations
-      if (
-        gameState.you.lost &&
-        gameState.board.snakes
-          .filter((s) => s.id != gameState.you.id)
-          .some((s) => s.lost)
-      ) {
+      if (gameState.you.lost && otherSnakes.some((s) => s.lost)) {
         console.log("TIE!!!!");
         return FF_TIE_VALUE;
       }
       //
       // console.log(gameState);
-      return 0 + gameState.mm.path.length / 10;
+      return 0 + gameState.mm.path.length / 10 - otherFloodFill;
     }
   }
 
@@ -394,7 +402,7 @@ function heuristic(gameState) {
 
   const floodFill = floodFillEvaluation(gameState, gameState.you);
   const health = gameState.you.health / 5;
-  return floodFill + health;
+  return floodFill + health - otherFloodFill;
 }
 
 module.exports = {
