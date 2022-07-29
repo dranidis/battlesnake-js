@@ -83,8 +83,13 @@ function children(gameState) {
   }
 }
 
+function getPath(gameState) {
+  return gameState.mm.path;
+}
+
 module.exports = {
   myChildren,
   children,
   isTerminal,
+  getPath
 };

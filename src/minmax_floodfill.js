@@ -20,8 +20,15 @@ const {
 const { getTrueKeys, bigIntSerializer, getMaxKey } = require("./util");
 const { getPathTowardsClosestTail } = require("./path");
 const { MinMax } = require("./minmax");
-const { isTerminal, children, myChildren } = require("./battlesnake_minmax");
+const {
+  isTerminal,
+  children,
+  myChildren,
+  getPath,
+} = require("./battlesnake_minmax");
 const { getStartTime, getRemainingTime } = require("./time");
+
+const FF_TIE_VALUE = 30;
 /**
  *
  * @param {*} gameState
@@ -153,15 +160,15 @@ function getPossibleMovesFloodFill(gameState) {
     if (allSnakes.length > 3) {
       const give = Math.max(remaining - 300, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 1, 50, 4);
+      squaresCount = bsMinMax(gameState, 1, 50, 0);
     } else if (allSnakes.length == 3) {
       const give = Math.max(remaining - 200, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 7, give, 2);
+      squaresCount = bsMinMax(gameState, 7, give, 0);
     } else {
       const give = Math.max(remaining - 50, 50);
       console.log("GIVE to mm", give);
-      squaresCount = bsMinMax(gameState, 11, give, 3);
+      squaresCount = bsMinMax(gameState, 11, give, 0);
     }
     console.log("MM TIME", Date.now() - mmstart);
     console.log("Remaining time after mm", getRemainingTime());
@@ -309,14 +316,10 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
 
   const myChildrenStates = myChildren(gameState);
 
-  // TODO : is this necessary?
-  // if (myChildrenStates.length == 0) return {};
-
-  let minResult = {};
-
+  let bestResult = {};
   let iterDepth = 3;
   while (Date.now() < endAt && iterDepth <= depth) {
-    const minmax = new MinMax(isTerminal, children, heuristic);
+    const minmax = new MinMax(isTerminal, children, heuristic, getPath);
     minmax.timePerRecursiveCall = timePerRecursiveCall;
     const timeAvailable = endAt - Date.now();
     const result = myChildrenStates.reduce((moveEval, state) => {
@@ -333,20 +336,28 @@ function bsMinMax(gameState, depth, ms, timePerRecursiveCall = 2) {
     console.log("Time per call", (Date.now() - start) / minmax.nodesVisited);
     console.log(iterDepth, result);
 
+    let undefinedCount = 0;
+
     ["up", "down", "left", "right"].forEach((direction) => {
+      // if (result[direction] != undefined) {
+      //   bestResult[direction] = Math.min(
+      //     result[direction],
+      //     bestResult[direction] != undefined ? bestResult[direction] : Infinity
+      //   );
+      // }
       if (result[direction] != undefined) {
-        minResult[direction] = Math.min(
-          result[direction],
-          minResult[direction] != undefined ? minResult[direction] : Infinity
-        );
+        bestResult[direction] = result[direction];
+      } else {
+        undefinedCount++;
       }
     });
 
-    console.log("minresult", minResult);
+    console.log("bestresult", bestResult);
+    if (undefinedCount == 4) break; // all directions undefined => timeout
     iterDepth += 2;
   }
 
-  return minResult;
+  return bestResult;
 }
 
 function heuristic(gameState) {
@@ -354,6 +365,18 @@ function heuristic(gameState) {
     const myMoves = getTrueKeys(getMyPossibleMoves(gameState));
     // console.log(myMoves);
     if (myMoves.length == 0 || gameState.you.lost) {
+      // check if other snake lost too!
+      // a tie is better in unavoidable situations
+      if (
+        gameState.you.lost &&
+        gameState.board.snakes
+          .filter((s) => s.id != gameState.you.id)
+          .some((s) => s.lost)
+      ) {
+        console.log("TIE!!!!");
+        return FF_TIE_VALUE;
+      }
+      //
       // console.log(gameState);
       return 0 + gameState.mm.path.length / 10;
     }

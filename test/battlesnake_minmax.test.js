@@ -213,6 +213,7 @@ describe("bsMinMax 11x11", () => {
       { x: 6, y: 8 },
       { x: 7, y: 8 },
       { x: 8, y: 8 },
+      { x: 9, y: 8 },
     ]);
     const gameState = createGameState(me, [me, other], 11, 11);
     preprocess(gameState);

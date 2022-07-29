@@ -167,6 +167,7 @@ describe("Battlesnake Moves", () => {
       { x: 2, y: 2 },
       { x: 1, y: 2 },
       { x: 1, y: 3 },
+      { x: 1, y: 4 },
     ]);
     const gameState = createGameState(me, [me, other]);
     preprocess(gameState);

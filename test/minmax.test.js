@@ -83,7 +83,7 @@ describe("Alpha beta", () => {
       // throw `Should not reach here ${node}` 
     };
     const minmax = new MinMax(isTerminal, children, heuristic);
-    const act = minmax.alphabeta(root, 4, -Infinity, Infinity, true);
+    const [act, path] = minmax.alphabeta(root, 4, -Infinity, Infinity, true);
     expect(act).toBe(6);
   });
 });
