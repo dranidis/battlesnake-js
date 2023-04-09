@@ -12,3 +12,6 @@ RUN npm install
 
 # Define the entry point for the container
 CMD ["npm", "start"]
+
+# Expose a port
+EXPOSE 8092
