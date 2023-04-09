@@ -14,7 +14,8 @@
   "license": "MIT",
   "homepage": "https://github.com/BattlesnakeOfficial/starter-snake-javascript#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "minimist": "^1.2.6"
   },
   "devDependencies": {
     "jest": "^27.0.6"

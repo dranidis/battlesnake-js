@@ -67,7 +67,7 @@ function bsAStar(matrix, startCoord, goalCoord) {
   const d = (n1, n2) => 1;
 
   actual = aStar(start, goal, h, neighbors, d);
-  return coordsToMoves( actual.map((n) => indexToCoord(width, n)));
+  return coordsToMoves(actual.map((n) => indexToCoord(width, n)));
 }
 
 module.exports = {

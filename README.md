@@ -1,3 +1,30 @@
+# Start the player server
+
+```
+npm start
+```
+
+or
+```
+node src/index.js
+```
+
+You can pass a port number with the `-p` command line argument.
+
+Other arguments:
+`-c` with an HTML color code for the snake.
+
+# Start the battlenake server
+
+Download the project from github:
+```
+git@github.com:BattlesnakeOfficial/rules.git
+```
+
+```
+./battlesnake play -W 11 -H 11 --name DDm --url http://0.0.0.0:8093 --name DDm2 --url http://0.0.0:8094  -v --browser
+```
+
 # Getting started with [Battlesnake](http://play.battlesnake.com?utm_source=github&utm_medium=readme&utm_campaign=javascript_starter&utm_content=homepage) and JavaScript
 
 ![Battlesnake Logo](https://media.battlesnake.com/social/StarterSnakeGitHubRepos_JavaScript.png)
@@ -98,4 +125,15 @@ Want to contribute to Battlesnake? We have a number of open-source codebases and
 ## Feedback
 
 **Do you have an issue or suggestions for this repository?** Head over to our [Feedback Repository](https://play.battlesnake.com/feedback?utm_source=github&utm_medium=readme&utm_campaign=javascript_starter&utm_content=feedback) today and let us know!
+
+## Docker
+Create with:
+```
+docker build -t test:latest .
+```
+
+Run with:
+```
+docker run -p 8092:8092 test:latest
+```
 
