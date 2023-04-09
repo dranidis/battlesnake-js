@@ -126,3 +126,14 @@ Want to contribute to Battlesnake? We have a number of open-source codebases and
 
 **Do you have an issue or suggestions for this repository?** Head over to our [Feedback Repository](https://play.battlesnake.com/feedback?utm_source=github&utm_medium=readme&utm_campaign=javascript_starter&utm_content=feedback) today and let us know!
 
+## Docker
+Create with:
+```
+docker build -t test:latest .
+```
+
+Run with:
+```
+docker run -p 8092:8092 test:latest
+```
+
